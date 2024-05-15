@@ -26,12 +26,27 @@ const Login = () => {
   // for security purpose, we use strong passwords
   const password = useStrongPassword();
 
+  // to show picture with Sign Up
   const avatar = useFileHandler("single");
+
   const toggleButton = () => {
     setIsLogin((prev) => !prev);
   };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+  };
+  const handleSignUp = (e) => {
+    e.preventDefault();
+  };
+
   return (
-    <>
+    <div
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(36 74 235 / 94%), rgba(134 221 14 / 0%))",
+      }}
+    >
       <Container
         component={"main"}
         maxWidth="sm"
@@ -60,6 +75,7 @@ const Login = () => {
                   width: "100%",
                   marginTop: "1rem",
                 }}
+                onSubmit={handleLogin}
               >
                 <TextField
                   required
@@ -107,6 +123,7 @@ const Login = () => {
                   width: "100%",
                   marginTop: "1rem",
                 }}
+                onSubmit={handleSignUp}
               >
                 <Stack position={"relative"} width={"10rem"} margin={"auto"}>
                   <Avatar
@@ -117,11 +134,7 @@ const Login = () => {
                     }}
                     src={avatar.preview}
                   />
-                  {avatar.error && (
-                    <Typography variant="body2" color="error">
-                      {avatar.error}
-                    </Typography>
-                  )}
+
                   <IconButton
                     sx={{
                       position: "absolute",
@@ -144,7 +157,19 @@ const Login = () => {
                     </>
                   </IconButton>
                 </Stack>
-
+                {avatar.error && (
+                  <Typography
+                    m={"1rem auto"}
+                    width={"fit-content"}
+                    fontSize={"18px"}
+                    fontWeight={"bold"}
+                    display={"block"}
+                    variant="caption"
+                    color="error"
+                  >
+                    {avatar.error}
+                  </Typography>
+                )}
                 <TextField
                   required
                   fullWidth
@@ -232,7 +257,7 @@ const Login = () => {
           )}
         </Paper>
       </Container>
-    </>
+    </div>
   );
 };
 
