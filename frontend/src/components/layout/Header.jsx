@@ -1,11 +1,12 @@
 import {
   AppBar,
+  Backdrop,
   Box,
   IconButton,
   Toolbar,
   Tooltip,
   Typography,
-} from "@mui/material";
+} from "@mui/material"; // Import Material-UI components
 import {
   Add as AddIcon,
   Menu as MenuIcon,
@@ -13,15 +14,20 @@ import {
   Group as GroupIcon,
   Logout as LogoutIcon,
   Notifications as NotificationsIcon,
-} from "@mui/icons-material";
-import { crimson } from "../../constants/color";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import SearchDialouge from "../specific/SearchDialouge";
-const Header = () => {
-  const navigate = useNavigate();
+} from "@mui/icons-material"; // Import Material-UI icons
+import { crimson } from "../../constants/color"; // Import a custom color
+import { useNavigate } from "react-router-dom"; // Import navigation hook
+import { lazy, Suspense, useState } from "react"; // Import React utilities
 
-  const [isMobile, setIsMobile] = useState(false);
+// Use lazy to split code and load components on demand with Suspense for better performance and user experience
+const SearchDialouge = lazy(() => import("../specific/SearchDialouge"));
+const NotificationsDialouge = lazy(() => import("../specific/Notifications"));
+const NewGroupDialouge = lazy(() => import("../specific/NewGroup"));
+
+const Header = () => {
+  const navigate = useNavigate(); // Initialize navigation
+
+  // const [isMobile, setIsMobile] = useState(false);
   const [isSearch, setIsSearch] = useState(false);
   const [isNewGroup, setIsNewGroup] = useState(false);
   const [isNotification, setIsNotification] = useState(false);
@@ -70,7 +76,7 @@ const Header = () => {
                 display: { xs: "none", sm: "block" },
               }}
             >
-              ChatHub
+              ChatHub{" "}
             </Typography>
             <Box
               sx={{
@@ -81,7 +87,6 @@ const Header = () => {
                 <MenuIcon />
               </IconButton>
             </Box>
-
             <Box
               sx={{
                 flexGrow: 1,
@@ -118,7 +123,21 @@ const Header = () => {
         </AppBar>
       </Box>
 
-      {isSearch && <SearchDialouge />}
+      {isSearch && (
+        <Suspense fallback={<Backdrop open />}>
+          <SearchDialouge />
+        </Suspense>
+      )}
+      {isNotification && (
+        <Suspense fallback={<Backdrop open />}>
+          <NotificationsDialouge />
+        </Suspense>
+      )}
+      {isNewGroup && (
+        <Suspense fallback={<Backdrop open />}>
+          <NewGroupDialouge />
+        </Suspense>
+      )}
     </>
   );
 };

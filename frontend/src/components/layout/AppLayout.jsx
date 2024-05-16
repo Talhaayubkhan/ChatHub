@@ -2,11 +2,17 @@ import React from "react";
 import Header from "./Header";
 import Title from "../shared/Title";
 import { Grid } from "@mui/material";
+import ChatList from "../specific/ChatList";
+import { sampleChats } from "../../constants/sampleData";
+import { useParams } from "react-router-dom";
 
 // This High Order Function
 // Higher-order components (HOCs) in React are used to enhance components with reusable logic, providing a way to share functionality across multiple components without repeating code
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
+    const params = useParams();
+    const chatId = params.chatId;
+
     return (
       <>
         <Title />
@@ -22,7 +28,12 @@ const AppLayout = () => (WrappedComponent) => {
             }}
             height={"100%"}
           >
-            First
+            <ChatList
+              chats={sampleChats}
+              chatId
+              newMessagesAert={[{ chatId: "1", count: 4 }]}
+              onlineUsers={["1", "2"]}
+            />
           </Grid>
           <Grid item xs={12} sm={8} md={5} lg={6} height={"100%"}>
             <WrappedComponent {...props} />

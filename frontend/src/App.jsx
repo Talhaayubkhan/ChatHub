@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { LayoutLoaders } from "./components/layout/Loaders";
 
 // Lazy loading components
 // we use Lazy loading, it helps web apps to load faster by only loading the parts of the website you need when you need them, making everything quicker and smoother.
@@ -17,7 +18,7 @@ const App = () => {
     <>
       <BrowserRouter>
         {/* Wrap Routes with Suspense to handle lazy loading */}
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LayoutLoaders />}>
           <Routes>
             <Route element={<ProtectedRoute user={user} />}>
               <Route path="/" element={<Home />} />
@@ -32,7 +33,6 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
