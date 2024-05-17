@@ -8,7 +8,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     {/* Enables changing page title, meta tags, etc., dynamically */}
     <HelmetProvider>
       <CssBaseline />
-      <App />
+      <div onClick={(e) => e.preventDefault()}>
+        <App />
+      </div>
     </HelmetProvider>
   </React.StrictMode>
 );

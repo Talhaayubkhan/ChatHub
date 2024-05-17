@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { Link } from "../styles/StyledComponent";
 import { Box, Stack, Typography } from "@mui/material";
+import AvatarCard from "./AvatarCard";
 
 const ChatItem = ({
   avatar = [],
@@ -8,9 +9,9 @@ const ChatItem = ({
   name,
   newMessageAlert,
   isOnline,
-  handleDeleteChatItem,
+  handleDeleteChat,
   sameSender,
-  groupChat = false,
+  groupChat,
   index = 0,
 }) => {
   return (
@@ -20,22 +21,27 @@ const ChatItem = ({
           padding: "0",
         }}
         to={`/chat/${_id}`}
-        onContextMenu={(e) => handleDeleteChatItem(e, _id, groupChat)}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          console.log("Right-click event detected for chat:", _id);
+          handleDeleteChat(e, _id, groupChat);
+        }}
+        onClick={() => console.log("Click event detected for chat:", _id)}
       >
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            padding: "10px 15px",
-            borderBottom: "1px solid lightgray",
-            backgroundColor: sameSender ? "white" : "black",
-            color: sameSender ? "black" : "white",
+            padding: "15px 20px",
+            // borderBottom: "1px solid lightgray",
+            backgroundColor: sameSender ? "black" : "unset",
+            color: sameSender ? "black" : "unset",
             position: "relative",
             gap: "1rem",
           }}
         >
           {/* Avatar Card */}
+          <AvatarCard avatar={avatar} />
           <Stack>
             <Typography>{name}</Typography>
             {newMessageAlert && (
@@ -50,8 +56,8 @@ const ChatItem = ({
                 height: "10px",
                 borderRadius: "50%",
                 position: "absolute",
-                right: "10px",
-                top: "10px",
+                right: "1rem",
+                top: "50%",
                 backgroundColor: "green",
                 //     borderRadius: "50%",
                 transform: "translateY(-50%)",

@@ -9,7 +9,7 @@ const ChatList = ({
   onlineUsers = [],
   newMessagesAert = [
     {
-      chatId: "1",
+      chatId: "",
       count: 0,
     },
   ],
@@ -28,12 +28,15 @@ const ChatList = ({
 
         return (
           <ChatItem
+            // Current position in the list
             index={index}
             newMessageAlert={newMessageAlert}
             isOnline={onlineUsers}
             avatar={avatar}
             name={name}
+            // Unique chat identifier
             _id={_id}
+            // React key for efficient updates
             key={_id}
             groupChat={groupChat}
             sameSender={chatId === _id}
