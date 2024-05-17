@@ -20,11 +20,15 @@ const App = () => {
         {/* Wrap Routes with Suspense to handle lazy loading */}
         <Suspense fallback={<LayoutLoaders />}>
           <Routes>
+            {/* Protected Routes */}
+
             <Route element={<ProtectedRoute user={user} />}>
               <Route path="/" element={<Home />} />
               <Route path="/chat/:chatid" element={<Chat />} />
               <Route path="/groups" element={<Group />} />
             </Route>
+            {/* Route for Login */}
+
             <Route
               path="/login"
               element={
@@ -33,6 +37,8 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            {/* Fallback Route for 404 */}
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
