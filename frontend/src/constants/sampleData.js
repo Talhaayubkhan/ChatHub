@@ -46,14 +46,14 @@ export const sampleNotifications = [
 ];
 export const sampleMessages = [
   {
-    attachment: [
-      {
-        public_id: "1",
-        url: "https://www.w3schools.com/howto/img_avatar.png",
-      },
-    ],
-    content: "Hey, how are you?",
-    id: "askdaksdnas2e912easnd",
+    // attachment: [
+    //   {
+    //     public_id: "1",
+    //     url: "https://www.w3schools.com/howto/img_avatar.png",
+    //   },
+    // ],
+    content: "Hey, send me Your Pic??",
+    _id: "askdaksdnas2e912easnd",
 
     sender: { _id: "user._id", name: "John Doe" },
     chat: "chatId",
@@ -67,8 +67,8 @@ export const sampleMessages = [
         url: "https://www.w3schools.com/howto/img_avatar.png",
       },
     ],
-    content: "Hey, Hello i'm fine",
-    id: "khan1234@kkajdas",
+    // content: "Hey, Hello i'm fine",
+    _id: "khan1234kkajdassdcwwas",
 
     sender: { _id: "akdfj233", name: "John khan" },
     chat: "chatId",

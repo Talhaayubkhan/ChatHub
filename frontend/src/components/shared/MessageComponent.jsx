@@ -1,6 +1,8 @@
 import { Box, Typography } from "@mui/material";
 import moment from "moment";
-import React, { memo } from "react";
+import { memo } from "react";
+import { fileFormat } from "../../lib/features";
+import RenderAttachMent from "./RenderAttachMent";
 
 const MessageComponent = ({ message, user }) => {
   const { sender, content, attachment = [], timestamp } = message;
@@ -20,31 +22,30 @@ const MessageComponent = ({ message, user }) => {
     >
       {!sameSender && (
         <Typography color={"crimson"} fontWeight={"bold"}>
-          {sender.name}
+          {sender?.name}
         </Typography>
       )}
       {content && <Typography>{content}</Typography>}
-
-      {attachment.length > 0 &&
-        attachment.map((currentAttachment, i) => {
-          const url = currentAttachment?.url;
-          const file = "Hello World";
-          return (
-            <Box key={i}>
-              <a
-                href={url}
-                target="_blank"
-                download
-                rel="noreferrer"
-                style={{
-                  color: "black",
-                }}
-              >
-                {file}
-              </a>
-            </Box>
-          );
-        })}
+      {attachment.map((currentAttachment, i) => {
+        const url = currentAttachment.url;
+        const file = fileFormat(url);
+        return (
+          <Box key={i}>
+            <a
+              href={url}
+              target="_blank"
+              download
+              rel="noreferrer"
+              style={{
+                color: "black",
+              }}
+            >
+              {/* hello */}
+              {RenderAttachMent && RenderAttachMent(file, url)}
+            </a>
+          </Box>
+        );
+      })}
 
       <Typography variant="caption" color={"text.secondary"}>
         {timeAgo}
