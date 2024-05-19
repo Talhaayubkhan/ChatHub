@@ -26,7 +26,7 @@ const Chat = () => {
         padding="1rem"
         spacing="1rem"
         bgcolor={grayColor}
-        height="90%"
+        height={"90%"}
         sx={{
           overflowX: "hidden",
           overflowY: "auto",

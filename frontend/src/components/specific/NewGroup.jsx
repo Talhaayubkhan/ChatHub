@@ -25,7 +25,7 @@ const NewGroup = () => {
         : [...prev, id]
     );
   };
-  console.log(selectedMembers);
+  // console.log(selectedMembers);
 
   const submitHandler = () => {};
 
