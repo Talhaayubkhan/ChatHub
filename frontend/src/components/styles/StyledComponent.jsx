@@ -18,7 +18,7 @@ export const Link = styled(LinkComponent)`
   color: black;
   padding: 1rem;
   &:hover {
-    background-color: #892901;
+    background-color: "lightgray";
   }
 `;
 
@@ -32,4 +32,27 @@ export const InputBox = styled("input")`
   border-radius: 1.5rem;
   background-color: ${grayColor};
   color: black;
+`;
+
+export const SearchField = styled("input")`
+  flex-grow: 1;
+  height: 3rem;
+  padding: 1rem 1rem;
+  margin: 1rem 1rem;
+  border: none;
+  border-radius: 0.8rem;
+  background-color: "#1976d2";
+  color: black !important;
+  outline: none;
+`;
+
+export const CurveButton = styled("button")`
+  background-color: "#1976d2";
+  color: black;
+  padding: 1rem 1rem;
+  margin: 0.5rem 0;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 `;
