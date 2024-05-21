@@ -76,3 +76,92 @@ export const sampleMessages = [
     status: "sent",
   },
 ];
+
+export const dashboardData = {
+  users: [
+    {
+      name: "John Doe",
+      avatar: ["https://www.w3schools.com/howto/img_avatar.png"],
+      _id: "1",
+      username: "John_Doe",
+      friends: 20,
+      groups: 5,
+    },
+    {
+      name: "John Radius",
+      avatar: ["https://www.w3schools.com/howto/img_avatar.png"],
+      _id: "2",
+      username: "John_Radius",
+      friends: 30,
+      groups: 52,
+    },
+  ],
+
+  chats: [
+    {
+      avatar: ["https://www.w3schools.com/howto/img_avatar.png"],
+      name: "Hello khan",
+      _id: "1",
+      groupChat: false,
+      members: [
+        { _id: 1, avatar: "https://www.w3schools.com/howto/img_avatar.png" },
+        { _id: 2, avatar: "https://www.w3schools.com/howto/img_avatar.png" },
+      ],
+      totalMembers: 2,
+      totalMessages: 30,
+      creator: {
+        avatar: ["https://www.w3schools.com/howto/img_avatar.png"],
+        name: "John Radius",
+      },
+    },
+    {
+      avatar: ["https://www.w3schools.com/howto/img_avatar.png"],
+      name: "khan khan",
+      _id: "2",
+      groupChat: false,
+      members: [
+        { _id: 1, avatar: "https://www.w3schools.com/howto/img_avatar.png" },
+        { _id: 2, avatar: "https://www.w3schools.com/howto/img_avatar.png" },
+      ],
+      totalMembers: 2,
+      totalMessages: 30,
+      creator: {
+        avatar: ["https://www.w3schools.com/howto/img_avatar.png"],
+        name: "John Radius",
+      },
+    },
+  ],
+  messages: [
+    {
+      attachments: [],
+      content: "Hey, send me Your Pic??",
+      _id: "1",
+      sender: {
+        _id: "https://www.w3schools.com/howto/img_avatar.png",
+        name: "John Doe",
+      },
+      chatId: "1",
+      groupChat: false,
+      createdAt: "2024-05-18T10:15:00Z",
+      status: "sent",
+    },
+    {
+      attachments: [
+        {
+          public_id: "2",
+          url: "https://www.w3schools.com/howto/img_avatar.png",
+        },
+      ],
+      content: "Hey, Hello i'm fine",
+      _id: "2",
+      sender: {
+        avatar: "https://www.w3schools.com/howto/img_avatar.png",
+        name: "John khan",
+      },
+      chatId: "2",
+      groupChat: false,
+      createdAt: "2024-05-18T10:15:00Z",
+      status: "sent",
+    },
+  ],
+};
