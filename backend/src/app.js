@@ -1,6 +1,6 @@
 import express from "express";
 const app = express();
-import { notFound } from "./errors/index.js";
+import notFound from "./middlewares/NotFound.js";
 
 // built in middleware
 app.use(express.json({ limit: "16kb" }));

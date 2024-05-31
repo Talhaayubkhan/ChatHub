@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import validator from "validator";
+import bcrypt, { genSalt } from "bcrypt";
 
 // username validation
 // Example regex: 3-30 characters, letters, numbers, underscores
@@ -9,7 +10,9 @@ const UserSchema = new Schema(
   {
     name: {
       type: String,
+      lowercase: true,
       required: true,
+      index: true,
       trim: true,
       unique: true,
     },
@@ -62,5 +65,17 @@ const UserSchema = new Schema(
   },
   { timestamps: true }
 );
+
+// hash the password
+UserSchema.pre("save", async function () {
+  try {
+    // Check if the password field has been modified, then Avoid Double Hashing
+    if (!this.isModified("password")) return;
+    const hashPassword = await genSalt(10);
+    this.password = await bcrypt.hash(this.password, hashPassword);
+  } catch (error) {
+    throw new Error("Error while generating password: " + error.message);
+  }
+});
 
 export const User = mongoose.model("User", UserSchema);
