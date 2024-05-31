@@ -1,5 +1,9 @@
 import { User } from "../models/User.Models.js";
 import { StatusCodes } from "http-status-codes";
+import {
+  CustomApiError,
+  createCustomErrorHandler,
+} from "../errors/CustomError.js";
 
 const registerUser = async (req, res) => {
   // We use req.body to access the data sent by the client in the request body
@@ -8,7 +12,7 @@ const registerUser = async (req, res) => {
 
   // check user name, username, email, password for authentication purposes
   if (!name || !username || !email) {
-    throw new Error("Invalid authentication credentials");
+    throw new CustomApiError("Invalid username or password provided", 401);
   }
 
   const avatar = {
