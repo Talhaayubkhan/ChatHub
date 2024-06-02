@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import validator from "validator";
-import bcrypt, { genSalt } from "bcrypt";
+import bcrypt from "bcrypt";
+import { Unauthenticated } from "../errors/index.js";
 
 // username validation
 // Example regex: 3-30 characters, letters, numbers, underscores
@@ -67,15 +68,26 @@ const UserSchema = new Schema(
 );
 
 // hash the password
-UserSchema.pre("save", async function () {
-  try {
-    // Check if the password field has been modified, then Avoid Double Hashing
-    if (!this.isModified("password")) return;
-    const hashPassword = await genSalt(10);
-    this.password = await bcrypt.hash(this.password, hashPassword);
-  } catch (error) {
-    throw new Error("Error while generating password: " + error.message);
-  }
+UserSchema.pre("save", async function (next) {
+  // Check if the password field has been modified, then Avoid Double Hashing
+  if (!this.isModified()) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
+
+// providedPassword is the password, that input provided by the user during the login attempt
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+  // console.log("comparePassword", candidatePassword);
+
+  const isMatchPassword = await bcrypt.compare(
+    candidatePassword,
+    this.password
+  );
+  if (!isMatchPassword) {
+    throw new Unauthenticated("Password Mismatch, please try again");
+  }
+  return isMatchPassword;
+};
 
 export const User = mongoose.model("User", UserSchema);

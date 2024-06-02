@@ -6,7 +6,7 @@ const registerUser = async (req, res) => {
   // We use req.body to access the data sent by the client in the request body
   // IMPORTANT NOTE: req.body is used to access the data sent by the client in the request body, which is essential for operations like user registration.
   const { name, username, email, password, bio } = req.body;
-  console.log(req.body);
+  // console.log(req.body);
 
   if (!name || !username || !email) {
     throw new BadRequest(
@@ -35,8 +35,30 @@ const registerUser = async (req, res) => {
   // res.status(StatusCodes.CREATED).json({ message: "successfully registered" });
 };
 
-const login = async (req, res) => {
-  res.send("Login");
-};
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
 
-export { login, registerUser };
+  // if (!email || !password) {
+  //   throw new BadRequest(
+  //     "Please provide a name, username, email, and password"
+  //   );
+  // }
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    throw new Unauthenticated("Invalid Email, Please try again");
+  }
+
+  const isPasswordCorrect = await user.comparePassword(password);
+  if (!isPasswordCorrect) {
+    throw new Unauthenticated("Invalid Password, Please try again");
+  }
+
+  const tokenUser = generateToken(user);
+  cookieResponse({ res, user: tokenUser });
+
+  res.status(StatusCodes.OK).send({ user: tokenUser });
+};
+const logoutUser = (req, res) => {};
+export { loginUser, registerUser, logoutUser };

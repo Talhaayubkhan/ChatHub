@@ -37,9 +37,13 @@ export const cookieResponse = ({ res, user }) => {
 
   // Set the JWT token in a cookie named "token" in the response
   res.cookie("token", token, {
-    httpOnly: true, // Make the cookie accessible only via HTTP(S) requests
-    // secure: process.env.NODE_ENV === "production", // Set cookie as secure if in production environment
-    expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // Set cookie expiration time (24 hours)
+    // Make the cookie accessible only via HTTP(S) requests
+    httpOnly: true,
+    // Set cookie as secure if in production environment
+    secure: process.env.NODE_ENV === "production",
+    success: true,
+    // Set cookie expiration time (24 hours)
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
     sameSite: "lax", // Set SameSite attribute to "Lax" for CSRF protection
     // signed: true, // Sign the cookie for added security
   });

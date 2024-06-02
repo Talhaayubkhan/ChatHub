@@ -4,7 +4,7 @@ class Unauthenticated extends CustomApiError {
   constructor(message) {
     super(message);
     this.statusCode = StatusCodes.UNAUTHORIZED;
-    this.message = message || "Bad request";
+    this.message = message || "Unauthenticated Error!";
   }
 }
 
