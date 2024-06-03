@@ -2,6 +2,7 @@ import { User } from "../models/User.Models.js";
 import { StatusCodes } from "http-status-codes";
 import { BadRequest, Unauthenticated } from "../errors/index.js";
 import { cookieResponse, generateToken } from "../utils/index.js";
+
 const registerUser = async (req, res) => {
   // We use req.body to access the data sent by the client in the request body
   // IMPORTANT NOTE: req.body is used to access the data sent by the client in the request body, which is essential for operations like user registration.
@@ -60,5 +61,13 @@ const loginUser = async (req, res) => {
 
   res.status(StatusCodes.OK).send({ user: tokenUser });
 };
-const logoutUser = (req, res) => {};
-export { loginUser, registerUser, logoutUser };
+const logoutUser = async (req, res) => {
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    secure: true,
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+  });
+};
+
+const getUserProfile = async (req, res) => {};
+export { loginUser, registerUser, logoutUser, getUserProfile };
