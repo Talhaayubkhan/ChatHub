@@ -1,9 +1,9 @@
 import { Unauthenticated, Unauthorized } from "../errors/index.js";
 import { verifyJWT } from "../utils/index.js";
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
 
-export const isAuthenticatedUser = async (req, _, next) => {
-  console.log(req.headers.authorization);
+export const isAuthenticatedUser = async (req, res, next) => {
+  // console.log(req.headers.authorization);
   // console.log(req.cookies);
   let token;
   const authHeaderToken = req.headers.authorization;
@@ -26,11 +26,7 @@ export const isAuthenticatedUser = async (req, _, next) => {
     if (!authPayloaddecodedToken) {
       throw new Unauthorized("Inavlid Authentication Token!");
     }
-    req.user = {
-      userId: authPayloaddecodedToken.userId,
-      name: authPayloaddecodedToken.name,
-    };
-
+    req.user = authPayloaddecodedToken?.userId;
     next();
   } catch (error) {
     throw new Unauthorized("Unauthorized Access denied!");

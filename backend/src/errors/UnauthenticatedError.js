@@ -1,10 +1,9 @@
 import CustomApiError from "./CustomError.js";
 import { StatusCodes } from "http-status-codes";
 class Unauthenticated extends CustomApiError {
-  constructor(message) {
+  constructor(message = "User Not Authenticated!") {
     super(message);
     this.statusCode = StatusCodes.UNAUTHORIZED;
-    this.message = message || "Unauthenticated Error!";
   }
 }
 

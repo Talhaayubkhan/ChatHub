@@ -48,7 +48,7 @@ const loginUser = async (req, res) => {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
-    throw new Unauthenticated("Invalid Email, Please try again");
+    throw new Unauthenticated(`Not foun a user with that ${email}`);
   }
 
   const isPasswordCorrect = await user.comparePassword(password);
@@ -61,13 +61,44 @@ const loginUser = async (req, res) => {
 
   res.status(StatusCodes.OK).send({ user: tokenUser });
 };
-// const logoutUser = async (req, res) => {
-//   res.cookie("token", "logout", {
-//     httpOnly: true,
-//     secure: true,
-//     expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-//   });
-// };
+const logoutUser = async (req, res) => {
+  return res
+    .cookie("token", "", {
+      ...cookieResponse,
+      maxAge: 0,
+    })
+    .json({
+      message: "You have been logged out",
+      sucess: true,
+    });
+};
 
-const getUserProfile = async (req, res) => {};
-export { loginUser, registerUser, getUserProfile };
+const getUserProfile = async (req, res) => {
+  try {
+    const getUser = await User.findById(req.user);
+
+    res.status(StatusCodes.OK).json({
+      sucess: true,
+      getUser,
+    });
+  } catch (error) {
+    console.error(
+      "An error occurred while processing the request" || error?.message
+    );
+  }
+};
+const searchChatUser = async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    return res.status(StatusCodes.OK).json({
+      sucess: true,
+      message: name,
+    });
+  } catch (error) {
+    console.error(
+      "An error occurred while processing the request" || error?.message
+    );
+  }
+};
+export { loginUser, registerUser, logoutUser, getUserProfile, searchChatUser };

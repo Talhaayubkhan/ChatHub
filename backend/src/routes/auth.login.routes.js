@@ -1,11 +1,12 @@
-import { Router } from "express";
-const router = Router();
+import express from "express";
+const router = express.Router();
 
 import {
   loginUser,
   registerUser,
-  // logoutUser,
-  // getUserProfile,
+  logoutUser,
+  getUserProfile,
+  searchUser,
 } from "../controllers/authController.js";
 import {
   multerUploadFile,
@@ -15,7 +16,10 @@ import {
 import { isAuthenticatedUser } from "../middlewares/authentication.js";
 
 router.route("/register").post(singleAavatar, registerUser);
-router.route("/login").post(isAuthenticatedUser, loginUser);
-// router.route("/logout").post(logoutUser);
+router.route("/login").post(loginUser);
 
+// app.use(isAuthenticatedUser);
+router.route("/logout").get(isAuthenticatedUser, logoutUser);
+router.route("/user").get(isAuthenticatedUser, getUserProfile);
+router.route("/search").get(isAuthenticatedUser, searchUser);
 export default router;
