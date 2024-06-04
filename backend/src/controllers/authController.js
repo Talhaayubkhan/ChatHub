@@ -61,13 +61,13 @@ const loginUser = async (req, res) => {
 
   res.status(StatusCodes.OK).send({ user: tokenUser });
 };
-const logoutUser = async (req, res) => {
-  res.cookie("token", "logout", {
-    httpOnly: true,
-    secure: true,
-    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-  });
-};
+// const logoutUser = async (req, res) => {
+//   res.cookie("token", "logout", {
+//     httpOnly: true,
+//     secure: true,
+//     expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+//   });
+// };
 
 const getUserProfile = async (req, res) => {};
-export { loginUser, registerUser, logoutUser, getUserProfile };
+export { loginUser, registerUser, getUserProfile };

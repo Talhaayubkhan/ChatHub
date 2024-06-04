@@ -6,7 +6,7 @@ const app = express();
 // built in middleware
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
-app.use(cookieParser());
+app.use(cookieParser(process.env.JWT_SECRET));
 
 // routes implementation
 import authRouter from "./routes/auth.login.routes.js";
