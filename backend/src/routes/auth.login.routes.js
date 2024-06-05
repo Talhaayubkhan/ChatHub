@@ -6,7 +6,7 @@ import {
   registerUser,
   logoutUser,
   getUserProfile,
-  searchUser,
+  // searchUser,
 } from "../controllers/authController.js";
 import {
   multerUploadFile,
@@ -21,5 +21,5 @@ router.route("/login").post(loginUser);
 // app.use(isAuthenticatedUser);
 router.route("/logout").get(isAuthenticatedUser, logoutUser);
 router.route("/user").get(isAuthenticatedUser, getUserProfile);
-router.route("/search").get(isAuthenticatedUser, searchUser);
+// router.route("/search").get(isAuthenticatedUser, searchUser);
 export default router;

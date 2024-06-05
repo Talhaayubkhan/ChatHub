@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import connectDB from "./src/db/connect.js";
 import { app } from "./src/app.js";
+import { createUser } from "./src/seeders/userSeeders.js";
 
 dotenv.config();
 
@@ -15,3 +16,5 @@ connectDB()
   .catch((err) => {
     console.log("Error While Connecting to Database", err.message);
   });
+
+createUser(10);

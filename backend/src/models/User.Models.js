@@ -36,12 +36,12 @@ const UserSchema = new Schema(
       required: true,
       trim: true,
       unique: true,
-      validate: {
-        validator: (value) => {
-          return !value || usernameRegex.test(value);
-        },
-        message: (props) => `${props.value} is not a valid username`,
-      },
+      // validate: {
+      //   validator: (value) => {
+      //     return !value || usernameRegex.test(value);
+      //   },
+      //   message: (props) => `${props.value} is not a valid username`,
+      // },
     },
     password: {
       type: String,

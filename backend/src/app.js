@@ -16,8 +16,6 @@ import searchChatRouter from "./routes/chat.search.routes.js";
 import notFoundMiddleware from "./middlewares/NotFound.js";
 import errorHandlerMiddleware from "./middlewares/ErrorHandlerMiddleware.js";
 
-app;
-
 // use routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/chat", searchChatRouter);
