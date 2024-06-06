@@ -4,7 +4,12 @@ import bcrypt from "bcrypt";
 
 const createUser = async (numUsers) => {
   try {
+    let numUsers = 10;
     const userPromise = [];
+
+    if (numUsers > 10) {
+      return;
+    }
 
     for (let i = 0; i < numUsers; i++) {
       const hashedPassword = await bcrypt.hash("123", 10); // Hashing the password
