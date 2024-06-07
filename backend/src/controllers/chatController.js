@@ -1,9 +1,11 @@
 import { Chat } from "../models/Chat.Models.js";
-import { BadRequest } from "../errors/index.js";
+import { User } from "../models/User.Models.js";
+import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
 import { emitEvent } from "../utils/eventEmit.js";
 import { ALERT, REFETCH_ALERT } from "../constants/events.js";
 import { StatusCodes } from "http-status-codes";
 import { getOtherMembers } from "../../lib/helper.js";
+import crypto from "crypto";
 
 const newGroupChat = async (req, res) => {
   const { name, members } = req.body;
@@ -105,14 +107,167 @@ const getMyGroups = async (req, res) => {
   });
 };
 
-const newAddMembers = async (req, res) => {
+const addGroupMembers = async (req, res) => {
   const { chatId, members } = req.body;
 
-  const chat = Chat.findById(chatId);
+  if (!members || members.length < 1) {
+    throw new BadRequest("Please Provide at least One Group Member");
+  }
+
+  const chat = await Chat.findById(chatId);
 
   if (!chat) {
-    throw new BadRequest("Chat not found");
+    throw new NotFound("Chats not found");
   }
+
+  if (!chat.groupChat) {
+    throw new BadRequest("This chat is not a group chat");
+  }
+  // Ensure that the current user is the creator of the group chat
+  if (chat.creator.toString() !== req.user.toString()) {
+    throw new Unauthorized("You are not allowed to add Members to this group!");
+  }
+
+  // Fetch details of all members being added
+  const allNewAddMembersPromise = members.map((member) =>
+    User.findById(member, "name")
+  );
+
+  if (!allNewAddMembersPromise) {
+    throw new BadRequest("Members not found");
+  }
+
+  const allNewAddMembers = await Promise.all(allNewAddMembersPromise);
+
+  // make sure do not add duplicate members
+  const detectDuplicateMembers = allNewAddMembers
+    .filter((member) => !chat.members.includes(member._id.toString()))
+    .map((i) => i._id);
+
+  if (detectDuplicateMembers) {
+    throw new BadRequest("You can't add duplicate members to a group chat");
+  }
+
+  const membersAdded = chat.members.push(...detectDuplicateMembers);
+
+  if (membersAdded.length > 30) {
+    throw new BadRequest("You can't add more than 30 members to a group chat");
+  }
+
+  await chat.save();
+
+  // Emit real-time events to notify members about the addition of new members
+  const allAddMembersNames = allNewAddMembers
+    .map((member) => member.name)
+    .join(", ");
+
+  emitEvent(req, ALERT, chat.members, `${allAddMembersNames} has been added`);
+  emitEvent(req, REFETCH_ALERT, chat.members);
+
+  return res.status(StatusCodes.OK).json({
+    message: "Members added successfully",
+    success: true,
+    // membersAdded,
+    // chat,
+  });
 };
 
-export { newGroupChat, getMyChats, getMyGroups, newAddMembers };
+const removeGroupMembers = async (req, res) => {
+  const { userId, chatId } = req.body;
+
+  if (!userId || !chatId) {
+    throw new BadRequest("Please Provide User Id and Chat Id");
+  }
+
+  const [chat, thatUserRemove] = await Promise.all([
+    Chat.findById(chatId),
+    User.findById(userId, "name"),
+  ]);
+
+  if (!chat) {
+    throw new NotFound("Chats not found");
+  }
+
+  if (!chat.groupChat) {
+    throw new BadRequest("This chat is not a group chat");
+  }
+
+  if (chat.creator.toString() !== req.user.toString()) {
+    throw new Unauthorized(
+      "You are not allowed to remove Members from this group!"
+    );
+  }
+
+  if (chat.members.length <= 3) {
+    throw new BadRequest(
+      "You can't remove members from a group chat with less than 3 members"
+    );
+  }
+
+  // Filter out the user to be removed from the members list
+  // This creates a new array excluding the user with userId
+  chat.members = chat.members.filter(
+    (member) => member.toString() !== userId.toString()
+  );
+
+  await chat.save();
+
+  emitEvent(
+    req,
+    ALERT,
+    chat.members,
+    `${thatUserRemove.name} has been removed`
+  );
+  emitEvent(req, REFETCH_ALERT, chat.members);
+
+  return res.status(StatusCodes.OK).json({
+    message: "Members removed successfully",
+    success: true,
+  });
+};
+
+const leaveGroup = async (req, res) => {
+  const chatId = req.params.chatid;
+
+  const chat = await Chat.findById(chatId);
+
+  if (!chat) {
+    throw new NotFound("Chats not found");
+  }
+
+  // Filter out the leaving user from the members list
+  const findRemainingMembers = chat.members.filter(
+    (member) => member.toString() !== req.user.toString()
+  );
+
+  // If the creator (admin) is leaving, transfer admin rights
+  if (chat.creator.toString() === req.user.toString()) {
+    //  Handles the scenario where there are no members left
+    if (findRemainingMembers.length > 0) {
+      const randomInt = crypto.randomInt(findRemainingMembers.length);
+      const newCreator = removeGroupMembers[randomInt];
+      chat.creator = newCreator;
+    }
+  } else {
+    chat.creator = null;
+  }
+  chat.members = findRemainingMembers;
+
+  await chat.save();
+  emitEvent(req, ALERT, chat.members, `${req.user.name} has left the group`);
+  emitEvent(req, REFETCH_ALERT, chat.members);
+
+  return res.status(StatusCodes.OK).json({
+    message: "You have left the group",
+    success: true,
+  });
+};
+
+export {
+  newGroupChat,
+  getMyChats,
+  getMyGroups,
+  addGroupMembers,
+  removeGroupMembers,
+  leaveGroup,
+};
