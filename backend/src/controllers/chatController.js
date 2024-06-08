@@ -1,8 +1,12 @@
-import { Chat } from "../models/Chat.Models.js";
-import { User } from "../models/User.Models.js";
+import { Chat, Message, User } from "../models/index.js";
 import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
 import { emitEvent } from "../utils/eventEmit.js";
-import { ALERT, REFETCH_ALERT } from "../constants/events.js";
+import {
+  ALERT,
+  NEW_ATTACHMENT,
+  NEW_MESSAGE_ALERT,
+  REFETCH_ALERT,
+} from "../constants/events.js";
 import { StatusCodes } from "http-status-codes";
 import { getOtherMembers } from "../../lib/helper.js";
 import crypto from "crypto";
@@ -240,15 +244,23 @@ const leaveGroup = async (req, res) => {
     (member) => member.toString() !== req.user.toString()
   );
 
+  if (findRemainingMembers.length < 2) {
+    throw new BadRequest(
+      "You can't remove members from a group chat with less than 2 members"
+    );
+  }
+
   // If the creator (admin) is leaving, transfer admin rights
   if (chat.creator.toString() === req.user.toString()) {
     //  Handles the scenario where there are no members left
     if (findRemainingMembers.length > 0) {
+      // Randomly select a new admin from the remaining members
       const randomInt = crypto.randomInt(findRemainingMembers.length);
       const newCreator = removeGroupMembers[randomInt];
       chat.creator = newCreator;
     }
   } else {
+    // If no members are left, the chat creator should be set to nul
     chat.creator = null;
   }
   chat.members = findRemainingMembers;
@@ -263,6 +275,62 @@ const leaveGroup = async (req, res) => {
   });
 };
 
+const sendFileAttachment = async (req, res) => {
+  const chatId = req.body;
+
+  const [chat, user] = await Promise.all([
+    Chat.findById(chatId),
+    User.findById(req.user, "name avatar"),
+  ]);
+  if (!chat || !user) {
+    throw new NotFound("Chats and Users are not available!");
+  }
+  const files = req.files || [];
+
+  if (files.length < 1) {
+    throw new BadRequest("Please Provide at least One File");
+  }
+
+  // upload filer from here
+  // Initialize attachments array to hold file details
+  const attachments = [];
+
+  //  Prepare message object for real-time communication to notify users
+  const messageForRealTime = {
+    content: "",
+    attachments,
+    sender: {
+      name: user.name,
+      avatar: user.avatar?.url,
+      _id: user._id,
+    },
+    chatId,
+  };
+
+  // Create a message object for database storage
+
+  const messageForDB = { content: "", attachments, sender: user._id, chatId };
+
+  const createMessage = await Message.create(messageForDB);
+
+  // Emit an event to notify chat members about the new attachment in real-time
+  emitEvent(req, NEW_ATTACHMENT, chat.members, {
+    message: messageForRealTime,
+    chatId,
+  });
+
+  // Emit an event to notify chat members about a new message alert in real-time
+  emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
+    chatId,
+  });
+
+  return res.status(StatusCodes.OK).json({
+    message: "Send attachment Successfully",
+    success: true,
+    createMessage,
+  });
+};
+
 export {
   newGroupChat,
   getMyChats,
@@ -270,4 +338,5 @@ export {
   addGroupMembers,
   removeGroupMembers,
   leaveGroup,
+  sendFileAttachment,
 };
