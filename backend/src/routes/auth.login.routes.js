@@ -19,7 +19,7 @@ router.route("/register").post(singleAavatar, registerUser);
 router.route("/login").post(loginUser);
 
 // app.use(isAuthenticatedUser);
-router.route("/logout").get(isAuthenticatedUser, logoutUser);
+router.route("/logout").post(isAuthenticatedUser, logoutUser);
 router.route("/user").get(isAuthenticatedUser, getUserProfile);
 // router.route("/search").get(isAuthenticatedUser, searchUser);
 export default router;

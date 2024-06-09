@@ -2,11 +2,7 @@ import CustomApiError from "./CustomError.js";
 import { StatusCodes } from "http-status-codes";
 
 class Unauthorized extends CustomApiError {
-  constructor(
-    message = "Unauthorized access denied!",
-    errorCode = "Unauthorized Error",
-    metadata = {}
-  ) {
+  constructor(message, errorCode = "Unauthorized Error", metadata = {}) {
     super(message);
     this.statusCode = StatusCodes.FORBIDDEN;
     this.errorCode = errorCode;

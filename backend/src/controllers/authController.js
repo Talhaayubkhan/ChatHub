@@ -64,8 +64,9 @@ const loginUser = async (req, res) => {
 const logoutUser = async (req, res) => {
   return res
     .cookie("token", "", {
-      ...cookieResponse,
-      maxAge: 0,
+      httpOnly: true,
+      secure: true,
+      expires: new Date(0),
     })
     .json({
       message: "You have been logged out",

@@ -5,7 +5,6 @@ class BadRequest extends CustomApiError {
   constructor(message) {
     super(message);
     this.statusCode = StatusCodes.BAD_REQUEST;
-    this.message = "Bad request...";
   }
 }
 

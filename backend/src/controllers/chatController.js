@@ -276,58 +276,159 @@ const leaveGroup = async (req, res) => {
 };
 
 const sendFileAttachment = async (req, res) => {
-  const chatId = req.body;
+  try {
+    const chatId = req.body.chatId;
 
-  const [chat, user] = await Promise.all([
-    Chat.findById(chatId),
-    User.findById(req.user, "name avatar"),
-  ]);
-  if (!chat || !user) {
-    throw new NotFound("Chats and Users are not available!");
+    if (!chatId) {
+      throw new BadRequest("Please Provide Chat Id");
+    }
+
+    const [chat, userfind] = await Promise.all([
+      Chat.findById(chatId),
+      User.findById(req.user, "name avatar"),
+    ]);
+    if (!chat) {
+      throw new NotFound("Chats are not Found!");
+    }
+    if (!userfind) {
+      throw new NotFound("User are not Found!");
+    }
+    const files = req.files || [];
+
+    if (files.length < 1) {
+      throw new BadRequest("Please Provide at least One File");
+    }
+
+    // upload filer from here
+    // Initialize attachments array to hold file details
+    const attachments = [];
+
+    const messageForDB = {
+      content: "Attachments",
+      attachments,
+      sender: userfind._id,
+      chat: chatId,
+    };
+    //  Prepare message object for real-time communication to notify users
+    const messageForRealTime = {
+      ...messageForDB,
+      sender: {
+        _id: userfind._id,
+        name: userfind.name,
+      },
+    };
+
+    // Create a message object for database storage
+    const createMessage = await Message.create(messageForDB);
+
+    if (!createMessage) {
+      throw new BadRequest("Message not created");
+    }
+
+    // Emit an event to notify chat members about the new attachment in real-time
+    emitEvent(req, NEW_ATTACHMENT, chat.members, {
+      message: messageForRealTime,
+      chatId,
+    });
+
+    // Emit an event to notify chat members about a new message alert in real-time
+    emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
+      chatId,
+    });
+
+    return res.status(StatusCodes.OK).json({
+      message: "Send attachment Successfully",
+      success: true,
+      createMessage,
+    });
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message || "Internal Server Error",
+      success: false,
+    });
   }
-  const files = req.files || [];
+};
 
-  if (files.length < 1) {
-    throw new BadRequest("Please Provide at least One File");
+const chatDetails = async (req, res) => {
+  try {
+    // Check if the client requested to populate member details
+    if (req.query.populate === "true") {
+      const chat = await Chat.findById(req.params.chatid)
+        .populate("members", "name avatar")
+        .lean(); // Use lean() for better performance by returning plain JavaScript objects
+
+      if (!chat) {
+        throw new NotFound("Chats are not Found!");
+      }
+
+      chat.members = chat.members.map((_id, name, avatar) => {
+        return {
+          _id,
+          name,
+          avatar: avatar?.url || "Not Available",
+        };
+      });
+
+      return res.status(StatusCodes.OK).json({
+        message: "Chat Details",
+        success: true,
+        chat,
+      });
+    } else {
+      // Fetch chat by ID without populating the members field
+      const chat = await Chat.findById(req.params.id);
+
+      if (!chat) {
+        throw new NotFound("Chats are not Found!");
+      }
+      return res.status(StatusCodes.OK).json({
+        message: "Chat Details",
+        success: true,
+        chat,
+      });
+    }
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message || "Internal Server Error",
+      success: false,
+    });
+  }
+};
+
+const renameGroup = async (req, res) => {
+  const chatId = req.params.chatid;
+  const { name } = req.body;
+
+  if (!chatId) {
+    throw new BadRequest("Please Provide Chat Id");
+  }
+  if (!name) {
+    throw new BadRequest("Please Provide Name");
   }
 
-  // upload filer from here
-  // Initialize attachments array to hold file details
-  const attachments = [];
+  const chat = await Chat.findById(chatId);
 
-  //  Prepare message object for real-time communication to notify users
-  const messageForRealTime = {
-    content: "",
-    attachments,
-    sender: {
-      name: user.name,
-      avatar: user.avatar?.url,
-      _id: user._id,
-    },
-    chatId,
-  };
+  if (!chat) {
+    throw new NotFound("Chats are not Found!");
+  }
 
-  // Create a message object for database storage
+  if (!chat.groupChat) {
+    throw new BadRequest("This chat is not a group chat");
+  }
 
-  const messageForDB = { content: "", attachments, sender: user._id, chatId };
+  if (chat.creator.toString !== req.user.toString()) {
+    throw new Unauthorized("You are not allowed to rename this group!");
+  }
 
-  const createMessage = await Message.create(messageForDB);
+  chat.name = name;
 
-  // Emit an event to notify chat members about the new attachment in real-time
-  emitEvent(req, NEW_ATTACHMENT, chat.members, {
-    message: messageForRealTime,
-    chatId,
-  });
+  await chat.save();
 
-  // Emit an event to notify chat members about a new message alert in real-time
-  emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
-    chatId,
-  });
+  emitEvent(req, REFETCH_ALERT, chat?.members);
 
   return res.status(StatusCodes.OK).json({
-    message: "Send attachment Successfully",
+    message: "Group renamed successfully",
     success: true,
-    createMessage,
   });
 };
 
@@ -339,4 +440,6 @@ export {
   removeGroupMembers,
   leaveGroup,
   sendFileAttachment,
+  chatDetails,
+  renameGroup,
 };

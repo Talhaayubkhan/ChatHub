@@ -1,4 +1,4 @@
-import("express-async-errors");
+import "express-async-errors";
 import express from "express";
 import cookieParser from "cookie-parser";
 const app = express();
@@ -21,7 +21,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/chat", searchChatRouter);
 
 // error handler middleware
-app.use(errorHandlerMiddleware);
-app.use(notFoundMiddleware);
+// app.use(notFoundMiddleware);
+// app.use(errorHandlerMiddleware);
 
 export { app };

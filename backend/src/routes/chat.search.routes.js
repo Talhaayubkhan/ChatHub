@@ -9,6 +9,8 @@ import {
   removeGroupMembers,
   leaveGroup,
   sendFileAttachment,
+  chatDetails,
+  renameGroup,
 } from "../controllers/chatController.js";
 import { isAuthenticatedUser } from "../middlewares/authentication.js";
 import { fileAttachmentMulter } from "../middlewares/multer.middleware.js";
@@ -21,4 +23,6 @@ router.route("/addmembers").put(addGroupMembers);
 router.route("/removemember").delete(removeGroupMembers);
 router.route("/leave/:chatid").delete(leaveGroup);
 router.route("/message").post(fileAttachmentMulter, sendFileAttachment);
+
+router.route("/:chatid").get(chatDetails).put(renameGroup).delete();
 export default router;
