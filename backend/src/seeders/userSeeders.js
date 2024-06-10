@@ -10,7 +10,7 @@ const createUser = async (numUsers) => {
         username: faker.internet.userName(),
         email: faker.internet.email(),
         bio: faker.lorem.sentence(10),
-        password: faker.internet.password(), // Use hashed password
+        password: "password",
         avatar: {
           url: faker.image.avatar(),
           public_id: faker.system.fileName(),
@@ -21,7 +21,7 @@ const createUser = async (numUsers) => {
     }
 
     await Promise.all(userPromise);
-    // process.exit(0);
+    process.exit(1);
   } catch (error) {
     console.error("Error creating users:", error);
     process.exit(1);

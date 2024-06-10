@@ -10,6 +10,7 @@ import {
 import { StatusCodes } from "http-status-codes";
 import { getOtherMembers } from "../../lib/helper.js";
 import crypto from "crypto";
+import { deleteFilesFromCloudinary } from "../utils/cloudinary.js";
 
 const newGroupChat = async (req, res) => {
   const { name, members } = req.body;
@@ -275,7 +276,7 @@ const leaveGroup = async (req, res) => {
   });
 };
 
-const sendFileAttachment = async (req, res) => {
+const sendMessageFileAttachment = async (req, res) => {
   try {
     const chatId = req.body.chatId;
 
@@ -416,7 +417,7 @@ const renameGroup = async (req, res) => {
     throw new BadRequest("This chat is not a group chat");
   }
 
-  if (chat.creator.toString !== req.user.toString()) {
+  if (chat.creator.toString() !== req.user.toString()) {
     throw new Unauthorized("You are not allowed to rename this group!");
   }
 
@@ -432,6 +433,109 @@ const renameGroup = async (req, res) => {
   });
 };
 
+const deleteGroupChats = async (req, res) => {
+  const chatId = req.params.chatid;
+
+  if (!chatId) {
+    throw new BadRequest("Please Provide Chat Id");
+  }
+
+  const chat = await Chat.findById(chatId);
+
+  if (!chat) {
+    throw new NotFound("Chats are not Found!");
+  }
+
+  const members = chat.members;
+
+  // Authorization check for group chat
+  // Only the creator of the group chat can delete the group
+  if (chat.groupChat && chat.creator.toString() !== req.user.toString()) {
+    throw new Unauthorized("You are not allowed to delete this group!");
+  }
+
+  // Authorization check for private chat
+  // Only members of the private chat can delete the chat
+  // One-to-One (Private) Chats
+  if (!chat.groupChat && !chat.members.includes(req.user.toString())) {
+    throw new Unauthorized("You are not allowed to delete this chat!");
+  }
+
+  // from here we delete all messages as well as files, attachments on cloudinary
+
+  // Find all messages in the chat that have attachments
+
+  const messagesWithAttachments = await Message.find({
+    chat: chatId,
+    attachments: { $exists: true, $ne: [] },
+  });
+
+  if (!messagesWithAttachments) {
+    throw new NotFound("Messages are not Found!");
+  }
+
+  const public_ids = [];
+
+  // Collect the public IDs of all attachments
+  //  These public_ids are unique identifiers used by Cloudinary (or any other cloud storage service) to manage files
+  messagesWithAttachments.forEach(({ attachments }) => {
+    attachments.forEach(({ public_id }) => {
+      public_ids.push(public_id);
+    });
+  });
+
+  // Perform parallel deletion of:
+  // 1. Files from Cloudinary
+  // 2. The chat document from the database
+  // 3. All messages associated with the chat from the database
+  const filesDeleted = await Promise.all([
+    deleteFilesFromCloudinary(public_ids),
+    chat.deleteOne(),
+    Message.deleteMany({ chat: chatId }),
+  ]);
+
+  if (!filesDeleted) {
+    throw new NotFound("Files are not Found!");
+  }
+
+  emitEvent(req, REFETCH_ALERT, members);
+
+  return res.status(StatusCodes.OK).json({
+    message: "Group deleted successfully",
+    success: true,
+  });
+};
+
+const getMessages = async (req, res) => {
+  const chatId = req.params.id;
+
+  const { page = 1 } = req.query;
+
+  const chatsPerPage = 20;
+  const skip = (page - 1) * chatsPerPage;
+
+  const [messages, totalMessageCounts] = await Promise.all([
+    Message.find({ chat: chatId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(chatsPerPage)
+      .populate("sender", "name avatar")
+      .lean(),
+    Message.countDocuments({ chat: chatId }),
+  ]);
+
+  if (!messages) {
+    throw new NotFound("Messages are not Found!");
+  }
+
+  const totalPages = Math.ceil(totalMessageCounts / chatsPerPage);
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    messages: messages.reverse(),
+    totalPages,
+  });
+};
+
 export {
   newGroupChat,
   getMyChats,
@@ -439,7 +543,9 @@ export {
   addGroupMembers,
   removeGroupMembers,
   leaveGroup,
-  sendFileAttachment,
+  sendMessageFileAttachment,
   chatDetails,
   renameGroup,
+  deleteGroupChats,
+  getMessages,
 };

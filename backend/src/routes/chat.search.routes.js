@@ -8,9 +8,11 @@ import {
   addGroupMembers,
   removeGroupMembers,
   leaveGroup,
-  sendFileAttachment,
+  sendMessageFileAttachment,
   chatDetails,
   renameGroup,
+  deleteGroupChats,
+  getMessages,
 } from "../controllers/chatController.js";
 import { isAuthenticatedUser } from "../middlewares/authentication.js";
 import { fileAttachmentMulter } from "../middlewares/multer.middleware.js";
@@ -22,7 +24,12 @@ router.route("/mychats/mygroups").get(getMyGroups);
 router.route("/addmembers").put(addGroupMembers);
 router.route("/removemember").delete(removeGroupMembers);
 router.route("/leave/:chatid").delete(leaveGroup);
-router.route("/message").post(fileAttachmentMulter, sendFileAttachment);
+router.route("/message").post(fileAttachmentMulter, sendMessageFileAttachment);
+router.route("/message/:id").get(getMessages);
 
-router.route("/:chatid").get(chatDetails).put(renameGroup).delete();
+router
+  .route("/:chatid")
+  .get(chatDetails)
+  .patch(renameGroup)
+  .delete(deleteGroupChats);
 export default router;

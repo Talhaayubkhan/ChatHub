@@ -1,4 +1,11 @@
 import { generateToken } from "./createToken.js";
 import { cookieResponse, createJWT, verifyJWT } from "./jwtToken.js";
+import { deleteFilesFromCloudinary } from "./cloudinary.js";
 
-export { generateToken, cookieResponse, createJWT, verifyJWT };
+export {
+  generateToken,
+  cookieResponse,
+  createJWT,
+  verifyJWT,
+  deleteFilesFromCloudinary,
+};
