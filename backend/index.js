@@ -6,11 +6,12 @@ import { app } from "./src/app.js";
 import notFoundMiddleware from "./src/middlewares/NotFound.js";
 import errorHandlerMiddleware from "./src/middlewares/ErrorHandlerMiddleware.js";
 
-import { createUser } from "./src/seeders/userSeeders.js";
-import {
-  createGroupChats,
-  createSingleChats,
-} from "./src/seeders/chatSeeders.js";
+// import { createUser } from "./src/seeders/userSeeders.js";
+// import {
+//   createGroupChats,
+//   createMessageInChats,
+//   createSingleChats,
+// } from "./src/seeders/chatSeeders.js";
 
 dotenv.config();
 
@@ -29,7 +30,3 @@ connectDB()
   .catch((err) => {
     console.log("Error While Connecting to Database", err.message);
   });
-
-// createUser(10);
-// createSingleChats(10);
-// createGroupChats(10);

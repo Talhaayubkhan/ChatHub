@@ -528,7 +528,7 @@ const getMessages = async (req, res) => {
     throw new NotFound("Messages are not Found!");
   }
 
-  const totalPages = Math.ceil(totalMessageCounts / chatsPerPage);
+  const totalPages = Math.ceil(totalMessageCounts / chatsPerPage) || 0;
   return res.status(StatusCodes.OK).json({
     success: true,
     messages: messages.reverse(),

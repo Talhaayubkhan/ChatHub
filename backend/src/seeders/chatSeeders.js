@@ -1,4 +1,4 @@
-import { User, Chat } from "../models/index.js";
+import { User, Chat, Message } from "../models/index.js";
 import { faker, simpleFaker } from "@faker-js/faker";
 
 const createSingleChats = async (numChats) => {
@@ -11,7 +11,7 @@ const createSingleChats = async (numChats) => {
         chatPromise.push(
           Chat.create({
             name: faker.lorem.words(2),
-            users: [users[i], users[j]],
+            members: [users[i], users[j]],
           })
         );
       }
@@ -45,7 +45,7 @@ const createGroupChats = async (numChats) => {
 
       const chat = await Chat.create({
         groupChat: true,
-        name: faker.lorem.words(2),
+        name: faker.lorem.words(1),
         members,
         creator: members[0],
       });
@@ -71,9 +71,9 @@ const createMessages = async (numMessages) => {
 
       messagePromise.push(
         Message.create({
-          content: faker.lorem.sentence(10),
+          content: faker.lorem.sentence(),
           chat: randomChat,
-          user: randomUser,
+          sender: randomUser,
         })
       );
     }
@@ -95,16 +95,15 @@ const createMessageInChats = async (chatId, numMessages) => {
 
       messagePromise.push(
         Message.create({
-          content: faker.lorem.sentence(10),
+          content: faker.lorem.sentence(),
           chat: chatId,
-          user: randomUser,
+          sender: randomUser,
         })
       );
-
-      await Promise.all(messagePromise);
-      console.log("Messages created successfully");
-      process.exit();
     }
+    await Promise.all(messagePromise);
+    console.log("Messages created successfully");
+    process.exit();
   } catch (error) {
     console.error("Error creating chats:", error);
     process.exit(1);
