@@ -37,15 +37,11 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, username, password } = req.body;
 
-  // if (!email || !password) {
-  //   throw new BadRequest(
-  //     "Please provide a name, username, email, and password"
-  //   );
-  // }
-
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({
+    $or: [{ email: email }, { username: username }],
+  }).select("+password");
 
   if (!user) {
     throw new Unauthenticated(`Not foun a user with that ${email}`);

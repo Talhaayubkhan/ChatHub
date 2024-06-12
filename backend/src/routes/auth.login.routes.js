@@ -2,6 +2,11 @@ import express from "express";
 const router = express.Router();
 
 import {
+  registerValidator,
+  loginValidator,
+  handleValidationErrors,
+} from "../lib/authValidators.js";
+import {
   loginUser,
   registerUser,
   logoutUser,
@@ -15,11 +20,20 @@ import {
 
 import { isAuthenticatedUser } from "../middlewares/authentication.js";
 
-router.route("/register").post(singleAavatar, registerUser);
-router.route("/login").post(loginUser);
+router
+  .route("/register")
+  .post(
+    singleAavatar,
+    registerValidator(),
+    handleValidationErrors,
+    registerUser
+  );
+router
+  .route("/login")
+  .post(loginValidator(), handleValidationErrors, loginUser);
 
-// app.use(isAuthenticatedUser);
-router.route("/logout").post(isAuthenticatedUser, logoutUser);
-router.route("/user").get(isAuthenticatedUser, getUserProfile);
+router.use(isAuthenticatedUser);
+router.route("/logout").post(logoutUser);
+router.route("/user").get(getUserProfile);
 // router.route("/search").get(isAuthenticatedUser, searchUser);
 export default router;

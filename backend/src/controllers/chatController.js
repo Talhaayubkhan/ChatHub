@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { Chat, Message, User } from "../models/index.js";
 import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
 import { emitEvent } from "../utils/eventEmit.js";
@@ -8,8 +9,7 @@ import {
   REFETCH_ALERT,
 } from "../constants/events.js";
 import { StatusCodes } from "http-status-codes";
-import { getOtherMembers } from "../../lib/helper.js";
-import crypto from "crypto";
+import { getOtherMembers } from "../lib/helper.js";
 import { deleteFilesFromCloudinary } from "../utils/cloudinary.js";
 
 const newGroupChat = async (req, res) => {
