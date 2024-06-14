@@ -9,12 +9,6 @@ const registerUser = async (req, res) => {
   const { name, username, email, password, bio } = req.body;
   // console.log(req.body);
 
-  if (!name || !username || !email) {
-    throw new BadRequest(
-      "Please provide a name, username, email, and password"
-    );
-  }
-
   const avatar = {
     public_id: "sdfs",
     url: "asd",

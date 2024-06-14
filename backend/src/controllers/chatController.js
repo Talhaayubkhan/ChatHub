@@ -15,10 +15,6 @@ import { deleteFilesFromCloudinary } from "../utils/cloudinary.js";
 const newGroupChat = async (req, res) => {
   const { name, members } = req.body;
 
-  if (members.length < 2) {
-    throw new BadRequest("Group chat requires at least 3 members");
-  }
-
   const allMembers = [...members, req.user];
 
   const creatChatMembers = await Chat.create({
@@ -115,10 +111,6 @@ const getMyGroups = async (req, res) => {
 const addGroupMembers = async (req, res) => {
   const { chatId, members } = req.body;
 
-  if (!members || members.length < 1) {
-    throw new BadRequest("Please Provide at least One Group Member");
-  }
-
   const chat = await Chat.findById(chatId);
 
   if (!chat) {
@@ -179,10 +171,6 @@ const addGroupMembers = async (req, res) => {
 
 const removeGroupMembers = async (req, res) => {
   const { userId, chatId } = req.body;
-
-  if (!userId || !chatId) {
-    throw new BadRequest("Please Provide User Id and Chat Id");
-  }
 
   const [chat, thatUserRemove] = await Promise.all([
     Chat.findById(chatId),
@@ -277,84 +265,73 @@ const leaveGroup = async (req, res) => {
 };
 
 const sendMessageFileAttachment = async (req, res) => {
-  try {
-    const chatId = req.body.chatId;
+  const chatId = req.body.chatId;
 
-    if (!chatId) {
-      throw new BadRequest("Please Provide Chat Id");
-    }
-
-    const [chat, userfind] = await Promise.all([
-      Chat.findById(chatId),
-      User.findById(req.user, "name avatar"),
-    ]);
-    if (!chat) {
-      throw new NotFound("Chats are not Found!");
-    }
-    if (!userfind) {
-      throw new NotFound("User are not Found!");
-    }
-    const files = req.files || [];
-
-    if (files.length < 1) {
-      throw new BadRequest("Please Provide at least One File");
-    }
-
-    // upload filer from here
-    // Initialize attachments array to hold file details
-    const attachments = [];
-
-    const messageForDB = {
-      content: "Attachments",
-      attachments,
-      sender: userfind._id,
-      chat: chatId,
-    };
-    //  Prepare message object for real-time communication to notify users
-    const messageForRealTime = {
-      ...messageForDB,
-      sender: {
-        _id: userfind._id,
-        name: userfind.name,
-      },
-    };
-
-    // Create a message object for database storage
-    const createMessage = await Message.create(messageForDB);
-
-    if (!createMessage) {
-      throw new BadRequest("Message not created");
-    }
-
-    // Emit an event to notify chat members about the new attachment in real-time
-    emitEvent(req, NEW_ATTACHMENT, chat.members, {
-      message: messageForRealTime,
-      chatId,
-    });
-
-    // Emit an event to notify chat members about a new message alert in real-time
-    emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
-      chatId,
-    });
-
-    return res.status(StatusCodes.OK).json({
-      message: "Send attachment Successfully",
-      success: true,
-      createMessage,
-    });
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: error.message || "Internal Server Error",
-      success: false,
-    });
+  const [chat, userfind] = await Promise.all([
+    Chat.findById(chatId),
+    User.findById(req.user, "name avatar"),
+  ]);
+  if (!chat) {
+    throw new NotFound("Chats are not Found!");
   }
+  if (!userfind) {
+    throw new NotFound("User are not Found!");
+  }
+  const files = req.files || [];
+
+  if (files.length < 1) {
+    throw new BadRequest("Please Provide at least One File");
+  }
+
+  // upload filer from here
+  // Initialize attachments array to hold file details
+  const attachments = [];
+
+  const messageForDB = {
+    content: "Attachments",
+    attachments,
+    sender: userfind._id,
+    chat: chatId,
+  };
+  //  Prepare message object for real-time communication to notify users
+  const messageForRealTime = {
+    ...messageForDB,
+    sender: {
+      _id: userfind._id,
+      name: userfind.name,
+    },
+  };
+
+  // Create a message object for database storage
+  const createMessage = await Message.create(messageForDB);
+
+  if (!createMessage) {
+    throw new BadRequest("Message not created");
+  }
+
+  // Emit an event to notify chat members about the new attachment in real-time
+  emitEvent(req, NEW_ATTACHMENT, chat.members, {
+    message: messageForRealTime,
+    chatId,
+  });
+
+  // Emit an event to notify chat members about a new message alert in real-time
+  emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
+    chatId,
+  });
+
+  return res.status(StatusCodes.OK).json({
+    message: "Send attachment Successfully",
+    success: true,
+    createMessage,
+  });
 };
 
 const chatDetails = async (req, res) => {
   try {
     // Check if the client requested to populate member details
     if (req.query.populate === "true") {
-      const chat = await Chat.findById(req.params.chatid)
+      const chat = await Chat.findById(req.params.chatId)
         .populate("members", "name avatar")
         .lean(); // Use lean() for better performance by returning plain JavaScript objects
 
@@ -397,7 +374,7 @@ const chatDetails = async (req, res) => {
 };
 
 const renameGroup = async (req, res) => {
-  const chatId = req.params.chatid;
+  const chatId = req.params.chatId;
   const { name } = req.body;
 
   if (!chatId) {
@@ -434,7 +411,7 @@ const renameGroup = async (req, res) => {
 };
 
 const deleteGroupChats = async (req, res) => {
-  const chatId = req.params.chatid;
+  const chatId = req.params.chatId;
 
   if (!chatId) {
     throw new BadRequest("Please Provide Chat Id");

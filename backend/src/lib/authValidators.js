@@ -1,4 +1,4 @@
-import { body, validationResult } from "express-validator";
+import { body, validationResult, check } from "express-validator";
 import { BadRequest } from "../errors/index.js";
 
 export const registerValidator = () => [
@@ -31,6 +31,7 @@ export const registerValidator = () => [
     .isStrongPassword()
     .withMessage("Password must be at least 8 characters..")
     .trim(),
+  // check("avatar").notEmpty().withMessage("Please Provide Avatar Also..."),
 ];
 
 export const loginValidator = () => [
