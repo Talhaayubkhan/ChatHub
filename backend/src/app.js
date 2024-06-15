@@ -21,7 +21,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/chat", searchChatRouter);
 
 // error handler middleware
-// app.use(notFoundMiddleware);
-// app.use(errorHandlerMiddleware);
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 export { app };

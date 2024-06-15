@@ -76,11 +76,46 @@ const getUserProfile = async (req, res) => {
 const searchUser = async (req, res) => {
   const { name } = req.query;
 
-  const allMyChats = await Chat.find({ groupChat: false, members: req.user });
+  const allChats = await Chat.find({});
+
+  if (!allChats || allChats.length === 0) {
+    throw new BadRequest("No chats found");
+  }
+
+  const allChatMembers = allChats.flatMap((chat) => chat.members);
+
+  if (!allChatMembers || allChatMembers.length === 0) {
+    throw new BadRequest("No Members found in chats");
+  }
+
+  // Clarifies that this operation ensures only users who are not already members of any chat the current user is in are retrieved.
+  const findAllUsersExceptMeAndMyFriends = await User.find({
+    // Query to find all users who are not already members of any chat the current user is also not part
+    _id: {
+      $nin: allChatMembers, //ensuring the search results are only new potential contacts or users the current user is not already connected with.
+      // name: { $regex: name, $options: "i" },
+    },
+  });
+
+  if (findAllUsersExceptMeAndMyFriends.length === 0) {
+    throw new BadRequest("No Members found in chats");
+  }
+
+  const findUsersAvatar = findAllUsersExceptMeAndMyFriends.map(
+    ({ _id, name, avatar }) => ({
+      _id,
+      name,
+      avatar: avatar?.url || "No Avatar URL Found",
+    })
+  );
+
+  if (!findUsersAvatar) {
+    throw new BadRequest("No Avatar found in chats, please try again");
+  }
 
   return res.status(StatusCodes.OK).json({
     sucess: true,
-    allMyChats,
+    findUsersAvatar,
   });
 };
 export { loginUser, registerUser, logoutUser, getUserProfile, searchUser };

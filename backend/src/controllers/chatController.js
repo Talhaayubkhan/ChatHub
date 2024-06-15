@@ -335,10 +335,6 @@ const chatDetails = async (req, res) => {
         .populate("members", "name avatar")
         .lean(); // Use lean() for better performance by returning plain JavaScript objects
 
-      if (!chat) {
-        throw new NotFound("Chats are not Found!");
-      }
-
       chat.members = chat.members.map((_id, name, avatar) => {
         return {
           _id,
@@ -473,7 +469,7 @@ const deleteGroupChats = async (req, res) => {
 };
 
 const getMessages = async (req, res) => {
-  const chatId = req.params.id;
+  const chatId = req.params.chatId;
 
   const { page = 1 } = req.query;
 

@@ -54,7 +54,7 @@ router
     sendMessageFileAttachment
   );
 router
-  .route("/message/:id")
+  .route("/message/:chatId")
   .get(chatIdGroupValidator(), handleGroupValidationErrors, getMessages);
 
 router
