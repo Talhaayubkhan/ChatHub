@@ -377,13 +377,6 @@ const renameGroup = async (req, res) => {
   const chatId = req.params.chatId;
   const { name } = req.body;
 
-  if (!chatId) {
-    throw new BadRequest("Please Provide Chat Id");
-  }
-  if (!name) {
-    throw new BadRequest("Please Provide Name");
-  }
-
   const chat = await Chat.findById(chatId);
 
   if (!chat) {
@@ -412,10 +405,6 @@ const renameGroup = async (req, res) => {
 
 const deleteGroupChats = async (req, res) => {
   const chatId = req.params.chatId;
-
-  if (!chatId) {
-    throw new BadRequest("Please Provide Chat Id");
-  }
 
   const chat = await Chat.findById(chatId);
 

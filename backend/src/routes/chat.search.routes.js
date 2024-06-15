@@ -5,11 +5,10 @@ import {
   newGroupChatValidator,
   addGroupMemberValidator,
   removeGroupValidator,
-  handleGroupValidationErrors,
-  leaveGroupValidator,
   fileAttachmentGroupValidator,
-  getMessageGroupValidator,
-  chatDetailsGroupValidator,
+  chatIdGroupValidator,
+  handleGroupValidationErrors,
+  renameGroupValidator,
 } from "../lib/chatValidators.js";
 import {
   newGroupChat,
@@ -45,7 +44,7 @@ router
   );
 router
   .route("/leave/:chatid")
-  .delete(leaveGroupValidator(), handleGroupValidationErrors, leaveGroup);
+  .delete(chatIdGroupValidator(), handleGroupValidationErrors, leaveGroup);
 router
   .route("/message")
   .post(
@@ -56,11 +55,15 @@ router
   );
 router
   .route("/message/:id")
-  .get(getMessageGroupValidator(), handleGroupValidationErrors, getMessages);
+  .get(chatIdGroupValidator(), handleGroupValidationErrors, getMessages);
 
 router
   .route("/:chatId")
-  .get(chatDetailsGroupValidator(), handleGroupValidationErrors, chatDetails)
-  .patch(renameGroup)
-  .delete(deleteGroupChats);
+  .get(chatIdGroupValidator(), handleGroupValidationErrors, chatDetails)
+  .patch(renameGroupValidator(), handleGroupValidationErrors, renameGroup)
+  .delete(
+    chatIdGroupValidator(),
+    handleGroupValidationErrors,
+    deleteGroupChats
+  );
 export default router;

@@ -1,4 +1,4 @@
-import { User } from "../models/User.Models.js";
+import { User, Chat } from "../models/index.js";
 import { StatusCodes } from "http-status-codes";
 import { BadRequest, Unauthenticated } from "../errors/index.js";
 import { cookieResponse, generateToken } from "../utils/index.js";
@@ -65,31 +65,22 @@ const logoutUser = async (req, res) => {
 };
 
 const getUserProfile = async (req, res) => {
-  try {
-    const getUser = await User.findById(req.user);
+  const getUser = await User.findById(req.user);
 
-    res.status(StatusCodes.OK).json({
-      sucess: true,
-      getUser,
-    });
-  } catch (error) {
-    console.error(
-      "An error occurred while processing the request" || error?.message
-    );
-  }
+  res.status(StatusCodes.OK).json({
+    sucess: true,
+    getUser,
+  });
 };
-const searchChatUser = async (req, res) => {
-  try {
-    const { name } = req.query;
 
-    return res.status(StatusCodes.OK).json({
-      sucess: true,
-      message: name,
-    });
-  } catch (error) {
-    console.error(
-      "An error occurred while processing the request" || error?.message
-    );
-  }
+const searchUser = async (req, res) => {
+  const { name } = req.query;
+
+  const allMyChats = await Chat.find({ groupChat: false, members: req.user });
+
+  return res.status(StatusCodes.OK).json({
+    sucess: true,
+    allMyChats,
+  });
 };
-export { loginUser, registerUser, logoutUser, getUserProfile, searchChatUser };
+export { loginUser, registerUser, logoutUser, getUserProfile, searchUser };

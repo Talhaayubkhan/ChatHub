@@ -24,7 +24,7 @@ const removeGroupValidator = () => [
   body("userId").notEmpty().withMessage("Please enter your user ID ").trim(),
 ];
 
-const leaveGroupValidator = () => [
+const chatIdGroupValidator = () => [
   param("chatId").notEmpty().withMessage("Please enter your Correct chat ID"),
 ];
 
@@ -37,12 +37,9 @@ const fileAttachmentGroupValidator = () => [
     .withMessage("Attachments Must be between 1-10"),
 ];
 
-const getMessageGroupValidator = () => [
-  param("id").notEmpty().withMessage("Please enter your Correct ID"),
-];
-
-const chatDetailsGroupValidator = () => [
-  param("chatId ").notEmpty().withMessage("Please enter your Correct chat ID"),
+const renameGroupValidator = () => [
+  param("chatId").notEmpty().withMessage("Please enter your Correct chat ID"),
+  body("name").notEmpty().withMessage("Please enter your Name").trim(),
 ];
 
 const handleGroupValidationErrors = (req, res, next) => {
@@ -69,9 +66,8 @@ export {
   newGroupChatValidator,
   addGroupMemberValidator,
   removeGroupValidator,
-  leaveGroupValidator,
+  chatIdGroupValidator,
   fileAttachmentGroupValidator,
-  getMessageGroupValidator,
-  chatDetailsGroupValidator,
+  renameGroupValidator,
   handleGroupValidationErrors,
 };
