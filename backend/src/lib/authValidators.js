@@ -53,6 +53,18 @@ export const loginValidator = () => [
   body("password").notEmpty().withMessage("Please enter your password.").trim(),
 ];
 
+export const sendFriendRequestValidation = () => [
+  body("userId").notEmpty().withMessage("Please enter your User ID"),
+];
+export const acceptFriendRequestValidation = () => [
+  body("requestId").notEmpty().withMessage("Please enter your Request ID"),
+  body("accept")
+    .notEmpty()
+    .withMessage("Please Add To Accept")
+    .isBoolean()
+    .withMessage("Accept Must Be Boolean"),
+];
+
 export const handleValidationErrors = (req, res, next) => {
   try {
     const errors = validationResult(req);

@@ -5,6 +5,8 @@ import {
   registerValidator,
   loginValidator,
   handleValidationErrors,
+  sendFriendRequestValidation,
+  acceptFriendRequestValidation,
 } from "../lib/authValidators.js";
 import {
   loginUser,
@@ -12,6 +14,9 @@ import {
   logoutUser,
   getUserProfile,
   searchUser,
+  sendFriendRequest,
+  acceptFriendRequest,
+  getAllNotifications,
 } from "../controllers/authController.js";
 import {
   multerUploadFile,
@@ -36,5 +41,20 @@ router.use(isAuthenticatedUser);
 router.route("/logout").post(logoutUser);
 router.route("/user").get(getUserProfile);
 router.route("/search").get(searchUser);
+router
+  .route("/send-request")
+  .post(
+    sendFriendRequestValidation(),
+    handleValidationErrors,
+    sendFriendRequest
+  );
+router
+  .route("/accept-request")
+  .post(
+    acceptFriendRequestValidation(),
+    handleValidationErrors,
+    acceptFriendRequest
+  );
+router.route("/notifications").get(getAllNotifications);
 
 export default router;

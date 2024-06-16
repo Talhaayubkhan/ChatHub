@@ -1,8 +1,8 @@
-import { User, Chat } from "../models/index.js";
+import { User, Chat, Request } from "../models/index.js";
 import { StatusCodes } from "http-status-codes";
-import { BadRequest, Unauthenticated } from "../errors/index.js";
-import { cookieResponse, generateToken } from "../utils/index.js";
-
+import { BadRequest, NotFound, Unauthenticated } from "../errors/index.js";
+import { cookieResponse, generateToken, emitEvent } from "../utils/index.js";
+import { NEW_REQUEST } from "../constants/events.js";
 const registerUser = async (req, res) => {
   // We use req.body to access the data sent by the client in the request body
   // IMPORTANT NOTE: req.body is used to access the data sent by the client in the request body, which is essential for operations like user registration.
@@ -74,7 +74,7 @@ const getUserProfile = async (req, res) => {
 };
 
 const searchUser = async (req, res) => {
-  const { name } = req.query;
+  const { name = "" } = req.query;
 
   const allChats = await Chat.find({});
 
@@ -82,19 +82,20 @@ const searchUser = async (req, res) => {
     throw new BadRequest("No chats found");
   }
 
+  // extracting All Users From my chats
   const allChatMembers = allChats.flatMap((chat) => chat.members);
 
   if (!allChatMembers || allChatMembers.length === 0) {
     throw new BadRequest("No Members found in chats");
   }
 
-  // Clarifies that this operation ensures only users who are not already members of any chat the current user is in are retrieved.
+  // Query to find all users who are not already members of any chat the current user is also not part
   const findAllUsersExceptMeAndMyFriends = await User.find({
-    // Query to find all users who are not already members of any chat the current user is also not part
     _id: {
-      $nin: allChatMembers, //ensuring the search results are only new potential contacts or users the current user is not already connected with.
-      // name: { $regex: name, $options: "i" },
+      //ensuring the search results are only new potential contacts or users the current user is not already connected with.
+      $nin: allChatMembers,
     },
+    name: { $regex: name, $options: "i" },
   });
 
   if (findAllUsersExceptMeAndMyFriends.length === 0) {
@@ -118,4 +119,109 @@ const searchUser = async (req, res) => {
     findUsersAvatar,
   });
 };
-export { loginUser, registerUser, logoutUser, getUserProfile, searchUser };
+
+const sendFriendRequest = async (req, res) => {
+  const { userId } = req.body;
+
+  const alreadySendRequest = await Request.findOne({
+    $or: [
+      { sender: req.user, reciver: userId },
+      { sender: userId, reciver: req.user },
+    ],
+  });
+  if (alreadySendRequest) {
+    throw new BadRequest("You have already sent a friend request");
+  }
+
+  await Request.create({
+    sender: req.user,
+    receiver: userId,
+  });
+
+  emitEvent(req, NEW_REQUEST, [userId]);
+
+  return res.status(StatusCodes.OK).json({
+    sucess: true,
+    message: "Friend request sent successfully",
+  });
+};
+
+const acceptFriendRequest = async (req, res) => {
+  const { requestId, accept } = req.body;
+
+  // Find the friend request by ID and populate sender and receiver details
+  const request = await Request.findById(requestId)
+    .populate("sender", "name")
+    .populate("receiver", "name");
+
+  if (!request) {
+    throw new NotFound("Request not found");
+  }
+
+  if (request.receiver.toString() !== req.user.toString()) {
+    throw new Unauthenticated("You are not authorized to accept this request");
+  }
+
+  // If the accept flag is false, delete the friend request
+  if (!accept) {
+    await request.deleteOne();
+    return res.status(StatusCodes.OK).json({
+      sucess: true,
+      message: "Friend request declined successfully",
+    });
+  }
+
+  // If the accept flag is true, create an array of members for the new chat means for both sender and receiver
+  const members = [request.sender?._id, request.receiver?._id];
+
+  // 1. Create a new chat with the sender and receiver as members
+  // 2. Delete the friend request
+  await Promise.all([
+    Chat.create({
+      members,
+      name: `${request.sender.name}-${request.receiver.name}`,
+    }),
+    request.deleteOne(),
+  ]);
+
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Friend request accepted and chat created successfully",
+  });
+};
+
+const getAllNotifications = async (req, res) => {
+  const requests = await Request.find({ receiver: req.user }).populate(
+    "sender",
+    "name avatar"
+  );
+
+  if (!requests) {
+    throw new NotFound("No requests found");
+  }
+
+  const allRequests = requests.map(({ _id, sender }) => ({
+    _id,
+    sender: {
+      _id: sender?._id,
+      name: sender.name,
+      avatar: sender.avatar?.url || "No Avatar URL Found",
+    },
+  }));
+
+  return res.status(StatusCodes.OK).json({
+    sucess: true,
+    allRequests,
+  });
+};
+
+export {
+  loginUser,
+  registerUser,
+  logoutUser,
+  getUserProfile,
+  searchUser,
+  sendFriendRequest,
+  acceptFriendRequest,
+  getAllNotifications,
+};

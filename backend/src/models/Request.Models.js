@@ -10,12 +10,12 @@ const RequestSchema = new Schema(
     sender: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      // required: true,
     },
-    reciver: {
+    receiver: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      // required: true,
     },
   },
   { timestamps: true }
