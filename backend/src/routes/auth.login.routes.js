@@ -17,6 +17,7 @@ import {
   sendFriendRequest,
   acceptFriendRequest,
   getAllNotifications,
+  getMyAllFriends,
 } from "../controllers/authController.js";
 import {
   multerUploadFile,
@@ -56,5 +57,6 @@ router
     acceptFriendRequest
   );
 router.route("/notifications").get(getAllNotifications);
+router.route("/friends").get(getMyAllFriends);
 
 export default router;

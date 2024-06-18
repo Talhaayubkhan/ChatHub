@@ -3,6 +3,8 @@ import { StatusCodes } from "http-status-codes";
 import { BadRequest, NotFound, Unauthenticated } from "../errors/index.js";
 import { cookieResponse, generateToken, emitEvent } from "../utils/index.js";
 import { NEW_REQUEST } from "../constants/events.js";
+import { getOtherMembers } from "../lib/helper.js";
+
 const registerUser = async (req, res) => {
   // We use req.body to access the data sent by the client in the request body
   // IMPORTANT NOTE: req.body is used to access the data sent by the client in the request body, which is essential for operations like user registration.
@@ -158,7 +160,7 @@ const acceptFriendRequest = async (req, res) => {
     throw new NotFound("Request not found");
   }
 
-  if (request.receiver.toString() !== req.user.toString()) {
+  if (request.receiver._id.toString() !== req.user.toString()) {
     throw new Unauthenticated("You are not authorized to accept this request");
   }
 
@@ -203,7 +205,7 @@ const getAllNotifications = async (req, res) => {
   const allRequests = requests.map(({ _id, sender }) => ({
     _id,
     sender: {
-      _id: sender?._id,
+      _id: sender._id,
       name: sender.name,
       avatar: sender.avatar?.url || "No Avatar URL Found",
     },
@@ -215,6 +217,55 @@ const getAllNotifications = async (req, res) => {
   });
 };
 
+const getMyAllFriends = async (req, res) => {
+  const chatId = req.query.chatId;
+
+  // Fetch all direct (one-on-one) chats involving the current user
+  const chats = await Chat.find({
+    members: req.user,
+    groupChat: false,
+  }).populate("members", "name avatar");
+
+  if (!chats || chats.length === 0) {
+    throw new NotFound("No chats found");
+  }
+
+  // The map function iterates over each chat (chats) and extracts the other member (friend) of each chat, excluding the current user.
+  const friends = chats.map(({ members }) => {
+    const otherUsers = getOtherMembers(members, req.user);
+
+    // Create a friend object with necessary details
+    return {
+      _id: otherUsers._id,
+      name: otherUsers.name,
+      avatar: otherUsers.avatar?.url || "No Avatar URL Found",
+    };
+  });
+
+  if (friends.length === 0) {
+    throw new NotFound("No friends found");
+  }
+
+  // If chatId is provided, filter out friends who are already members of the specified chat
+  if (chatId) {
+    const chat = await Chat.findById(chatId);
+
+    // include those friends who are not members of the specified chat
+    const availableFriends = friends.filter(
+      (friend) => !chat.members.includes(friend?._id)
+    );
+    return res.status(StatusCodes.OK).json({
+      sucess: true,
+      friends: availableFriends,
+    });
+  } else {
+    return res.status(StatusCodes.OK).json({
+      sucess: true,
+      friends,
+    });
+  }
+};
+
 export {
   loginUser,
   registerUser,
@@ -224,4 +275,5 @@ export {
   sendFriendRequest,
   acceptFriendRequest,
   getAllNotifications,
+  getMyAllFriends,
 };
