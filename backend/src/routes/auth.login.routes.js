@@ -7,7 +7,7 @@ import {
   handleValidationErrors,
   sendFriendRequestValidation,
   acceptFriendRequestValidation,
-} from "../lib/authValidators.js";
+} from "../lib/auth.Validators.js";
 import {
   loginUser,
   registerUser,

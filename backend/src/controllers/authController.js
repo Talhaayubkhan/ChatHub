@@ -217,6 +217,7 @@ const getAllNotifications = async (req, res) => {
   });
 };
 
+// TODO: We face some issues in this function, later we should correct them!
 const getMyAllFriends = async (req, res) => {
   const chatId = req.query.chatId;
 

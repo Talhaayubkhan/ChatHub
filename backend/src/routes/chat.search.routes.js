@@ -9,7 +9,7 @@ import {
   chatIdGroupValidator,
   handleGroupValidationErrors,
   renameGroupValidator,
-} from "../lib/chatValidators.js";
+} from "../lib/chat.Validators.js";
 import {
   newGroupChat,
   getMyChats,
