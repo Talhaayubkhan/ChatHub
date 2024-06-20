@@ -9,7 +9,14 @@ const registerUser = async (req, res) => {
   // We use req.body to access the data sent by the client in the request body
   // IMPORTANT NOTE: req.body is used to access the data sent by the client in the request body, which is essential for operations like user registration.
   const { name, username, email, password, bio } = req.body;
-  // console.log(req.body);
+
+  const emialAlreadyExists = await User.findOne({ email });
+  if (emialAlreadyExists) {
+    throw new BadRequest("Email already exists. Try with another");
+  }
+
+  const isFirstUser = (await User.countDocuments({})) === 0;
+  const role = isFirstUser ? "admin" : "user";
 
   const avatar = {
     public_id: "sdfs",
@@ -20,6 +27,7 @@ const registerUser = async (req, res) => {
     name,
     username,
     email,
+    role,
     bio,
     password,
     avatar,
@@ -29,7 +37,9 @@ const registerUser = async (req, res) => {
   const tokenUser = generateToken(user);
   // Generate a JWT token for the user and set it in an HTTP-only, secure cookie in the response
   cookieResponse({ res, user: tokenUser });
-  // res.status(StatusCodes.CREATED).json({ message: "successfully registered" });
+  res
+    .status(StatusCodes.CREATED)
+    .send({ success: true, user, message: "user created successfully" });
 };
 
 const loginUser = async (req, res) => {

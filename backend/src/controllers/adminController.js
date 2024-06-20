@@ -1,30 +1,44 @@
 import { StatusCodes } from "http-status-codes";
 import { Chat, Message, User } from "../models/index.js";
-import { NotFound, Unauthorized } from "../errors/index.js";
-import { cookieResponse, createJWT } from "../utils/jwtToken.js";
+import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
+import { cookieResponse, createJWT, generateToken } from "../utils/index.js";
 
 const adminLogin = async (req, res) => {
   const { secretKey } = req.body;
 
-  const adminSecretKey =
-    process.env.ADMIN_SECRET_KEY || "HIHELLOkhanALLOKHHELLO";
+  const adminSecretKey = process.env.ADMIN_SECRET_KEY || "khakhanhellokhan";
 
-  const isMatchSecretKey = secretKey === adminSecretKey;
+  if (!adminSecretKey) {
+    throw new BadRequest("Admin secret key not set in environment variables");
+  }
 
-  if (!isMatchSecretKey) {
+  if (secretKey !== adminSecretKey) {
     throw new Unauthorized("Invalid secret key");
   }
 
-  const createToken = createJWT(secretKey, adminSecretKey);
-  cookieResponse("token", token, {
-    maxAge: 1000 * 60 * 15,
-    httpOnly: true,
-    secure: true,
-  });
-  return res.status(StatusCodes.OK).json({
-    success: true,
-    token: createToken,
-  });
+  const isMatchedSecretKey = secretKey === adminSecretKey;
+
+  if (!isMatchedSecretKey) {
+    throw new Unauthorized("Invalid secret key");
+  }
+
+  // const tokenPayload = { role: "admin" };
+  const token = generateToken(secretKey, process.env.JWT_SECRET);
+
+  if (!token) {
+    throw new Unauthorized("Failed to generate token");
+  }
+
+  return res
+    .status(StatusCodes.OK)
+    .cookie("admin-verification", token, {
+      ...cookieResponse,
+      maxAge: 1000 * 60 * 15,
+    })
+    .json({
+      success: true,
+      message: "Authenticated Successfully!",
+    });
 };
 const getAllUsers = async (req, res) => {
   const users = await User.find({});

@@ -8,7 +8,7 @@ export const isAuthenticatedUser = async (req, res, next) => {
   let token;
   const authHeaderToken = req.headers.authorization;
 
-  if (authHeaderToken && authHeaderToken.startsWith("Bearer")) {
+  if (authHeaderToken && authHeaderToken.startsWith("Bearer ")) {
     // throw new Unauthorized("Invalid authorization, try again");
     token = authHeaderToken.split("")[1];
   } else if (req.cookies.token) {
@@ -20,17 +20,29 @@ export const isAuthenticatedUser = async (req, res, next) => {
   }
 
   try {
-    const authPayloaddecodedToken = await verifyJWT(token);
+    const decodedToken = await verifyJWT(token);
     // console.log(authPayloaddecodedToken);
 
-    if (!authPayloaddecodedToken) {
+    if (!decodedToken) {
       throw new Unauthorized("Inavlid Authentication Token!");
     }
-    req.user = authPayloaddecodedToken?.userId;
+    req.user = {
+      name: decodedToken.name,
+      userId: decodedToken?.userId,
+      role: decodedToken.role,
+    };
     next();
   } catch (error) {
-    throw new Unauthorized("Unauthorized Access denied!");
+    throw new Unauthenticated("Error While Authentication");
   }
 };
 
-export const authorizedPermission = async (req, res) => {};
+export const authorizedPermission = (...roles) => {
+  return (req, res, next) => {
+    // const userRole =
+    if (!roles.includes(req.user.role)) {
+      throw new Unauthorized("You are not Access to this route!");
+    }
+    next();
+  };
+};
