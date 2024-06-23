@@ -3,7 +3,7 @@ import Unauthenticated from "../errors/UnauthenticatedError.js";
 import { StatusCodes } from "http-status-codes";
 
 // Function to create a JWT token based on the provided payload
-export const createJWT = ({ payload }) => {
+const createJWT = ({ payload }) => {
   // Generate JWT token with payload, secret key, and expiration time
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRY,
@@ -17,21 +17,26 @@ export const createJWT = ({ payload }) => {
 };
 
 // Function to verify and decode a JWT token
-export const verifyJWT = (token) => {
-  // Verify and decode the JWT token using the secret key
-  const decodeToken = jwt.verify(token, process.env.JWT_SECRET);
+const verifyJWT = ({ token }) => {
+  try {
+    // Verify and decode the JWT token using the secret key
+    const decodeToken = jwt.verify(token, process.env.JWT_SECRET);
 
-  // If decoding fails (decodeToken is falsy), throw an UnauthenticatedError indicating verification failure
-  if (!decodeToken) {
+    // If decoding fails (decodeToken is falsy), throw an UnauthenticatedError indicating verification failure
+    if (!decodeToken) {
+      throw new Unauthenticated("Failed to Verify JWT Token");
+    }
+
+    // Return the decoded payload if token is valid
+    return decodeToken;
+  } catch (error) {
+    // If decoding fails, throw an UnauthenticatedError indicating verification failure
     throw new Unauthenticated("Failed to Verify JWT Token");
   }
-
-  // Return the decoded payload if token is valid
-  return decodeToken;
 };
 
 // Function to set JWT token in a cookie and send it back to the client as part of the response
-export const cookieResponse = ({ res, user }) => {
+const cookieResponse = ({ res, user }) => {
   // Generate JWT token for the user payload
   const token = createJWT({ payload: user });
 
@@ -51,3 +56,5 @@ export const cookieResponse = ({ res, user }) => {
   // Send a success response along with the user data
   res.status(StatusCodes.CREATED).send({ user });
 };
+
+export { createJWT, verifyJWT, cookieResponse };

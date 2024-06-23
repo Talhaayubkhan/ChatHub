@@ -2,6 +2,7 @@ import express from "express";
 import {
   adminDashboardStats,
   adminLogin,
+  adminLogout,
   getAllChats,
   getAllMessages,
   getAllUsers,
@@ -20,11 +21,12 @@ router.route("/").get();
 router
   .route("/admin-verification")
   .post(adminLoginVerifyValidator(), handleAdminValidationError, adminLogin);
-router.route(isAuthenticatedUser);
-router.route("/logout").get(authorizedPermission("admin"));
-router.route("/users").get(authorizedPermission("admin"), getAllUsers);
-router.route("/chats").get(authorizedPermission("admin"), getAllChats);
-router.route("/messages").get(authorizedPermission("admin"), getAllMessages);
-router.route("/stats").get(authorizedPermission("admin"), adminDashboardStats);
+router.route("/logout").get(isAuthenticatedUser, adminLogout);
+router.use(isAuthenticatedUser);
+router.route(authorizedPermission("admin"));
+router.route("/users").get(getAllUsers);
+router.route("/chats").get(getAllChats);
+router.route("/messages").get(getAllMessages);
+router.route("/stats").get(adminDashboardStats);
 
 export default router;

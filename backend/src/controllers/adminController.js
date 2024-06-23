@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { Chat, Message, User } from "../models/index.js";
 import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
 import { cookieResponse, createJWT, generateToken } from "../utils/index.js";
+import { allowPermission } from "../utils/checkPermission.js";
 
 const adminLogin = async (req, res) => {
   const { secretKey } = req.body;
@@ -31,7 +32,7 @@ const adminLogin = async (req, res) => {
 
   return res
     .status(StatusCodes.OK)
-    .cookie("admin-verification", token, {
+    .cookie("admin-verification-token", token, {
       ...cookieResponse,
       maxAge: 1000 * 60 * 15,
     })
@@ -40,6 +41,20 @@ const adminLogin = async (req, res) => {
       message: "Authenticated Successfully!",
     });
 };
+const adminLogout = async (req, res) => {
+  return res
+    .status(StatusCodes.OK)
+    .cookie("admin-verification-token", "", {
+      ...cookieResponse,
+      maxAge: 0,
+    })
+    .json({
+      success: true,
+      message: "Logout Successfully!",
+    });
+};
+
+// TODO: we check these for admin access!!
 const getAllUsers = async (req, res) => {
   const users = await User.find({});
 
@@ -66,6 +81,8 @@ const getAllUsers = async (req, res) => {
   if (!transformData) {
     throw new NotFound("No transform data available");
   }
+
+  allowPermission(users.user, req.user);
 
   return res.status(StatusCodes.OK).json({
     success: true,
@@ -199,6 +216,7 @@ const adminDashboardStats = async (req, res) => {
 
 export {
   adminLogin,
+  adminLogout,
   getAllUsers,
   getAllChats,
   getAllMessages,
