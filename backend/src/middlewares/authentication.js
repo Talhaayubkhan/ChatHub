@@ -3,14 +3,14 @@ import { verifyJWT } from "../utils/index.js";
 // import jwt from "jsonwebtoken";
 
 const isAuthenticatedUser = async (req, res, next) => {
-  const checkToken = req.signedCookies.token || {};
+  const token = req.signedCookies.token;
 
-  if (!checkToken) {
+  if (!token) {
     throw new Unauthenticated("Authentication token Invalid!");
   }
 
   try {
-    const decodedToken = await verifyJWT({ checkToken });
+    const decodedToken = await verifyJWT(token);
     // console.log(decodedToken);
     if (!decodedToken) {
       throw new Unauthenticated("Token is Invalid!, try again");
@@ -18,8 +18,8 @@ const isAuthenticatedUser = async (req, res, next) => {
 
     req.user = {
       name: decodedToken.name,
-      userId: decodedToken?.userId,
-      role: decodedToken?.role,
+      userId: decodedToken.userId,
+      role: decodedToken.role,
     };
     next();
   } catch (error) {

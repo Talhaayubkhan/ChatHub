@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import { Chat, Message, User } from "../models/index.js";
 import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
-import { cookieResponse, createJWT, generateToken } from "../utils/index.js";
-import { allowPermission } from "../utils/checkPermission.js";
+import { createJWT, setAdminTokenCookie } from "../utils/index.js";
+// import { allowPermission } from "../utils/checkPermission.js";
 
 const adminLogin = async (req, res) => {
   const { secretKey } = req.body;
@@ -22,36 +22,20 @@ const adminLogin = async (req, res) => {
   if (!isMatchedSecretKey) {
     throw new Unauthorized("Invalid secret key");
   }
+  const tokenPayload = { role: "admin", secretKey: adminSecretKey };
+  setAdminTokenCookie({ res, user: tokenPayload });
 
-  // const tokenPayload = { role: "admin" };
-  const token = generateToken(secretKey, process.env.JWT_SECRET);
-
-  if (!token) {
-    throw new Unauthorized("Failed to generate token");
-  }
-
-  return res
-    .status(StatusCodes.OK)
-    .cookie("admin-verification-token", token, {
-      ...cookieResponse,
-      maxAge: 1000 * 60 * 15,
-    })
-    .json({
-      success: true,
-      message: "Authenticated Successfully!",
-    });
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Authenticated Successfully!",
+  });
 };
 const adminLogout = async (req, res) => {
-  return res
-    .status(StatusCodes.OK)
-    .cookie("admin-verification-token", "", {
-      ...cookieResponse,
-      maxAge: 0,
-    })
-    .json({
-      success: true,
-      message: "Logout Successfully!",
-    });
+  setAdminTokenCookie({ res, clear: true });
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Admin Logged out Successfully!",
+  });
 };
 
 // TODO: we check these for admin access!!
@@ -81,8 +65,6 @@ const getAllUsers = async (req, res) => {
   if (!transformData) {
     throw new NotFound("No transform data available");
   }
-
-  allowPermission(users.user, req.user);
 
   return res.status(StatusCodes.OK).json({
     success: true,

@@ -10,8 +10,8 @@ const registerUser = async (req, res) => {
   // IMPORTANT NOTE: req.body is used to access the data sent by the client in the request body, which is essential for operations like user registration.
   const { name, username, email, password, bio } = req.body;
 
-  const emialAlreadyExists = await User.findOne({ email });
-  if (emialAlreadyExists) {
+  const emailAlreadyExists = await User.findOne({ email });
+  if (emailAlreadyExists) {
     throw new BadRequest("Email already exists. Try with another");
   }
 
@@ -37,9 +37,11 @@ const registerUser = async (req, res) => {
   const tokenUser = generateToken(user);
   // Generate a JWT token for the user and set it in an HTTP-only, secure cookie in the response
   cookieResponse({ res, user: tokenUser });
-  res
-    .status(StatusCodes.CREATED)
-    .send({ success: true, user, message: "user created successfully" });
+  res.status(StatusCodes.CREATED).json({
+    success: true,
+    user: tokenUser,
+    message: "user created successfully",
+  });
 };
 
 const loginUser = async (req, res) => {
@@ -61,19 +63,17 @@ const loginUser = async (req, res) => {
   const tokenUser = generateToken(user);
   cookieResponse({ res, user: tokenUser });
 
-  res.status(StatusCodes.OK).send({ user: tokenUser });
+  res
+    .status(StatusCodes.OK)
+    .json({ user: tokenUser, message: "User Login Successfully" });
 };
 const logoutUser = async (req, res) => {
-  return res
-    .cookie("token", "", {
-      httpOnly: true,
-      secure: true,
-      expires: new Date(0),
-    })
-    .json({
-      message: "You have been logged out",
-      sucess: true,
-    });
+  cookieResponse({ res, clear: true });
+
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Logout Successfully",
+  });
 };
 
 const getUserProfile = async (req, res) => {

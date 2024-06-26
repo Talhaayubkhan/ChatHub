@@ -24,7 +24,8 @@ import {
   singleAavatar,
 } from "../middlewares/multer.middleware.js";
 
-import { isAuthenticatedUser } from "../middlewares/authentication.js";
+// import { isAuthenticatedUser } from "../middlewares/authentication.js";
+import { isAuthenticated } from "../middlewares/AuthHeadersBased.Authentication.js";
 
 router
   .route("/register")
@@ -38,7 +39,7 @@ router
   .route("/login")
   .post(loginValidator(), handleValidationErrors, loginUser);
 
-router.use(isAuthenticatedUser);
+router.use(isAuthenticated);
 router.route("/logout").post(logoutUser);
 router.route("/user").get(getUserProfile);
 router.route("/search").get(searchUser);

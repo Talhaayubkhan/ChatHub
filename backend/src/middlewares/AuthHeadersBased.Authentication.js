@@ -6,8 +6,8 @@ const isAuthenticated = async (req, res, next) => {
 
   const authHeader = req.headers.authorization;
 
-  if (authHeader || authHeader.startsWith("Bearer ")) {
-    token = authHeader.split("")[1];
+  if (authHeader && authHeader.startsWith("Bearer")) {
+    token = authHeader.split(" ")[1];
   } else if (req.cookies.token) {
     token = req.cookies.token;
   } else {
@@ -20,12 +20,20 @@ const isAuthenticated = async (req, res, next) => {
 
   try {
     const checkTokenPayload = verifyJWT(token);
+    // console.log(checkTokenPayload);
     if (!checkTokenPayload) {
       throw new Unauthenticated("Payload Token Invalid");
     }
+
+    const userId = checkTokenPayload.user?.userId || checkTokenPayload?.userId;
+    const role = checkTokenPayload.user?.role || checkTokenPayload?.role;
+
+    if (!userId && !role) {
+      throw new Unauthenticated("Invalid Payload Token ");
+    }
     req.user = {
-      userId: checkTokenPayload.user?.userId,
-      role: checkTokenPayload.user?.role,
+      userId,
+      role,
     };
 
     next();
@@ -39,7 +47,8 @@ const isAuthenticated = async (req, res, next) => {
 //  Middleware to restrict access based on user roles
 const authPermisson = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    // console.log(req.user?.role);
+    if (!roles.includes(req.user?.role)) {
       throw new Unauthorized("You are not Access to this resource!");
     }
     next();
