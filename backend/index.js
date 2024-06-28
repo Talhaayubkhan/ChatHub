@@ -4,11 +4,11 @@ import connectDB from "./src/db/connect.js";
 import { app } from "./src/app.js";
 
 // import { createUser } from "./src/seeders/userSeeders.js";
-import {
-  createGroupChats,
-  createMessageInChats,
-  createSingleChats,
-} from "./src/seeders/chatSeeders.js";
+// import {
+//   createGroupChats,
+//   createMessageInChats,
+//   createSingleChats,
+// } from "./src/seeders/chatSeeders.js";
 
 dotenv.config();
 

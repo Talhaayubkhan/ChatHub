@@ -31,7 +31,6 @@ export const registerValidator = () => [
     .isStrongPassword()
     .withMessage("Password must be at least 8 characters..")
     .trim(),
-  // check("avatar").notEmpty().withMessage("Please Provide Avatar Also..."),
 ];
 
 export const loginValidator = () => [

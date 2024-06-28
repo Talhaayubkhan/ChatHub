@@ -10,12 +10,25 @@ const registerUser = async (req, res) => {
   // IMPORTANT NOTE: req.body is used to access the data sent by the client in the request body, which is essential for operations like user registration.
   const { name, username, email, password, bio } = req.body;
 
-  const emailAlreadyExists = await User.findOne({ email });
-  if (emailAlreadyExists) {
-    throw new BadRequest("Email already exists. Try with another");
+  const avatarFilePath = req.file;
+  if (!avatarFilePath) {
+    throw new BadRequest("Avatar file is required");
+  }
+
+  const checkBoth = await User.findOne({
+    $or: [{ email }, { username }],
+  });
+
+  if (checkBoth) {
+    if (checkBoth.email === email) {
+      throw new BadRequest("Email already exists");
+    } else {
+      throw new BadRequest("Username already exists");
+    }
   }
 
   const isFirstUser = (await User.countDocuments({})) === 0;
+  // If it's the first user, set the role to 'admin', otherwise set it to 'user'
   const role = isFirstUser ? "admin" : "user";
 
   const avatar = {

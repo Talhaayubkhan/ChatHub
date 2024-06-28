@@ -267,6 +267,15 @@ const leaveGroup = async (req, res) => {
 const sendMessageFileAttachment = async (req, res) => {
   const chatId = req.body.chatId;
 
+  const files = req.files || [];
+
+  if (files.length < 1) {
+    throw new BadRequest("Please Upload attachment");
+  }
+  if (files.length > 5) {
+    throw new BadRequest("You can't send more than 5 attachments");
+  }
+
   const [chat, userfind] = await Promise.all([
     Chat.findById(chatId),
     User.findById(req.user, "name avatar"),
@@ -276,11 +285,6 @@ const sendMessageFileAttachment = async (req, res) => {
   }
   if (!userfind) {
     throw new NotFound("User are not Found!");
-  }
-  const files = req.files || [];
-
-  if (files.length < 1) {
-    throw new BadRequest("Please Provide at least One File");
   }
 
   // upload filer from here

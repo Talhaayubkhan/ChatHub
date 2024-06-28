@@ -3,6 +3,7 @@ import {
   adminDashboardStats,
   adminLogin,
   adminLogout,
+  getAdminData,
   getAllChats,
   getAllMessages,
   getAllUsers,
@@ -12,29 +13,24 @@ import {
   handleAdminValidationError,
 } from "../lib/admin.Validator.js";
 
-// TODO: letter if we use this
-// import {
-//   isAuthenticatedUser,
-//   authorizedPermission,
-// } from "../middlewares/authentication.js";
 import {
-  isAuthenticated,
+  isAuthenticatedAdmin,
   authPermisson,
-} from "../middlewares/AuthHeadersBased.Authentication.js";
+} from "../middlewares/admin.authentication.middleware.js";
 const router = express.Router();
 
-router.route("/").get();
 router
   .route("/login")
   .post(adminLoginVerifyValidator(), handleAdminValidationError, adminLogin);
-router.route("/logout").get(isAuthenticated, adminLogout);
+router.route("/logout").get(isAuthenticatedAdmin, adminLogout);
 
 // Apply isAuthenticated middleware to all subsequent routes
-router.use(isAuthenticated);
+router.use(isAuthenticatedAdmin);
 
 // Apply authPermission middleware to restrict access to admin-only routes
 router.use(authPermisson("admin"));
 
+router.route("/").get(getAdminData);
 router.route("/users").get(getAllUsers);
 router.route("/chats").get(getAllChats);
 router.route("/messages").get(getAllMessages);

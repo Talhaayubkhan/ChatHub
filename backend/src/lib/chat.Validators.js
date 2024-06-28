@@ -30,11 +30,11 @@ const chatIdGroupValidator = () => [
 
 const fileAttachmentGroupValidator = () => [
   body("chatId").notEmpty().withMessage("Please enter your chat ID").trim(),
-  check("files")
-    .notEmpty()
-    .withMessage("Please enter your attachments")
-    .isArray({ min: 1, max: 10 })
-    .withMessage("Attachments Must be between 1-10"),
+  // check("files")
+  //   .notEmpty()
+  //   .withMessage("Please enter your attachments")
+  //   .isArray({ min: 1, max: 10 })
+  //   .withMessage("Attachments Must be between 1-10"),
 ];
 
 const renameGroupValidator = () => [

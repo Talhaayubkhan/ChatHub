@@ -23,10 +23,10 @@ import {
   deleteGroupChats,
   getMessages,
 } from "../controllers/chatController.js";
-import { isAuthenticatedUser } from "../middlewares/authentication.js";
+import { isAuthenticated } from "../middlewares/AuthHeadersBased.Authentication.js";
 import { fileAttachmentMulter } from "../middlewares/multer.middleware.js";
 
-router.use(isAuthenticatedUser);
+router.use(isAuthenticated);
 router
   .route("/groupchat")
   .post(newGroupChatValidator(), handleGroupValidationErrors, newGroupChat);

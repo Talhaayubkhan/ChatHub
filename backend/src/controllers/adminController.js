@@ -2,8 +2,8 @@ import { StatusCodes } from "http-status-codes";
 import { Chat, Message, User } from "../models/index.js";
 import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
 import { createJWT, setAdminTokenCookie } from "../utils/index.js";
-// import { allowPermission } from "../utils/checkPermission.js";
 
+// const
 const adminLogin = async (req, res) => {
   const { secretKey } = req.body;
 
@@ -35,6 +35,12 @@ const adminLogout = async (req, res) => {
   return res.status(StatusCodes.OK).json({
     success: true,
     message: "Admin Logged out Successfully!",
+  });
+};
+
+const getAdminData = async (req, res) => {
+  return res.status(StatusCodes.OK).json({
+    admin: true,
   });
 };
 
@@ -203,4 +209,5 @@ export {
   getAllChats,
   getAllMessages,
   adminDashboardStats,
+  getAdminData,
 };
