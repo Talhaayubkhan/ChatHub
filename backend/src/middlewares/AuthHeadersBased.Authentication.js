@@ -11,7 +11,7 @@ const isAuthenticated = async (req, res, next) => {
   } else if (req.cookies.token) {
     token = req.cookies.token;
   } else {
-    throw new Unauthenticated("Authentication header Invalid");
+    throw new Unauthenticated("You must be logged in");
   }
 
   if (!token) {

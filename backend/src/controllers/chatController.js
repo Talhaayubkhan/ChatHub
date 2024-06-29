@@ -332,43 +332,36 @@ const sendMessageFileAttachment = async (req, res) => {
 };
 
 const chatDetails = async (req, res) => {
-  try {
-    // Check if the client requested to populate member details
-    if (req.query.populate === "true") {
-      const chat = await Chat.findById(req.params.chatId)
-        .populate("members", "name avatar")
-        .lean(); // Use lean() for better performance by returning plain JavaScript objects
+  // Check if the client requested to populate member details
+  if (req.query.populate === "true") {
+    const chat = await Chat.findById(req.params.chatId)
+      .populate("members", "name avatar")
+      .lean(); // Use lean() for better performance by returning plain JavaScript objects
 
-      chat.members = chat.members.map((_id, name, avatar) => {
-        return {
-          _id,
-          name,
-          avatar: avatar?.url || "Not Available",
-        };
-      });
+    chat.members = chat.members.map((_id, name, avatar) => {
+      return {
+        _id,
+        name,
+        avatar: avatar?.url || "Not Available",
+      };
+    });
 
-      return res.status(StatusCodes.OK).json({
-        message: "Chat Details",
-        success: true,
-        chat,
-      });
-    } else {
-      // Fetch chat by ID without populating the members field
-      const chat = await Chat.findById(req.params.id);
+    return res.status(StatusCodes.OK).json({
+      message: "Chat Details",
+      success: true,
+      chat,
+    });
+  } else {
+    // Fetch chat by ID without populating the members field
+    const chat = await Chat.findById(req.params.chatId);
 
-      if (!chat) {
-        throw new NotFound("Chats are not Found!");
-      }
-      return res.status(StatusCodes.OK).json({
-        message: "Chat Details",
-        success: true,
-        chat,
-      });
+    if (!chat) {
+      throw new NotFound("Chats are not Found!");
     }
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: error.message || "Internal Server Error",
-      success: false,
+    return res.status(StatusCodes.OK).json({
+      message: "Chat Details",
+      success: true,
+      allChats: chat,
     });
   }
 };

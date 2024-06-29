@@ -1,7 +1,9 @@
 import dotenv from "dotenv";
+dotenv.config();
 
 import connectDB from "./src/db/connect.js";
 import { app } from "./src/app.js";
+import { Server } from "socket.io";
 
 // import { createUser } from "./src/seeders/userSeeders.js";
 // import {
@@ -10,9 +12,10 @@ import { app } from "./src/app.js";
 //   createSingleChats,
 // } from "./src/seeders/chatSeeders.js";
 
-dotenv.config();
-
 const PORT = process.env.PORT || 8000;
+
+// Create HTTP server and integrate with Socket.IO
+const io = new Server(app, {});
 
 connectDB()
   .then(() => {
