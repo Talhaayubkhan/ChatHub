@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom"; // Importing Navigate component from react-router-dom for redirection
+import { Navigate, Outlet } from "react-router-dom";
 
 // Defining a functional component called ProtectedRoute
 // It takes three props: children, user, and redirect

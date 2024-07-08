@@ -1,12 +1,12 @@
-const ALERT = "alert";
-const REFETCH_ALERT = "refetch ALERT";
+const ALERT = "ALERT";
+const REFETCH_ALERT = "REFETCH_ALERT";
 
-const NEW_ATTACHMENT = "new-attachment";
-const NEW_MESSAGE_ALERT = "new-message-alert";
+const NEW_ATTACHMENT = "NEW_ATTACHMENT";
+const NEW_MESSAGE_ALERT = "NEW_MESSAGE_ALERT";
 
-const NEW_REQUEST = "new-request";
+const NEW_REQUEST = "NEW_REQUEST";
 
-const NEW_MESSAGE = "new-message";
+const NEW_MESSAGE = "NEW_MESSAGE";
 
 export {
   ALERT,

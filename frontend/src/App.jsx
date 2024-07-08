@@ -1,7 +1,9 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import axios from "axios";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { LayoutLoaders } from "./components/layout/Loaders";
+import { server } from "./constants/config.js";
 
 // Lazy loading components
 // we use Lazy loading, it helps web apps to load faster by only loading the parts of the website you need when you need them, making everything quicker and smoother.
@@ -21,6 +23,18 @@ const AdminMessageManagement = lazy(() =>
 );
 let user = true;
 const App = () => {
+  useEffect(() => {
+    // console.log(server);
+    axios
+      .get(`${server}/api/v1/auth/user`)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+  }, []);
+
   return (
     <>
       <BrowserRouter>
