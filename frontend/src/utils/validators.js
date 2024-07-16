@@ -5,4 +5,6 @@ export const userNameValidator = (username) => {
   if (!isValidUsername(username)) {
     return { isValid: false, errorMessage: "Username is not a valid" };
   }
+
+  return { isValid: true, errorMessage: "" };
 };

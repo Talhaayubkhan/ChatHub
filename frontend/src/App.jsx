@@ -1,9 +1,13 @@
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Toaster } from "react-hot-toast";
 import axios from "axios";
+
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { LayoutLoaders } from "./components/layout/Loaders";
 import { server } from "./constants/config.js";
+import { userNotExists } from "./redux-toolkit/reducers/reducerAuth.js";
 
 // Lazy loading components
 // we use Lazy loading, it helps web apps to load faster by only loading the parts of the website you need when you need them, making everything quicker and smoother.
@@ -21,21 +25,22 @@ const AdminChatManagement = lazy(() => import("./pages/admin/ChatManagement"));
 const AdminMessageManagement = lazy(() =>
   import("./pages/admin/MessagManagement")
 );
-let user = true;
+// let user = true;
 const App = () => {
+  const { user, loader } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
   useEffect(() => {
     // console.log(server);
     axios
-      .get(`${server}/api/v1/auth/user`)
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error("Error fetching user data:", error);
-      });
-  }, []);
+      .get(`${server}/api/v1/auth/user`, { withCredentials: true })
+      .then((res) => console.log(res))
+      .catch(() => dispatch(userNotExists()));
+  }, [dispatch]);
 
-  return (
+  return loader ? (
+    <LayoutLoaders />
+  ) : (
     <>
       <BrowserRouter>
         {/* Wrap Routes with Suspense to handle lazy loading */}
@@ -66,6 +71,7 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        <Toaster position="bottom-center" />
       </BrowserRouter>
     </>
   );

@@ -57,8 +57,8 @@ const errorHandlerMiddleware = (err, req, res, next) => {
   // Handle JWT unauthorized errors
   if (err instanceof Unauthenticated) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
-      msg: "Authentication  . You must be logged in",
       success: false,
+      msg: "Authentication Failed,You must be logged in First",
     });
   }
 

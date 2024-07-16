@@ -50,6 +50,7 @@ const registerUser = async (req, res) => {
   const tokenUser = generateToken(user);
   // Generate a JWT token for the user and set it in an HTTP-only, secure cookie in the response
   cookieResponse({ res, user: tokenUser });
+
   res.status(StatusCodes.CREATED).json({
     success: true,
     user: tokenUser,
@@ -60,9 +61,17 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { email, username, password } = req.body;
 
-  const user = await User.findOne({
-    $or: [{ email: email }, { username: username }],
-  }).select("+password");
+  // const user = await User.findOne({
+  //   $or: [{ email: email }, { username: username }],
+  // }).select("+password");
+
+  let user;
+
+  if (email) {
+    user = await User.findOne({ email }).select("+password");
+  } else {
+    user = await User.findOne({ username }).select("+password");
+  }
 
   if (!user) {
     throw new Unauthenticated(`Not foun a user with that ${email}`);
@@ -91,6 +100,9 @@ const logoutUser = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
   const getUser = await User.findById(req.user);
+  if (!getUser) {
+    throw new NotFound("User not found");
+  }
 
   res.status(StatusCodes.OK).json({
     sucess: true,
