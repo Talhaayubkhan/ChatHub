@@ -1,13 +1,16 @@
 import { User, Chat, Request } from "../models/index.js";
 import { StatusCodes } from "http-status-codes";
 import { BadRequest, NotFound, Unauthenticated } from "../errors/index.js";
-import { cookieResponse, generateToken, emitEvent } from "../utils/index.js";
+import {
+  cookieResponse,
+  generateToken,
+  emitEvent,
+  setAdminTokenCookie,
+} from "../utils/index.js";
 import { NEW_REQUEST } from "../constants/events.js";
 import { getOtherMembers } from "../lib/helper.js";
 
 const registerUser = async (req, res) => {
-  // We use req.body to access the data sent by the client in the request body
-  // IMPORTANT NOTE: req.body is used to access the data sent by the client in the request body, which is essential for operations like user registration.
   const { name, username, email, password, bio } = req.body;
 
   const avatarFilePath = req.file;
@@ -15,21 +18,20 @@ const registerUser = async (req, res) => {
     throw new BadRequest("Avatar file is required");
   }
 
-  const checkBoth = await User.findOne({
+  // Check if email or username already exists
+  const existingUser = await User.findOne({
     $or: [{ email }, { username }],
   });
 
-  if (checkBoth) {
-    if (checkBoth.email === email) {
+  if (existingUser) {
+    if (existingUser.email === email && existingUser.username === username) {
+      throw new BadRequest("Email and username already exists");
+    } else if (existingUser.email === email) {
       throw new BadRequest("Email already exists");
-    } else {
+    } else if (existingUser.username === username) {
       throw new BadRequest("Username already exists");
     }
   }
-
-  const isFirstUser = (await User.countDocuments({})) === 0;
-  // If it's the first user, set the role to 'admin', otherwise set it to 'user'
-  const role = isFirstUser ? "admin" : "user";
 
   const avatar = {
     public_id: "sdfs",
@@ -40,7 +42,6 @@ const registerUser = async (req, res) => {
     name,
     username,
     email,
-    role,
     bio,
     password,
     avatar,
@@ -48,7 +49,6 @@ const registerUser = async (req, res) => {
 
   // Extract necessary user data to be included in the JWT token payload
   const tokenUser = generateToken(user);
-  // Generate a JWT token for the user and set it in an HTTP-only, secure cookie in the response
   cookieResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.CREATED).json({
@@ -59,37 +59,45 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const { email, username, password } = req.body;
+  console.log("Login request received:", req.body);
 
-  // const user = await User.findOne({
-  //   $or: [{ email: email }, { username: username }],
-  // }).select("+password");
+  const { usernameOrEmail, password } = req.body;
 
   let user;
 
-  if (email) {
-    user = await User.findOne({ email }).select("+password");
+  if (usernameOrEmail.includes("@")) {
+    user = await User.findOne({ email: usernameOrEmail }).select("+password");
   } else {
-    user = await User.findOne({ username }).select("+password");
+    user = await User.findOne({ username: usernameOrEmail }).select(
+      "+password"
+    );
   }
+  // console.log("User found:", user);
 
   if (!user) {
-    throw new Unauthenticated(`Not foun a user with that ${email}`);
+    throw new Unauthenticated(
+      "User not found with the provided email or username"
+    );
   }
 
   const isPasswordCorrect = await user.comparePassword(password);
+  // console.log("Password match:", isPasswordCorrect);
   if (!isPasswordCorrect) {
     throw new Unauthenticated("Invalid Password, Please try again");
   }
 
   const tokenUser = generateToken(user);
+  // console.log("Token user:", tokenUser);
   cookieResponse({ res, user: tokenUser });
 
   res
     .status(StatusCodes.OK)
-    .json({ user: tokenUser, message: "User Login Successfully" });
+    .json({ user: tokenUser, message: "User logged in Successfully" });
 };
+
 const logoutUser = async (req, res) => {
+  console.log("Logout request received:", req.body);
+
   cookieResponse({ res, clear: true });
 
   return res.status(StatusCodes.OK).json({

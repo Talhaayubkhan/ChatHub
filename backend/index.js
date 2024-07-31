@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import connectDB from "./src/db/connect.js";
 import { app } from "./src/app.js";
 
@@ -11,7 +10,7 @@ import NotFound from "./src/errors/NotFound.js";
 import { Message } from "./src/models/Message.Models.js";
 import BadRequest from "./src/errors/BadRequestError.js";
 
-dotenv.config();
+// dotenv.config();
 const PORT = process.env.PORT || 8000;
 
 // Create HTTP server and integrate with Socket.IO

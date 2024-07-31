@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import Unauthenticated from "../errors/UnauthenticatedError.js";
-import { StatusCodes } from "http-status-codes";
 
 // Function to create a JWT token based on the provided payload
 const createJWT = ({ payload }) => {
@@ -53,25 +52,26 @@ const cookieResponse = ({ res, user, clear = false }) => {
       httpOnly: true,
       // Set cookie as secure if in production environment
       secure: process.env.NODE_ENV === "production",
-      success: true,
       // Set cookie expiration time (24 hours)
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-      sameSite: "lax", // Set SameSite attribute to "Lax" for CSRF protection
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
+      signed: true,
     });
   } else {
     res.cookie("token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      expires: 0,
-      sameSite: "lax", // Set SameSite attribute to "Lax" for CSRF protection
+      expires: new Date(0),
+      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
+      signed: true,
     });
   }
 };
 
 // for admin only
 
-const setAdminTokenCookie = ({ res, user: adminUser, clear = false }) => {
-  if (!clear) {
+const setAdminTokenCookie = ({ res, user: adminUser, expireToken = false }) => {
+  if (!expireToken) {
     const adminToken = createJWT({ payload: adminUser });
 
     if (!adminToken) {
@@ -81,16 +81,17 @@ const setAdminTokenCookie = ({ res, user: adminUser, clear = false }) => {
     res.cookie("admin-token", adminToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      success: true,
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-      sameSite: "lax", // Set SameSite attribute to "Lax" for CSRF protection
+      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
+      signed: true,
     });
   } else {
     res.cookie("admin-token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       expires: new Date(0),
-      sameSite: "lax", // Set SameSite attribute to "Lax" for CSRF protection
+      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
+      signed: true, // Mark cookie as signed
     });
   }
 };

@@ -22,14 +22,14 @@ const router = express.Router();
 router
   .route("/login")
   .post(adminLoginVerifyValidator(), handleAdminValidationError, adminLogin);
-router.route("/logout").get(isAuthenticatedAdmin, adminLogout);
 
 // Apply isAuthenticated middleware to all subsequent routes
 router.use(isAuthenticatedAdmin);
 
 // Apply authPermission middleware to restrict access to admin-only routes
-router.use(authPermisson("admin"));
+// router.use(authPermisson("admin"));
 
+router.route("/logout").get(isAuthenticatedAdmin, adminLogout);
 router.route("/").get(getAdminData);
 router.route("/users").get(getAllUsers);
 router.route("/chats").get(getAllChats);

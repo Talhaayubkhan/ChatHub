@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Toaster } from "react-hot-toast";
 import axios from "axios";
+import { Toaster } from "react-hot-toast";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { LayoutLoaders } from "./components/layout/Loaders";
@@ -31,7 +31,6 @@ const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // console.log(server);
     axios
       .get(`${server}/api/v1/auth/user`, { withCredentials: true })
       .then((res) => console.log(res))
@@ -70,8 +69,8 @@ const App = () => {
             {/* NotFound Route for 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Toaster position="top-center" />
         </Suspense>
-        <Toaster position="bottom-center" />
       </BrowserRouter>
     </>
   );

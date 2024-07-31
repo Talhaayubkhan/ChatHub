@@ -3,10 +3,6 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 import { Unauthenticated } from "../errors/index.js";
 
-// username validation
-// Example regex: 3-30 characters, letters, numbers, underscores
-const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
-
 const UserSchema = new Schema(
   {
     name: {
@@ -20,9 +16,10 @@ const UserSchema = new Schema(
     //   TODO: IF WE ADD EMAIL LATER!!!
     email: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
       unique: true,
+      sparse: true,
       validate: {
         validator: (value) => {
           return !value || validator.isEmail(value);
@@ -33,15 +30,17 @@ const UserSchema = new Schema(
 
     username: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
       unique: true,
-      // validate: {
-      //   validator: (value) => {
-      //     return !value || usernameRegex.test(value);
-      //   },
-      //   message: (props) => `${props.value} is not a valid username`,
-      // },
+      sparse: true,
+      validate: {
+        validator: (value) => {
+          const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+          return !value || usernameRegex.test(value);
+        },
+        message: (props) => `${props.value} is not a valid username`,
+      },
     },
     password: {
       type: String,
@@ -51,22 +50,17 @@ const UserSchema = new Schema(
     avatar: {
       public_id: {
         type: String,
-        required: true,
+        // required: true,
       },
       url: {
         type: String,
-        required: true,
+        // required: true,
       },
     },
     bio: {
       type: String,
       required: true,
       trim: true,
-    },
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
     },
   },
   { timestamps: true }
@@ -90,7 +84,7 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
     this.password
   );
   if (!isMatchPassword) {
-    throw new Unauthenticated("Password Mismatch, please try again");
+    throw new Unauthenticated("Password Is Not Match, please try again");
   }
   return isMatchPassword;
 };

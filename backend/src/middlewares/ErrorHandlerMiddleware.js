@@ -1,13 +1,16 @@
 import { StatusCodes } from "http-status-codes";
 import {
+  BadRequest,
   CustomApiError,
   Unauthenticated,
   Unauthorized,
 } from "../errors/index.js";
+import { logger } from "../logger.js";
 import { ValidationError } from "express-validation";
 import mongoose from "mongoose";
+
 const errorHandlerMiddleware = (err, req, res, next) => {
-  // console.log(err);
+  logger.error(err.message, { stack: err.stack });
 
   let defaultErrorResponse = {
     message: "Internal Server Error",
@@ -18,7 +21,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
   if (err instanceof ValidationError) {
     return res.status(err.statusCode).json({
       msg:
-        err.message ||
+        err.details?.body?.map((detail) => detail.message).join(",") ||
         "A validation error occurred. Please check your input and try again",
       success: false,
     });
@@ -38,7 +41,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
 
   if (err instanceof mongoose.Error.CastError) {
     return res.status(StatusCodes.BAD_REQUEST).json({
-      msg: "Invalid ObjectId. Please check your input and try again",
+      msg: `Invalid ${err.path}: ${err.value}. Please check your input and try again`,
       success: false,
     });
   }
@@ -58,13 +61,20 @@ const errorHandlerMiddleware = (err, req, res, next) => {
   if (err instanceof Unauthenticated) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
       success: false,
-      msg: "Authentication Failed,You must be logged in First",
+      msg: "Authentication failed. Please log in to continue",
     });
   }
 
   if (err instanceof Unauthorized) {
     return res.status(StatusCodes.FORBIDDEN).json({
       msg: "Unauthorized access. You don't have the necessary permissions",
+      success: false,
+    });
+  }
+  // Handle bad request errors
+  if (err instanceof BadRequest) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      msg: err.message || "Bad Request. Please check your input and try again",
       success: false,
     });
   }
@@ -84,7 +94,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
 
   return res.status(err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
     ...defaultErrorResponse,
-    msg: err.message || defaultErrorResponse.message,
+    msg: err.message || "An unexpected error occurred. Please try again later",
   });
 };
 

@@ -1,6 +1,5 @@
 import express from "express";
 const router = express.Router();
-
 import {
   registerValidator,
   loginValidator,
@@ -23,6 +22,7 @@ import {
   multerUploadFile,
   singleAavatar,
 } from "../middlewares/multer.middleware.js";
+import { loginLimiter, registerLimiter } from "../utils/rateLimiter.js";
 
 // import { isAuthenticatedUser } from "../middlewares/authentication.js";
 import { isAuthenticated } from "../middlewares/AuthHeadersBased.Authentication.js";
@@ -31,16 +31,18 @@ router
   .route("/register")
   .post(
     singleAavatar,
+    registerLimiter,
     registerValidator(),
     handleValidationErrors,
     registerUser
   );
 router
   .route("/login")
-  .post(loginValidator(), handleValidationErrors, loginUser);
+  .post(loginLimiter, loginValidator(), handleValidationErrors, loginUser);
+
+router.route("/logout").post(logoutUser);
 
 router.use(isAuthenticated);
-router.route("/logout").post(logoutUser);
 router.route("/user").get(getUserProfile);
 router.route("/search").get(searchUser);
 router

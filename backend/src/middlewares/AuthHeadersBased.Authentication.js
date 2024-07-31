@@ -6,13 +6,12 @@ const isAuthenticated = async (req, res, next) => {
 
   const authHeader = req.headers.authorization;
 
-  if (authHeader && authHeader.startsWith("Bearer")) {
-    token = authHeader.split(" ")[1];
-  } else if (req.cookies.token) {
-    token = req.cookies.token;
-  } else {
-    throw new Unauthenticated("You must be logged in");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split("")[1];
+  } else if (req.signedCookies.token) {
+    token = req.signedCookies.token;
   }
+  console.log("Token:", token);
 
   if (!token) {
     throw new Unauthenticated("Authentication Token Invalid");
@@ -20,20 +19,14 @@ const isAuthenticated = async (req, res, next) => {
 
   try {
     const checkTokenPayload = verifyJWT(token);
-    // console.log(checkTokenPayload);
-    if (!checkTokenPayload) {
-      throw new Unauthenticated("Payload Token Invalid");
-    }
+    console.log(checkTokenPayload);
 
-    const userId = checkTokenPayload.user?.userId || checkTokenPayload?.userId;
-    const role = checkTokenPayload.user?.role || checkTokenPayload?.role;
-
-    if (!userId && !role) {
-      throw new Unauthenticated("Invalid Payload Token ");
+    const userId = checkTokenPayload?.user?.userId || checkTokenPayload?.user;
+    if (!userId) {
+      throw new Unauthenticated("Invalid user ID");
     }
     req.user = {
       userId,
-      role,
     };
 
     next();

@@ -1,20 +1,20 @@
 import { Unauthenticated, Unauthorized } from "../errors/index.js";
 import { verifyJWT } from "../utils/index.js";
+
 const isAuthenticatedAdmin = (req, res, next) => {
   let adminToken;
 
   const authHeader = req.headers.authorization;
 
-  if (authHeader && authHeader.startsWith("Bearer")) {
-    adminToken = authHeader.split(" ")[1];
-  } else if (req.cookies["admin-token"]) {
-    adminToken = req.cookies["admin-token"];
-  } else {
-    throw new Unauthenticated("Admin Authentication header Invalid");
-  }
+  adminToken =
+    authHeader && authHeader.startsWith("Bearer")
+      ? authHeader.split(" ")[1]
+      : req.signedCookies["admin-token"];
 
   if (!adminToken) {
-    throw new Unauthenticated("Admin Authentication Token Invalid");
+    throw new Unauthenticated(
+      "Missing or invalid admin authentication header. Please ensure the header is in the format"
+    );
   }
 
   try {
@@ -25,14 +25,13 @@ const isAuthenticatedAdmin = (req, res, next) => {
       throw new Unauthenticated("Admin Payload Token Invalid");
     }
 
-    const role = checkAdminTokenPayload?.role;
+    const secretKey = checkAdminTokenPayload?.secretKey;
 
-    if (!role && role !== "admin") {
+    if (!secretKey || !secretKey !== process.env.ADMIN_SECRET_KEY) {
       throw new Unauthorized("Unauthorized to access admin resource");
     }
-
     req.user = {
-      role,
+      secretKey,
     };
 
     next();

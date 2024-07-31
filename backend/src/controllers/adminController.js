@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { Chat, Message, User } from "../models/index.js";
 import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
-import { createJWT, setAdminTokenCookie } from "../utils/index.js";
+import { setAdminTokenCookie } from "../utils/index.js";
 
 // const
 const adminLogin = async (req, res) => {
@@ -22,7 +22,7 @@ const adminLogin = async (req, res) => {
   if (!isMatchedSecretKey) {
     throw new Unauthorized("Invalid secret key");
   }
-  const tokenPayload = { role: "admin", secretKey: adminSecretKey };
+  const tokenPayload = { secretKey: adminSecretKey };
   setAdminTokenCookie({ res, user: tokenPayload });
 
   return res.status(StatusCodes.OK).json({
@@ -31,7 +31,7 @@ const adminLogin = async (req, res) => {
   });
 };
 const adminLogout = async (req, res) => {
-  setAdminTokenCookie({ res, clear: true });
+  setAdminTokenCookie({ res, expireToken: true });
   return res.status(StatusCodes.OK).json({
     success: true,
     message: "Admin Logged out Successfully!",
