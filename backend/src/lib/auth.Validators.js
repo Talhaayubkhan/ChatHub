@@ -2,27 +2,34 @@ import { body, validationResult, check } from "express-validator";
 import { BadRequest } from "../errors/index.js";
 
 export const registerValidator = () => [
-  body("name").notEmpty().withMessage("Please enter your name.").trim(),
-  body("username").notEmpty().withMessage("Please enter a username.").trim(),
+  body("name")
+    .notEmpty()
+    .withMessage("Please enter your name.")
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage("Name must be between 2 and 50 characters."),
+  body("username")
+    .notEmpty()
+    .withMessage("Please enter a username.")
+    .trim()
+    .isLength({ min: 3, max: 30 })
+    .withMessage("Username must be between 3 and 30 characters."),
   body("email")
     .notEmpty()
     .withMessage("Please enter your email address.")
     .isEmail()
-    .withMessage("Please enter a valid email address."),
+    .withMessage("Please enter a valid email address.")
+    .trim(),
   body("password")
     .notEmpty()
     .withMessage("Please enter your password.")
     .isStrongPassword()
-    .withMessage("Password must be at least 8 characters long."),
+    .withMessage(
+      "Password must be at least 8 characters long and contain a mix of characters."
+    ),
 ];
 
 export const loginValidator = () => [
-  body().custom((value, { req }) => {
-    if (!req.body.usernameOrEmail) {
-      throw new BadRequest("Please Provide either email or username");
-    }
-    return true;
-  }),
   body("usernameOrEmail")
     .optional()
     .trim()

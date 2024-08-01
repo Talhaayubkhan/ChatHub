@@ -47,9 +47,6 @@ const Login = () => {
     console.log("Login button clicked");
     e.preventDefault();
 
-    console.log("Username or Email:", usernameOrEmail.value);
-    console.log("Password:", password.value);
-
     try {
       const config = {
         withCredentials: true,

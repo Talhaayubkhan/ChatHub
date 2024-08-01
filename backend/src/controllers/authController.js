@@ -13,9 +13,15 @@ import { getOtherMembers } from "../lib/helper.js";
 const registerUser = async (req, res) => {
   const { name, username, email, password, bio } = req.body;
 
+  const isValid = true;
+
   const avatarFilePath = req.file;
   if (!avatarFilePath) {
     throw new BadRequest("Avatar file is required");
+  }
+
+  if (!email.includes("@")) {
+    throw new BadRequest("Invalid Email address..");
   }
 
   // Check if email or username already exists
@@ -37,6 +43,9 @@ const registerUser = async (req, res) => {
     public_id: "sdfs",
     url: "asd",
   };
+  // Set primary credential based on input (email or username)
+  // This determines which credential will be used for login and unique identification
+  const primaryCredential = email ? "email" : "username";
 
   const user = await User.create({
     name,
@@ -45,7 +54,12 @@ const registerUser = async (req, res) => {
     bio,
     password,
     avatar,
+    primaryCredential,
   });
+
+  if (!isValid) {
+    return;
+  }
 
   // Extract necessary user data to be included in the JWT token payload
   const tokenUser = generateToken(user);
@@ -66,11 +80,15 @@ const loginUser = async (req, res) => {
   let user;
 
   if (usernameOrEmail.includes("@")) {
-    user = await User.findOne({ email: usernameOrEmail }).select("+password");
+    user = await User.findOne({
+      email: usernameOrEmail,
+      primaryCredential: "email",
+    }).select("+password");
   } else {
-    user = await User.findOne({ username: usernameOrEmail }).select(
-      "+password"
-    );
+    user = await User.findOne({
+      username: usernameOrEmail,
+      primaryCredential: "username",
+    }).select("+password");
   }
   // console.log("User found:", user);
 

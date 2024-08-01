@@ -6,12 +6,11 @@ const isAuthenticated = async (req, res, next) => {
 
   const authHeader = req.headers.authorization;
 
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    token = authHeader.split("")[1];
-  } else if (req.signedCookies.token) {
-    token = req.signedCookies.token;
-  }
-  console.log("Token:", token);
+  token =
+    authHeader && authHeader.startsWith("Bearer")
+      ? authHeader.split(" ")[1]
+      : req.signedCookies.token;
+  console.log("Received Token:", token); // Add this log
 
   if (!token) {
     throw new Unauthenticated("Authentication Token Invalid");
@@ -38,14 +37,13 @@ const isAuthenticated = async (req, res, next) => {
 };
 
 //  Middleware to restrict access based on user roles
-const authPermisson = (...roles) => {
-  return (req, res, next) => {
-    // console.log(req.user?.role);
-    if (!roles.includes(req.user?.role)) {
-      throw new Unauthorized("You are not Access to this resource!");
-    }
-    next();
-  };
-};
+// const authPermisson = (...roles) => {
+//   return (req, res, next) => {
+//     if (!roles.includes(req.user?.role)) {
+//       throw new Unauthorized("You are not Access to this resource!");
+//     }
+//     next();
+//   };
+// };
 
-export { isAuthenticated, authPermisson };
+export { isAuthenticated };

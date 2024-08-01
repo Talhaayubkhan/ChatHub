@@ -1,4 +1,4 @@
-import { isValidUsername } from "6pp";
+import { isValidUsername, isValidEmail } from "6pp";
 
 const combinedRegex =
   /^[a-zA-Z0-9_-]{3,16}$|^([a-zA-Z0-9_.-]+)@([a-zA-Z0-9_.-]+)\.([a-zA-Z]{2,5})$/;
@@ -17,7 +17,7 @@ const userNameValidator = (input) => {
 
 // Email validator
 const emailValidator = (input) => {
-  if (!combinedRegex.test(input)) {
+  if (!combinedRegex.test(input) && !isValidEmail(input)) {
     return {
       isValid: false,
       errorMessage: "Email must be a valid email address",
@@ -29,10 +29,18 @@ const emailValidator = (input) => {
 // Combined validator for username or email
 const usernameOrEmailValidator = (input) => {
   if (!combinedRegex.test(input)) {
-    return {
-      isValid: false,
-      errorMessage: "Input must be a valid username or email",
-    };
+    if (!isValidUsername(input)) {
+      return {
+        isValid: false,
+        errorMessage:
+          "Username must be between 3-16 characters, containing only letters, numbers, underscores, or hyphens",
+      };
+    } else {
+      return {
+        isValid: false,
+        errorMessage: "Email must be a valid email address",
+      };
+    }
   }
   return { isValid: true, errorMessage: "" };
 };

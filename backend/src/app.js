@@ -1,6 +1,6 @@
 // Automatically handles async errors without needing try-catch in each routes
-import "express-async-errors";
 import express from "express";
+import "express-async-errors";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";

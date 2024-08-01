@@ -7,6 +7,7 @@ const createJWT = ({ payload }) => {
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRY,
   });
+  console.log("Generated Token:", token); // Add this log
 
   if (!token) {
     throw new Unauthenticated("Failed to Create JWT Token");
@@ -20,6 +21,7 @@ const verifyJWT = (token) => {
   try {
     // Verify and decode the JWT token using the secret key
     const decodeToken = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Verified Token Payload:", decodeToken); // Add this log
 
     // If decoding fails (decodeToken is falsy), throw an UnauthenticatedError indicating verification failure
     if (!decodeToken) {
@@ -39,6 +41,7 @@ const cookieResponse = ({ res, user, clear = false }) => {
   if (!clear) {
     // Generate JWT token for the user payload
     const token = createJWT({ payload: user });
+    console.log("Stored Token in Cookie:", token); // Add this log
 
     if (!token) {
       throw new Unauthenticated(
@@ -48,11 +51,9 @@ const cookieResponse = ({ res, user, clear = false }) => {
 
     // Set the JWT token in a cookie named "token" in the response
     res.cookie("token", token, {
-      // Make the cookie accessible only via HTTP(S) requests
       httpOnly: true,
-      // Set cookie as secure if in production environment
-      secure: process.env.NODE_ENV === "production",
-      // Set cookie expiration time (24 hours)
+      // secure: process.env.NODE_ENV === "production",
+      secure: true,
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
       signed: true,
@@ -60,7 +61,8 @@ const cookieResponse = ({ res, user, clear = false }) => {
   } else {
     res.cookie("token", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      // secure: process.env.NODE_ENV === "production",
+      secure: true,
       expires: new Date(0),
       sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
       signed: true,
