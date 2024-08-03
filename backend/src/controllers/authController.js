@@ -68,7 +68,7 @@ const registerUser = async (req, res) => {
   res.status(StatusCodes.CREATED).json({
     success: true,
     user: tokenUser,
-    message: "user created successfully",
+    message: "User Register Successfully",
   });
 };
 
@@ -108,15 +108,17 @@ const loginUser = async (req, res) => {
   // console.log("Token user:", tokenUser);
   cookieResponse({ res, user: tokenUser });
 
-  res
-    .status(StatusCodes.OK)
-    .json({ user: tokenUser, message: "User logged in Successfully" });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    user: tokenUser,
+    message: "User Login Successfully",
+  });
 };
 
 const logoutUser = async (req, res) => {
   console.log("Logout request received:", req.body);
 
-  cookieResponse({ res, clear: true });
+  cookieResponse({ res, expireToken: true });
 
   return res.status(StatusCodes.OK).json({
     success: true,

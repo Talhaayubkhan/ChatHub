@@ -14,7 +14,7 @@ import { CameraAlt as CameraAltIcon } from "@mui/icons-material";
 import { VisuallyHiddenInput } from "../components/styles/StyledComponent";
 import PasswordInput from "./PasswordInput"; // Import PasswordInput component
 import { useDispatch } from "react-redux";
-import { server } from "../constants/config";
+import server from "../constants/config.js";
 import { userExists } from "../redux-toolkit/reducers/reducerAuth";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -28,6 +28,7 @@ const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
 
   const toggleButton = () => {
+    console.log("Im clicked");
     setIsLogin((prev) => !prev);
   };
 
@@ -44,17 +45,19 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const handleLogin = async (e) => {
-    console.log("Login button clicked");
     e.preventDefault();
+    console.log("Username or Email:", usernameOrEmail.value);
+    console.log("Password:", password.value);
+
+    const config = {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
 
     try {
-      const config = {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      console.log(server);
+      // console.log(server);
       const { data } = await axios.post(
         `${server}/api/v1/auth/login`,
         {
@@ -64,7 +67,7 @@ const Login = () => {
         config
       );
 
-      console.log("API response:", data);
+      // console.log("API response:", data);
 
       if (data.success) {
         dispatch(userExists(true));
@@ -73,7 +76,6 @@ const Login = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("Login error:", error);
       toast.error(error?.response?.data?.message || "Something went wrong");
     }
   };
@@ -123,10 +125,7 @@ const Login = () => {
                 Log In
               </Typography>
               <form
-                style={{
-                  width: "100%",
-                  marginTop: "1rem",
-                }}
+                style={{ width: "100%", marginTop: "1rem" }}
                 onSubmit={handleLogin}
               >
                 <TextField
@@ -144,10 +143,10 @@ const Login = () => {
                   onChange={password.changeHandler}
                 />
                 <Button
-                  fullWidth
                   variant="contained"
                   color="primary"
                   type="submit"
+                  fullWidth
                   sx={{
                     mt: 2,
                     mb: 1.5,
@@ -155,9 +154,9 @@ const Login = () => {
                     fontSize: "1.2rem",
                     borderRadius: 4,
                   }}
-                  // onClick={toggleButton}
+                  onClick={handleLogin} // Add this line
                 >
-                  Log In
+                  Log In Here
                 </Button>
                 <Typography textAlign="center" m="0.5rem">
                   OR

@@ -37,8 +37,8 @@ const verifyJWT = (token) => {
 };
 
 // Function to set JWT token in a cookie and send it back to the client as part of the response
-const cookieResponse = ({ res, user, clear = false }) => {
-  if (!clear) {
+const cookieResponse = ({ res, user, expireToken = false }) => {
+  if (!expireToken) {
     // Generate JWT token for the user payload
     const token = createJWT({ payload: user });
     console.log("Stored Token in Cookie:", token); // Add this log

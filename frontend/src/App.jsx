@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { LayoutLoaders } from "./components/layout/Loaders";
-import { server } from "./constants/config.js";
+import server from "./constants/config.js";
 import { userNotExists } from "./redux-toolkit/reducers/reducerAuth.js";
 
 // Lazy loading components
@@ -31,10 +31,15 @@ const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // console.log(server);
+
     axios
       .get(`${server}/api/v1/auth/user`, { withCredentials: true })
       .then((res) => console.log(res))
-      .catch(() => dispatch(userNotExists()));
+      .catch(() => {
+        // console.error(error);
+        dispatch(userNotExists());
+      });
   }, [dispatch]);
 
   return loader ? (
