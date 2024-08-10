@@ -62,12 +62,6 @@ const UserSchema = new Schema(
       required: true,
       trim: true,
     },
-    primaryCredential: {
-      type: String,
-      default: function () {
-        return this.email ? "email" : "username";
-      },
-    },
   },
   { timestamps: true }
 );

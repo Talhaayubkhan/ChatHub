@@ -28,7 +28,7 @@ const chatIdGroupValidator = () => [
   param("chatId").notEmpty().withMessage("Please enter your Correct chat ID"),
 ];
 
-const fileAttachmentGroupValidator = () => [
+const multipleFilesUploadGroupValidator = () => [
   body("chatId").notEmpty().withMessage("Please enter your chat ID").trim(),
   // check("files")
   //   .notEmpty()
@@ -67,7 +67,7 @@ export {
   addGroupMemberValidator,
   removeGroupValidator,
   chatIdGroupValidator,
-  fileAttachmentGroupValidator,
+  multipleFilesUploadGroupValidator,
   renameGroupValidator,
   handleGroupValidationErrors,
 };

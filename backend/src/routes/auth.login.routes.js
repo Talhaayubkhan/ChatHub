@@ -18,15 +18,11 @@ import {
   getAllNotifications,
   getMyAllFriends,
 } from "../controllers/authController.js";
-import {
-  multerUploadFile,
-  singleAavatar,
-} from "../middlewares/multer.middleware.js";
+import { multerUploadFile, singleAavatar } from "../utils/multerConfig.js";
 import { loginLimiter, registerLimiter } from "../utils/rateLimiter.js";
-
-// import { isAuthenticatedUser } from "../middlewares/authentication.js";
 import { isAuthenticated } from "../middlewares/AuthHeadersBased.Authentication.js";
 
+// Routes without authentication
 router
   .route("/register")
   .post(
@@ -36,13 +32,16 @@ router
     handleValidationErrors,
     registerUser
   );
+
 router
   .route("/login")
-  .post(loginLimiter, loginValidator(), handleValidationErrors, loginUser);
+  .post(loginValidator(), handleValidationErrors, loginUser);
 
-router.route("/logout").post(logoutUser);
+router.route("/logout").post(logoutUser); // Consider adding authentication if necessary
 
+// Apply isAuthenticated to routes that need authentication
 router.use(isAuthenticated);
+
 router.route("/user").get(getUserProfile);
 router.route("/search").get(searchUser);
 router

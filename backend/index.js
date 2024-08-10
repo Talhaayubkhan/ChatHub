@@ -3,14 +3,8 @@ import { app } from "./src/app.js";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
-import { v4 as uuid } from "uuid";
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from "./src/constants/events.js";
-import { getAllSocketIDs, userSocketIDs } from "./src/constants/sockets.js";
-import NotFound from "./src/errors/NotFound.js";
-import { Message } from "./src/models/Message.Models.js";
-import BadRequest from "./src/errors/BadRequestError.js";
+import { handleNewMessage, handleDisconnect } from "./socketEvents.js";
 
-// dotenv.config();
 const PORT = process.env.PORT || 8000;
 
 // Create HTTP server and integrate with Socket.IO
@@ -26,51 +20,9 @@ io.on("connection", (socket) => {
   const socketID = userSocketIDs.set(user._id.toString(), socket.id);
   console.log(socketID);
 
-  socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
-    const messageForRealTime = {
-      chat: chatId,
-      id: uuid(),
-      sender: {
-        _id: user._id,
-        name: user.name,
-      },
-      content: message,
-      createdAt: new Date(),
-    };
+  socket.on(NEW_MESSAGE, (data) => handleNewMessage(socket, data));
 
-    const messageForDatabse = {
-      chatId,
-      senderId: user._id,
-      content: message,
-      createdAt: new Date(),
-    };
-
-    const memberSocket = getAllSocketIDs(members);
-
-    if (!memberSocket) {
-      throw new NotFound("Not found member socket IDs");
-    }
-    io.to(memberSocket).emit(NEW_MESSAGE, {
-      chat: chatId,
-      message: messageForRealTime,
-    });
-    io.to(memberSocket).emit(NEW_MESSAGE_ALERT, {
-      chatId,
-    });
-
-    try {
-      await Message.create(messageForDatabse);
-    } catch (error) {
-      throw new BadRequest(
-        "Couldn't create message for databse!",
-        error.message
-      );
-    }
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
-  });
+  socket.on("disconnect", () => handleDisconnect(socket));
 });
 
 connectDB()

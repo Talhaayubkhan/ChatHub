@@ -1,11 +1,16 @@
 import { User, Chat, Request } from "../models/index.js";
 import { StatusCodes } from "http-status-codes";
-import { BadRequest, NotFound, Unauthenticated } from "../errors/index.js";
+import {
+  BadRequest,
+  CloudinaryFileUploadError,
+  NotFound,
+  Unauthenticated,
+} from "../errors/index.js";
 import {
   cookieResponse,
   generateToken,
   emitEvent,
-  setAdminTokenCookie,
+  uploadFilesToCloudinary,
 } from "../utils/index.js";
 import { NEW_REQUEST } from "../constants/events.js";
 import { getOtherMembers } from "../lib/helper.js";
@@ -13,16 +18,27 @@ import { getOtherMembers } from "../lib/helper.js";
 const registerUser = async (req, res) => {
   const { name, username, email, password, bio } = req.body;
 
-  const isValid = true;
-
-  const avatarFilePath = req.file;
-  if (!avatarFilePath) {
-    throw new BadRequest("Avatar file is required");
-  }
-
+  // Validate Email
   if (!email.includes("@")) {
     throw new BadRequest("Invalid Email address..");
   }
+
+  // Validate the avatar file
+  // const file = req.file;
+  // if (!file) {
+  //   throw new BadRequest("Avatar file is required");
+  // }
+  // console.log("Base64 formatted file:", avatarFilePath);
+
+  // const resultFromCloudinary = await uploadFilesToCloudinary([file]);
+  // if (!resultFromCloudinary || !resultFromCloudinary.length) {
+  //   throw new CloudinaryFileUploadError("Cloudinary file upload failed");
+  // }
+
+  // const avatar = {
+  //   public_id: resultFromCloudinary[0].public_id,
+  //   url: resultFromCloudinary[0].url,
+  // };
 
   // Check if email or username already exists
   const existingUser = await User.findOne({
@@ -39,26 +55,19 @@ const registerUser = async (req, res) => {
     }
   }
 
-  const avatar = {
-    public_id: "sdfs",
-    url: "asd",
-  };
-  // Set primary credential based on input (email or username)
-  // This determines which credential will be used for login and unique identification
-  const primaryCredential = email ? "email" : "username";
-
-  const user = await User.create({
-    name,
-    username,
-    email,
-    bio,
-    password,
-    avatar,
-    primaryCredential,
-  });
-
-  if (!isValid) {
-    return;
+  let user;
+  try {
+    user = await User.create({
+      name,
+      username,
+      email,
+      bio,
+      password,
+      // avatar,
+    });
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw new Error("An error occurred while registering the user");
   }
 
   // Extract necessary user data to be included in the JWT token payload
@@ -67,8 +76,8 @@ const registerUser = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({
     success: true,
+    message: "User registered successfully",
     user: tokenUser,
-    message: "User Register Successfully",
   });
 };
 
@@ -76,26 +85,20 @@ const loginUser = async (req, res) => {
   console.log("Login request received:", req.body);
 
   const { usernameOrEmail, password } = req.body;
-
-  let user;
-
-  if (usernameOrEmail.includes("@")) {
-    user = await User.findOne({
-      email: usernameOrEmail,
-      primaryCredential: "email",
-    }).select("+password");
-  } else {
-    user = await User.findOne({
-      username: usernameOrEmail,
-      primaryCredential: "username",
-    }).select("+password");
+  // Validate inputs
+  if (!usernameOrEmail || !password) {
+    return next(new BadRequest("Username or email and password are required."));
   }
-  // console.log("User found:", user);
+
+  // Find user by either email or username
+  const user = await User.findOne({
+    $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
+  }).select("+password");
+
+  console.log("User found:", user);
 
   if (!user) {
-    throw new Unauthenticated(
-      "User not found with the provided email or username"
-    );
+    throw new Unauthenticated("Invalid username and password");
   }
 
   const isPasswordCorrect = await user.comparePassword(password);
@@ -105,7 +108,7 @@ const loginUser = async (req, res) => {
   }
 
   const tokenUser = generateToken(user);
-  // console.log("Token user:", tokenUser);
+  console.log("Token user:", tokenUser);
   cookieResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.OK).json({
@@ -127,14 +130,18 @@ const logoutUser = async (req, res) => {
 };
 
 const getUserProfile = async (req, res) => {
-  const getUser = await User.findById(req.user);
+  const { userId } = req.user;
+  // console.log("Querying user with ID:", userId);
+
+  const getUser = await User.findById(userId);
   if (!getUser) {
     throw new NotFound("User not found");
   }
 
   res.status(StatusCodes.OK).json({
-    sucess: true,
-    getUser,
+    success: true,
+    user: getUser,
+    message: "User Profile",
   });
 };
 

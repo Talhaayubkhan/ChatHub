@@ -5,7 +5,10 @@ import {
   createJWT,
   verifyJWT,
 } from "./jwtToken.js";
-import { deleteFilesFromCloudinary } from "./cloudinary.js";
+import {
+  uploadFilesToCloudinary,
+  deleteFilesFromCloudinary,
+} from "./cloudinary.js";
 import { emitEvent } from "./eventEmit.js";
 export {
   generateToken,
@@ -13,6 +16,7 @@ export {
   setAdminTokenCookie,
   createJWT,
   verifyJWT,
+  uploadFilesToCloudinary,
   deleteFilesFromCloudinary,
   emitEvent,
 };

@@ -31,17 +31,20 @@ const verifyJWT = (token) => {
     // Return the decoded payload if token is valid
     return decodeToken;
   } catch (error) {
-    // If decoding fails, throw an UnauthenticatedError indicating verification failure
+    // If an error occurs during token verification, throw an UnauthenticatedError indicating the error
+    console.error("Error Verifying JWT Token:", error.message);
     throw new Unauthenticated("Failed to Verify JWT Token");
   }
 };
 
 // Function to set JWT token in a cookie and send it back to the client as part of the response
 const cookieResponse = ({ res, user, expireToken = false }) => {
+  const isProduction = process.env.NODE_ENV === "production";
+
   if (!expireToken) {
     // Generate JWT token for the user payload
     const token = createJWT({ payload: user });
-    console.log("Stored Token in Cookie:", token); // Add this log
+    console.log("Stored Token in Cookie:", token);
 
     if (!token) {
       throw new Unauthenticated(
@@ -52,19 +55,17 @@ const cookieResponse = ({ res, user, expireToken = false }) => {
     // Set the JWT token in a cookie named "token" in the response
     res.cookie("token", token, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production",
-      secure: true,
+      secure: isProduction,
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
+      sameSite: isProduction ? "Lax" : "None", //
       signed: true,
     });
   } else {
     res.cookie("token", "", {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production",
-      secure: true,
+      secure: isProduction,
       expires: new Date(0),
-      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
+      sameSite: isProduction ? "Lax" : "None", // Set SameSite attribute to "Lax" for CSRF protection
       signed: true,
     });
   }

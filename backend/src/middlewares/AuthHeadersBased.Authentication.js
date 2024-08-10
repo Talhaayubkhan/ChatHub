@@ -13,26 +13,34 @@ const isAuthenticated = async (req, res, next) => {
   console.log("Received Token:", token); // Add this log
 
   if (!token) {
-    throw new Unauthenticated("Authentication Token Invalid");
+    console.log("No token found");
+    throw new Unauthenticated("Authentication failed: No token provided");
   }
 
   try {
     const checkTokenPayload = verifyJWT(token);
-    console.log(checkTokenPayload);
-
-    const userId = checkTokenPayload?.user?.userId || checkTokenPayload?.user;
-    if (!userId) {
-      throw new Unauthenticated("Invalid user ID");
+    console.log("Token Payload:", checkTokenPayload);
+    if (
+      !checkTokenPayload ||
+      typeof checkTokenPayload !== "object" ||
+      !checkTokenPayload.userId ||
+      !checkTokenPayload?.user?.userId
+    ) {
+      console.log("Invalid user ID in token payload");
+      throw new Unauthenticated("Authentication failed: Invalid token payload");
     }
-    req.user = {
-      userId,
-    };
+
+    const userId = checkTokenPayload?.user?.userId;
+    if (!userId) {
+      console.log("No user ID found in token payload");
+      throw new Unauthenticated("Authentication failed: Invalid token payload");
+    }
+    req.user = { userId };
 
     next();
   } catch (error) {
-    throw new Unauthenticated(
-      "Error while verifying authentication token: " + error.message
-    );
+    onsole.error("Error during token verification:", error.message);
+    throw new Unauthenticated("Authentication failed. Please login again.");
   }
 };
 
