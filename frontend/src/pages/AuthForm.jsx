@@ -16,13 +16,13 @@ import PasswordInput from "./PasswordInput"; // Import PasswordInput component
 import { useDispatch } from "react-redux";
 import server from "../constants/config.js";
 import { userExists } from "../redux-toolkit/reducers/reducerAuth";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import axios from "axios";
 import {
   emailValidator,
   usernameOrEmailValidator,
-  userNameValidator,
-} from "../utils/validators";
+  usernameValidator,
+} from "../utils/validators.js";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -37,7 +37,7 @@ const Login = () => {
   });
   const bio = useInputValidation("");
   const usernameOrEmail = useInputValidation("", usernameOrEmailValidator); // This will be used for login
-  const username = useInputValidation("", userNameValidator);
+  const username = useInputValidation("", usernameValidator);
   const email = useInputValidation("", emailValidator);
   const password = useInputValidation("");
   const avatar = useFileHandler("single");
@@ -46,8 +46,6 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Username or Email:", usernameOrEmail.value);
-    console.log("Password:", password.value);
 
     const config = {
       withCredentials: true,
@@ -69,11 +67,11 @@ const Login = () => {
 
       // console.log("API response:", data);
 
-      if (data.success) {
+      if (data.success === true) {
         dispatch(userExists(true));
         toast.success(data.message);
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Invalid username or password");
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Something went wrong");

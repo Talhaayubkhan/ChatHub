@@ -5,7 +5,7 @@ import { Navigate, Outlet } from "react-router-dom";
 // children represents the nested components or elements within <ProtectedRoute>
 // user indicates whether the user is authenticated
 // redirect is the path where the user should be redirected if not authenticated (defaults to "/login")
-const ProtectedRoute = ({ children, user, redirect = "/login" }) => {
+const ProtectedRoute = ({ children, user, redirect = "/auth" }) => {
   // Checking if the user is not authenticated
   if (!user) {
     // If not authenticated, redirect the user to the specified redirect path

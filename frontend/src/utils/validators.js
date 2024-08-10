@@ -1,48 +1,36 @@
 import { isValidUsername, isValidEmail } from "6pp";
 
-const combinedRegex =
-  /^[a-zA-Z0-9_-]{3,16}$|^([a-zA-Z0-9_.-]+)@([a-zA-Z0-9_.-]+)\.([a-zA-Z]{2,5})$/;
-
-// Username validator
-const userNameValidator = (input) => {
-  if (!combinedRegex.test(input) && !isValidUsername(input)) {
+// Simplified username validator
+export const usernameValidator = (input) => {
+  const regex = /^[a-zA-Z0-9_-]{3,16}$/;
+  if (!regex.test(input) && !isValidUsername(input)) {
     return {
       isValid: false,
       errorMessage:
-        "Username must be between 3-16 characters, containing only letters, numbers, underscores, or hyphens",
+        "Username must be between 3-16 characters, and may include letters, numbers, underscores, or hyphens.",
     };
   }
   return { isValid: true, errorMessage: "" };
 };
 
-// Email validator
-const emailValidator = (input) => {
-  if (!combinedRegex.test(input) && !isValidEmail(input)) {
+// Simplified email validator
+export const emailValidator = (input) => {
+  if (!isValidEmail(input)) {
     return {
       isValid: false,
-      errorMessage: "Email must be a valid email address",
+      errorMessage: "Email must be a valid email address.",
     };
   }
   return { isValid: true, errorMessage: "" };
 };
 
-// Combined validator for username or email
-const usernameOrEmailValidator = (input) => {
-  if (!combinedRegex.test(input)) {
-    if (!isValidUsername(input)) {
-      return {
-        isValid: false,
-        errorMessage:
-          "Username must be between 3-16 characters, containing only letters, numbers, underscores, or hyphens",
-      };
-    } else {
-      return {
-        isValid: false,
-        errorMessage: "Email must be a valid email address",
-      };
-    }
+// Simplified combined validator for username or email
+export const usernameOrEmailValidator = (input) => {
+  if (!isValidUsername(input) && !isValidEmail(input)) {
+    return {
+      isValid: false,
+      errorMessage: "Please enter a valid username or email address.",
+    };
   }
   return { isValid: true, errorMessage: "" };
 };
-
-export { userNameValidator, emailValidator, usernameOrEmailValidator };
