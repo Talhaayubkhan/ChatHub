@@ -1,5 +1,4 @@
 import { Grid, Skeleton, Stack } from "@mui/material";
-import React from "react";
 
 // Loader component to show skeletons during data fetch
 
@@ -18,10 +17,10 @@ export const LayoutLoaders = () => {
         >
           <Skeleton variant="rectangular" height={"100vh"} />
         </Grid>
-        <Grid item xs={12} sm={8} md={5} lg={6} height={"100%"}>
+        <Grid item xs={12} sm={8} md={5} lg={6} height={"100vh"}>
           <Stack spacing={"1rem"}>
             {Array.from({ length: 10 }).map((_, i) => (
-              <Skeleton variant="rectangular" height={"5rem"} key={i} />
+              <Skeleton variant="rectangular" height={"4.5rem"} key={i} />
             ))}
           </Stack>
         </Grid>
@@ -32,7 +31,7 @@ export const LayoutLoaders = () => {
           sx={{
             display: { xs: "none", md: "block" },
           }}
-          height={"100%"}
+          height={"100vh"}
           bgcolor="primary.main"
         >
           <Skeleton variant="rectangular" height={"100vh"} />

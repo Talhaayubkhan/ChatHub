@@ -1,8 +1,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from "react-hot-toast";
 
 import axios from "axios";
 
@@ -14,6 +13,7 @@ import { userNotExists } from "./redux-toolkit/reducers/reducerAuth.js";
 // Lazy loading components
 const Home = lazy(() => import("./pages/Home"));
 const AuthForm = lazy(() => import("./pages/AuthForm"));
+// const Login = lazy(() => import("./pages/Login"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Group = lazy(() => import("./pages/Groups"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -54,7 +54,7 @@ const App = () => {
           </Route>
           {/* Route for AuthForm (Login/Signup) */}
           <Route
-            path="/auth"
+            path="/login"
             element={
               <ProtectedRoute user={!user} redirect="/">
                 <AuthForm />
@@ -70,7 +70,7 @@ const App = () => {
           {/* NotFound Route for 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <ToastContainer />
+        <Toaster position="top-center" />
       </Suspense>
     </BrowserRouter>
   );

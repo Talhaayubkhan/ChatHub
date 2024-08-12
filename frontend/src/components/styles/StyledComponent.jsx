@@ -1,11 +1,12 @@
 import { styled } from "@mui/material";
 import { Link as LinkComponent } from "react-router-dom";
 import { grayColor } from "../../constants/color";
-export const VisuallyHiddenInput = styled("input")({
+
+const VisuallyHiddenInput = styled("input")({
   position: "absolute",
-  width: "1px",
-  height: "1px",
-  margin: "-1px",
+  width: 1,
+  height: 1,
+  margin: -1,
   padding: 0,
   overflow: "hidden",
   clip: "rect(0, 0, 0, 0)",
@@ -13,7 +14,7 @@ export const VisuallyHiddenInput = styled("input")({
   border: 0,
 });
 
-export const Link = styled(LinkComponent)`
+const Link = styled(LinkComponent)`
   text-decoration: none;
   color: black;
   padding: 1rem;
@@ -22,7 +23,7 @@ export const Link = styled(LinkComponent)`
   }
 `;
 
-export const InputBox = styled("input")`
+const InputBox = styled("input")`
   width: 100%;
   height: 100%;
   padding: 0 3rem;
@@ -34,7 +35,7 @@ export const InputBox = styled("input")`
   color: black;
 `;
 
-export const SearchField = styled("input")`
+const SearchField = styled("input")`
   flex-grow: 1;
   height: 3rem;
   padding: 1rem 1rem;
@@ -46,7 +47,7 @@ export const SearchField = styled("input")`
   outline: none;
 `;
 
-export const CurveButton = styled("button")`
+const CurveButton = styled("button")`
   background-color: "#1976d2";
   color: black;
   padding: 1rem 1rem;
@@ -56,3 +57,5 @@ export const CurveButton = styled("button")`
   cursor: pointer;
   transition: background-color 0.3s ease;
 `;
+
+export { VisuallyHiddenInput, Link, InputBox, SearchField, CurveButton };

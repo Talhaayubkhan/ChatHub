@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { CameraAlt as CameraAltIcon } from "@mui/icons-material";
 import {
   Avatar,
@@ -10,6 +9,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import React, { useState } from "react";
 import { VisuallyHiddenInput } from "../components/styles/StyledComponent";
 import PasswordInput from "./PasswordInput";
 

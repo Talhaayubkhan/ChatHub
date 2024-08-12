@@ -15,6 +15,7 @@ import { Navigate } from "react-router-dom";
 const isAdmin = true;
 
 const AdminLogin = () => {
+  // TODO: we later use usernameOrEmail instead
   const username = useInputValidation("");
   const secretKey = useInputValidation("");
   const submitHandler = (e) => {
