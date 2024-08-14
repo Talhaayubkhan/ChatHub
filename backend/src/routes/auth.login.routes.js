@@ -40,9 +40,9 @@ router
 router.route("/logout").post(logoutUser); // Consider adding authentication if necessary
 
 // Apply isAuthenticated to routes that need authentication
+router.route("/user").get(getUserProfile);
 router.use(isAuthenticated);
 
-router.route("/user").get(getUserProfile);
 router.route("/search").get(searchUser);
 router
   .route("/send-request")

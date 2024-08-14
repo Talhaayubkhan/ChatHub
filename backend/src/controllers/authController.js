@@ -90,10 +90,11 @@ const loginUser = async (req, res) => {
     return next(new BadRequest("Username or email and password are required."));
   }
 
-  // Find user by either email or username
-  const user = await User.findOne({
+  const userFilter = {
     $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
-  }).select("+password");
+  };
+
+  const user = await User.findOne(userFilter).select("+password");
 
   console.log("User found:", user);
 
