@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CameraAlt as CameraAltIcon } from "@mui/icons-material";
+import { useFileHandler, useInputValidation } from "6pp";
 import {
   Avatar,
   Button,
@@ -10,8 +11,18 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { toast } from "react-hot-toast";
 import { VisuallyHiddenInput } from "../components/styles/StyledComponent";
 import PasswordInput from "./PasswordInput";
+import server from "../constants/config.js";
+import { userExists } from "../redux-toolkit/reducers/reducerAuth.js";
+import {
+  emailValidator,
+  usernameOrEmailValidator,
+  usernameValidator,
+} from "../utils/validators.js";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,9 +32,50 @@ const Login = () => {
     setIsLogin((prev) => !prev);
   };
 
-  const handleLogin = (e) => {
-    console.log("Hello, Khan!");
+  const name = useInputValidation("");
+  const usernameOrEmail = useInputValidation("", usernameOrEmailValidator);
+  const password = useInputValidation("");
+  const username = useInputValidation("", usernameValidator);
+  const email = useInputValidation("", emailValidator);
+  const bio = useInputValidation("");
+  const avatar = useFileHandler("single");
+
+  const dispatch = useDispatch();
+
+  const loginUser = async (e) => {
     e.preventDefault();
+    // console.log("I am Login Now...!");
+
+    const config = {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    try {
+      // console.log(server);
+
+      const response = await axios.post(
+        `${server}/api/v1/auth/login`,
+        {
+          usernameOrEmail: usernameOrEmail.value,
+          password: password.value,
+        },
+        config
+      );
+      if (response) {
+        dispatch(userExists(true));
+        // console.log("Login Successful");
+        toast.success("Login Successful");
+      } else {
+        // console.log("Login Failed");
+        toast.error("Login Failed", response);
+      }
+    } catch (error) {
+      toast.error("Failed to Login");
+      // console.error("Login Failed");
+    }
   };
 
   return (
@@ -66,7 +118,7 @@ const Login = () => {
                 marginTop: "10px",
                 marginBottom: "10px",
               }}
-              onSubmit={handleLogin}
+              onSubmit={loginUser}
             >
               <TextField
                 required
@@ -74,8 +126,13 @@ const Login = () => {
                 label="UsernameOrEmail"
                 margin="normal"
                 variant="outlined"
+                value={usernameOrEmail.value}
+                onChange={usernameOrEmail.changeHandler}
               />
-              <PasswordInput />
+              <PasswordInput
+                value={password.value}
+                onChange={password.changeHandler}
+              />
 
               <Button
                 fullWidth
@@ -91,6 +148,7 @@ const Login = () => {
                   letterSpacing: "0.05rem",
                   padding: "0.5rem 1rem",
                 }}
+                // onClick={loginUser}
               >
                 Login{" "}
               </Button>
@@ -128,7 +186,6 @@ const Login = () => {
                 marginTop: "10px",
                 marginBottom: "10px",
               }}
-              onSubmit={handleLogin}
             >
               <Stack position={"relative"} width={"10rem"} margin={"auto"}>
                 <Avatar
@@ -153,7 +210,10 @@ const Login = () => {
                 >
                   <>
                     <CameraAltIcon />
-                    <VisuallyHiddenInput type="file" />
+                    <VisuallyHiddenInput
+                      type="file"
+                      onChange={avatar.changeHandler} // Make sure this is correctly hooked up
+                    />
                   </>
                 </IconButton>
               </Stack>
@@ -164,6 +224,8 @@ const Login = () => {
                 label="Name"
                 margin="normal"
                 variant="outlined"
+                value={name.value}
+                onChange={name.changeHandler}
               />
               <TextField
                 required
@@ -171,6 +233,8 @@ const Login = () => {
                 label="Username"
                 margin="normal"
                 variant="outlined"
+                value={username.value}
+                onChange={username.changeHandler}
               />
               <TextField
                 required
@@ -179,6 +243,8 @@ const Login = () => {
                 type="email"
                 margin="normal"
                 variant="outlined"
+                value={email.value}
+                onChange={email.changeHandler}
               />
               <TextField
                 required
@@ -186,8 +252,13 @@ const Login = () => {
                 label="Bio"
                 margin="normal"
                 variant="outlined"
+                value={bio.value}
+                onChange={bio.changeHandler}
               />
-              <PasswordInput />
+              <PasswordInput
+                value={password.value}
+                onChange={password.changeHandler}
+              />
 
               <Button
                 fullWidth

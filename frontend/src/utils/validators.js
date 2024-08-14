@@ -26,7 +26,7 @@ export const emailValidator = (input) => {
 
 // Simplified combined validator for username or email
 export const usernameOrEmailValidator = (input) => {
-  if (!isValidUsername(input) && !isValidEmail(input)) {
+  if (!isValidUsername(input)) {
     return {
       isValid: false,
       errorMessage: "Please enter a valid username or email address.",

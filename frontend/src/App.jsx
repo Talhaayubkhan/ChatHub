@@ -32,6 +32,8 @@ const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // console.log(server);
+
     axios
       .get(`${server}/api/v1/auth/user`, { withCredentials: true })
       .then((res) => console.log(res))
