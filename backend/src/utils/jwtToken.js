@@ -39,7 +39,7 @@ const verifyJWT = (token) => {
 
 // Function to set JWT token in a cookie and send it back to the client as part of the response
 const cookieResponse = ({ res, user, expireToken = false }) => {
-  const isProduction = process.env.NODE_ENV === "production";
+  let isProduction = process.env.NODE_ENV === "production";
 
   if (!expireToken) {
     // Generate JWT token for the user payload

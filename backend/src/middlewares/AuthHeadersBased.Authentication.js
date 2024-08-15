@@ -20,17 +20,14 @@ const isAuthenticated = async (req, res, next) => {
   try {
     const checkTokenPayload = verifyJWT(token);
     console.log("Token Payload:", checkTokenPayload);
-    if (
-      !checkTokenPayload ||
-      typeof checkTokenPayload !== "object" ||
-      !checkTokenPayload.userId ||
-      !checkTokenPayload?.user?.userId
-    ) {
+
+    if (!checkTokenPayload || !checkTokenPayload.userId) {
       console.log("Invalid user ID in token payload");
       throw new Unauthenticated("Authentication failed: Invalid token payload");
     }
 
-    const userId = checkTokenPayload?.user?.userId;
+    const userId = checkTokenPayload.userId;
+
     if (!userId) {
       console.log("No user ID found in token payload");
       throw new Unauthenticated("Authentication failed: Invalid token payload");

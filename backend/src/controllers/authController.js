@@ -131,8 +131,10 @@ const logoutUser = async (req, res) => {
 };
 
 const getUserProfile = async (req, res) => {
+  console.log("Get user profile request received:", req.user);
   const { userId } = req.user;
-  // console.log("Querying user with ID:", userId);
+
+  console.log("Querying user with ID:", userId);
 
   const getUser = await User.findById(userId);
   if (!getUser) {
