@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { CameraAlt as CameraAltIcon } from "@mui/icons-material";
-import { useFileHandler, useInputValidation } from "6pp";
+import { useFileHandler, useInputValidation, useStrongPassword } from "6pp";
 import {
   Avatar,
   Button,
@@ -20,6 +20,7 @@ import server from "../constants/config.js";
 import { userExists } from "../redux-toolkit/reducers/reducerAuth.js";
 import {
   emailValidator,
+  passwordValidator,
   usernameOrEmailValidator,
   usernameValidator,
 } from "../utils/validators.js";
@@ -34,7 +35,8 @@ const Login = () => {
 
   const name = useInputValidation("");
   const usernameOrEmail = useInputValidation("", usernameOrEmailValidator);
-  const password = useInputValidation("");
+  // const password = useStrongPassword();
+  const password = useInputValidation("", passwordValidator);
   const username = useInputValidation("", usernameValidator);
   const email = useInputValidation("", emailValidator);
   const bio = useInputValidation("");
@@ -44,7 +46,7 @@ const Login = () => {
 
   const loginUser = async (e) => {
     e.preventDefault();
-    // console.log("I am Login Now...!");
+    console.log("I am Login Now...!");
 
     const config = {
       withCredentials: true,
@@ -79,221 +81,280 @@ const Login = () => {
   };
 
   return (
-    <Container
-      component={"main"}
-      maxWidth="sm"
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
+    <div
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(200, 200, 200,0.5),rgba(120, 110, 220,0.5)",
       }}
     >
-      <Paper
-        elevation={15}
+      <Container
+        component={"main"}
+        maxWidth="sm"
         sx={{
-          padding: 5,
           display: "flex",
-          flexDirection: "column",
+          justifyContent: "center",
           alignItems: "center",
+          height: "100vh",
         }}
       >
-        {isLogin ? (
-          <>
-            <Typography
-              variant="h4"
-              sx={{
-                fontSize: "1.5rem",
-                fontWeight: "700",
-                padding: "0.5rem 1rem",
-              }}
-              color="primary"
-            >
-              {" "}
-              Login Here{" "}
-            </Typography>
-            <form
-              style={{
-                width: "100%",
-                marginTop: "10px",
-                marginBottom: "10px",
-              }}
-              onSubmit={loginUser}
-            >
-              <TextField
-                required
-                fullWidth
-                label="UsernameOrEmail"
-                margin="normal"
-                variant="outlined"
-                value={usernameOrEmail.value}
-                onChange={usernameOrEmail.changeHandler}
-              />
-              <PasswordInput
-                value={password.value}
-                onChange={password.changeHandler}
-              />
-
-              <Button
-                fullWidth
-                variant="contained"
-                color="info"
-                type="submit"
+        <Paper
+          elevation={20}
+          sx={{
+            padding: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            borderRadius: "10px",
+          }}
+        >
+          {isLogin ? (
+            <>
+              <Typography
+                variant="h4"
                 sx={{
+                  fontSize: "2rem",
+                  fontWeight: "700",
+                  marginBottom: "10px",
+                }}
+                color="primary"
+              >
+                {" "}
+                Login Here{" "}
+              </Typography>
+              <form
+                style={{
+                  width: "100%",
                   marginTop: "10px",
                   marginBottom: "10px",
-                  fontSize: "1.2rem",
-                  textTransform: "capitalize",
-                  fontWeight: "600",
-                  letterSpacing: "0.05rem",
-                  padding: "0.5rem 1rem",
                 }}
-                // onClick={loginUser}
+                onSubmit={loginUser}
               >
-                Login{" "}
-              </Button>
-
-              <Typography
-                textAlign={"center"}
-                margin={"1rem"}
-                fontWeight={"600"}
-              >
-                OR
-              </Typography>
-
-              <Button color="primary" fullWidth onClick={toggleButton}>
-                Register Instead
-              </Button>
-            </form>
-          </>
-        ) : (
-          <>
-            <Typography
-              variant="h4"
-              sx={{
-                fontSize: "1.5rem",
-                fontWeight: "700",
-                padding: "0.5rem 1rem",
-              }}
-              color="primary"
-            >
-              {" "}
-              Register Your Account Here!{" "}
-            </Typography>
-            <form
-              style={{
-                width: "100%",
-                marginTop: "10px",
-                marginBottom: "10px",
-              }}
-            >
-              <Stack position={"relative"} width={"10rem"} margin={"auto"}>
-                <Avatar
-                  sx={{
-                    width: "10rem",
-                    height: "10rem",
-                    objectFit: "cover",
-                  }}
+                <TextField
+                  required
+                  fullWidth
+                  label="UsernameOrEmail"
+                  margin="normal"
+                  variant="outlined"
+                  value={usernameOrEmail.value}
+                  onChange={usernameOrEmail.changeHandler}
                 />
-                <IconButton
+                {usernameOrEmail.error && (
+                  <Typography variant="caption" color="error">
+                    {usernameOrEmail.error}
+                  </Typography>
+                )}
+                <PasswordInput
+                  value={password.value}
+                  onChange={password.changeHandler}
+                />
+                {password.error && (
+                  <Typography variant="caption" color="error">
+                    {password.error}
+                  </Typography>
+                )}
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="info"
+                  type="submit"
                   sx={{
-                    position: "absolute",
-                    bottom: "0",
-                    right: "0",
-                    cursor: "pointer",
-                    bgcolor: "rgba(0,0,0,0.4)",
-                    ":hover": {
-                      bgcolor: "rgba(255,255,255,0.10)",
-                    },
+                    marginTop: "25px",
+                    fontSize: "1.5rem",
+                    textTransform: "capitalize",
+                    fontWeight: "700",
+                    padding: "0.3rem 2rem",
                   }}
-                  component="label"
+                  // onClick={loginUser}
                 >
-                  <>
-                    <CameraAltIcon />
-                    <VisuallyHiddenInput
-                      type="file"
-                      onChange={avatar.changeHandler} // Make sure this is correctly hooked up
-                    />
-                  </>
-                </IconButton>
-              </Stack>
-
-              <TextField
-                required
-                fullWidth
-                label="Name"
-                margin="normal"
-                variant="outlined"
-                value={name.value}
-                onChange={name.changeHandler}
-              />
-              <TextField
-                required
-                fullWidth
-                label="Username"
-                margin="normal"
-                variant="outlined"
-                value={username.value}
-                onChange={username.changeHandler}
-              />
-              <TextField
-                required
-                fullWidth
-                label="Email"
-                type="email"
-                margin="normal"
-                variant="outlined"
-                value={email.value}
-                onChange={email.changeHandler}
-              />
-              <TextField
-                required
-                fullWidth
-                label="Bio"
-                margin="normal"
-                variant="outlined"
-                value={bio.value}
-                onChange={bio.changeHandler}
-              />
-              <PasswordInput
-                value={password.value}
-                onChange={password.changeHandler}
-              />
-
-              <Button
-                fullWidth
-                variant="contained"
-                color="info"
-                type="submit"
+                  Login{" "}
+                </Button>
+                <Typography
+                  textAlign={"center"}
+                  margin={"1rem"}
+                  fontWeight={"600"}
+                >
+                  OR
+                </Typography>
+                <Button
+                  sx={{
+                    fontSize: "1.2rem",
+                    textTransform: "capitalize",
+                    fontWeight: "700",
+                  }}
+                  color="primary"
+                  fullWidth
+                  onClick={toggleButton}
+                >
+                  Register Instead
+                </Button>
+              </form>
+            </>
+          ) : (
+            <>
+              <Typography
+                variant="h4"
                 sx={{
-                  marginTop: "10px",
-                  marginBottom: "10px",
-                  fontSize: "1.2rem",
-                  textTransform: "capitalize",
-                  fontWeight: "600",
-                  letterSpacing: "0.05rem",
+                  fontSize: "2rem",
+                  fontWeight: "700",
                   padding: "0.5rem 1rem",
                 }}
+                color="primary"
               >
-                Register Here{" "}
-              </Button>
-
-              <Typography
-                textAlign={"center"}
-                margin={"1rem"}
-                fontWeight={"600"}
-              >
-                OR
+                {" "}
+                Register Your Account Here{" "}
               </Typography>
+              <form
+                style={{
+                  width: "100%",
+                  marginTop: "10px",
+                  marginBottom: "10px",
+                }}
+              >
+                <Stack position={"relative"} width={"10rem"} margin={"auto"}>
+                  <Avatar
+                    sx={{
+                      width: "10rem",
+                      height: "10rem",
+                      objectFit: "cover",
+                    }}
+                    src={
+                      avatar
+                        ? avatar.preview
+                        : "images directory not found in the filesystem"
+                    }
+                  />
+                  <IconButton
+                    sx={{
+                      position: "absolute",
+                      bottom: "0",
+                      right: "0",
+                      cursor: "pointer",
+                      bgcolor: "rgba(0,0,0,0.4)",
+                      ":hover": {
+                        bgcolor: "rgba(255,255,255,0.10)",
+                      },
+                    }}
+                    component="label"
+                  >
+                    <>
+                      <CameraAltIcon />
+                      <VisuallyHiddenInput
+                        type="file"
+                        onChange={avatar.changeHandler} // Make sure this is correctly hooked up
+                      />
+                    </>
+                  </IconButton>
+                </Stack>
+                {avatar.error && (
+                  <Typography
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      color: "red",
+                      fontWeight: "600",
+                      padding: "0.3rem",
+                    }}
+                  >
+                    {avatar.error}
+                  </Typography>
+                )}
+                <TextField
+                  required
+                  fullWidth
+                  label="Name"
+                  margin="normal"
+                  variant="outlined"
+                  value={name.value}
+                  onChange={name.changeHandler}
+                />
+                <TextField
+                  required
+                  fullWidth
+                  label="Username"
+                  margin="normal"
+                  variant="outlined"
+                  value={username.value}
+                  onChange={username.changeHandler}
+                />
 
-              <Button color="primary" fullWidth onClick={toggleButton}>
-                Login Instead
-              </Button>
-            </form>
-          </>
-        )}
-      </Paper>
-    </Container>
+                {username.error && (
+                  <Typography variant="caption" color="error">
+                    {username.error}
+                  </Typography>
+                )}
+
+                <TextField
+                  required
+                  fullWidth
+                  label="Email"
+                  type="email"
+                  margin="normal"
+                  variant="outlined"
+                  value={email.value}
+                  onChange={email.changeHandler}
+                />
+                <TextField
+                  required
+                  fullWidth
+                  label="Bio"
+                  margin="normal"
+                  variant="outlined"
+                  value={bio.value}
+                  onChange={bio.changeHandler}
+                />
+                <PasswordInput
+                  value={password.value}
+                  onChange={password.changeHandler}
+                />
+                {password.error && (
+                  <Typography variant="caption" color="error">
+                    {password.error}
+                  </Typography>
+                )}
+
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="info"
+                  type="submit"
+                  sx={{
+                    marginTop: "25px",
+                    fontSize: "1.5rem",
+                    textTransform: "capitalize",
+                    fontWeight: "700",
+                    padding: "0.3rem 2rem",
+                  }}
+                >
+                  Register Here{" "}
+                </Button>
+
+                <Typography
+                  textAlign={"center"}
+                  margin={"1rem"}
+                  fontWeight={"600"}
+                >
+                  OR
+                </Typography>
+
+                <Button
+                  sx={{
+                    fontSize: "1.2rem",
+                    textTransform: "capitalize",
+                    fontWeight: "700",
+                  }}
+                  color="primary"
+                  fullWidth
+                  onClick={toggleButton}
+                >
+                  Login Instead
+                </Button>
+              </form>
+            </>
+          )}
+        </Paper>
+      </Container>
+    </div>
   );
 };
 
