@@ -24,21 +24,23 @@ const registerUser = async (req, res) => {
   }
 
   // Validate the avatar file
-  // const file = req.file;
-  // if (!file) {
-  //   throw new BadRequest("Avatar file is required");
-  // }
-  // console.log("Base64 formatted file:", avatarFilePath);
+  const file = req.file;
+  // console.log(file);
 
-  // const resultFromCloudinary = await uploadFilesToCloudinary([file]);
-  // if (!resultFromCloudinary || !resultFromCloudinary.length) {
-  //   throw new CloudinaryFileUploadError("Cloudinary file upload failed");
-  // }
+  if (!file) {
+    throw new BadRequest("Avatar file is required");
+  }
 
-  // const avatar = {
-  //   public_id: resultFromCloudinary[0].public_id,
-  //   url: resultFromCloudinary[0].url,
-  // };
+  const resultFromCloudinary = await uploadFilesToCloudinary([file]);
+  if (!resultFromCloudinary || !resultFromCloudinary.length) {
+    throw new CloudinaryFileUploadError("Cloudinary file upload failed");
+  }
+
+  const avatar = {
+    public_id: resultFromCloudinary[0].public_id,
+    url: resultFromCloudinary[0].url,
+  };
+  // console.log("Base64 formatted file:", avatar);
 
   // Check if email or username already exists
   const existingUser = await User.findOne({
@@ -63,11 +65,15 @@ const registerUser = async (req, res) => {
       email,
       bio,
       password,
-      // avatar,
+      avatar,
     });
   } catch (error) {
     console.error("Error creating user:", error);
     throw new Error("An error occurred while registering the user");
+  }
+
+  if (!user) {
+    return;
   }
 
   // Extract necessary user data to be included in the JWT token payload
@@ -75,14 +81,15 @@ const registerUser = async (req, res) => {
   cookieResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.CREATED).json({
+    user: tokenUser,
+    avatar: avatar,
     success: true,
     message: "User registered successfully",
-    user: tokenUser,
   });
 };
 
 const loginUser = async (req, res) => {
-  console.log("Login request received:", req.body);
+  // console.log("Login request received:", req.body);
 
   const { usernameOrEmail, password } = req.body;
   // Validate inputs
@@ -96,7 +103,7 @@ const loginUser = async (req, res) => {
 
   const user = await User.findOne(userFilter).select("+password");
 
-  console.log("User found:", user);
+  // console.log("User found:", user);
 
   if (!user) {
     throw new Unauthenticated("Invalid username and password");
@@ -109,7 +116,7 @@ const loginUser = async (req, res) => {
   }
 
   const tokenUser = generateToken(user);
-  console.log("Token user:", tokenUser);
+  // console.log("Token user:", tokenUser);
   cookieResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.OK).json({

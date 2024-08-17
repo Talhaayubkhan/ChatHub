@@ -23,7 +23,7 @@ const uploadFileToCloudinary = async (file) => {
   } catch (error) {
     console.error("Cloudinary upload error:", error);
     throw new CloudinaryFileUploadError(
-      "Failed to upload file to Cloudinary. Please try again later."
+      "Failed to upload file to Cloudinary. Please ensure your file is in the correct format and try again later."
     );
   }
 };
@@ -39,6 +39,35 @@ const uploadFilesToCloudinary = async (files = []) => {
     );
   }
 };
+
+// const cloudinaryUpload = async (files = []) => {
+//   const uploadPromise = files.map((file) => {
+//     return new Promise((resolve, reject) => {
+//       cloudinary.uploader.upload(
+//         file.path,
+//         {
+//           resource_type: "auto",
+//           public_id: uuid(),
+//         },
+//         (error, result) => {
+//           if (error) return reject(error);
+//           resolve(result);
+//         }
+//       );
+//     });
+//   });
+
+//   try {
+//     const result = await Promise.all(uploadPromise);
+//     return result.map((res) => ({
+//       public_id: res.public_id,
+//       url: res.secure_url,
+//     }));
+//   } catch (error) {
+//     console.error("Cloudinary upload error:", error);
+//   }
+// };
+
 // delete files from cloudinary!
 const deleteFilesFromCloudinary = async (public_ids) => {};
 

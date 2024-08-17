@@ -35,7 +35,7 @@ router
 
 router
   .route("/login")
-  .post(loginValidator(), handleValidationErrors, loginUser);
+  .post(loginLimiter, loginValidator(), handleValidationErrors, loginUser);
 
 router.route("/logout").post(logoutUser); // Consider adding authentication if necessary
 

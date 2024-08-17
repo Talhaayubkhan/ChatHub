@@ -10,33 +10,33 @@ const isAuthenticated = async (req, res, next) => {
     authHeader && authHeader.startsWith("Bearer")
       ? authHeader.split(" ")[1]
       : req.signedCookies.token;
-  console.log("Received Token:", token); // Add this log
+  // console.log("Received Token:", token); // Add this log
 
   if (!token) {
-    console.log("No token found");
+    // console.log("No token found");
     throw new Unauthenticated("Authentication failed: No token provided");
   }
 
   try {
     const checkTokenPayload = verifyJWT(token);
-    console.log("Token Payload:", checkTokenPayload);
+    // console.log("Token Payload:", checkTokenPayload);
 
     if (!checkTokenPayload || !checkTokenPayload.userId) {
-      console.log("Invalid user ID in token payload");
+      // console.log("Invalid user ID in token payload");
       throw new Unauthenticated("Authentication failed: Invalid token payload");
     }
 
     const userId = checkTokenPayload.userId;
 
     if (!userId) {
-      console.log("No user ID found in token payload");
+      // console.log("No user ID found in token payload");
       throw new Unauthenticated("Authentication failed: Invalid token payload");
     }
     req.user = { userId };
 
     next();
   } catch (error) {
-    onsole.error("Error during token verification:", error.message);
+    // console.error("Error during token verification:", error.message);
     throw new Unauthenticated("Authentication failed. Please login again.");
   }
 };

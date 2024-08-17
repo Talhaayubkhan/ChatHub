@@ -1,8 +1,18 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import multer from "multer";
+import { BadRequest } from "../errors/index.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "../uploads/");
+    const uploadPath = path.join(__dirname, "../../../uploads/");
+    if (!uploadPath) {
+      throw new BadRequest("Failed to create upload directory.");
+    }
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -10,9 +20,11 @@ const storage = multer.diskStorage({
 });
 
 const multerUploadFile = multer({
+  // storage,
   limits: {
     fileSize: 5 * 1024 * 1024,
   },
+
   fileFilter(req, file, cb) {
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
       return cb(

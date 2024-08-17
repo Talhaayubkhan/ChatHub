@@ -7,7 +7,7 @@ const createJWT = ({ payload }) => {
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRY,
   });
-  console.log("Generated Token:", token); // Add this log
+  // console.log("Generated Token:", token); // Add this log
 
   if (!token) {
     throw new Unauthenticated("Failed to Create JWT Token");
@@ -21,7 +21,7 @@ const verifyJWT = (token) => {
   try {
     // Verify and decode the JWT token using the secret key
     const decodeToken = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Verified Token Payload:", decodeToken); // Add this log
+    // console.log("Verified Token Payload:", decodeToken); // Add this log
 
     // If decoding fails (decodeToken is falsy), throw an UnauthenticatedError indicating verification failure
     if (!decodeToken) {
@@ -39,12 +39,10 @@ const verifyJWT = (token) => {
 
 // Function to set JWT token in a cookie and send it back to the client as part of the response
 const cookieResponse = ({ res, user, expireToken = false }) => {
-  let isProduction = process.env.NODE_ENV === "production";
-
   if (!expireToken) {
     // Generate JWT token for the user payload
     const token = createJWT({ payload: user });
-    console.log("Stored Token in Cookie:", token);
+    // console.log("Stored Token in Cookie:", token);
 
     if (!token) {
       throw new Unauthenticated(
@@ -55,17 +53,17 @@ const cookieResponse = ({ res, user, expireToken = false }) => {
     // Set the JWT token in a cookie named "token" in the response
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction,
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      sameSite: isProduction ? "Lax" : "None", //
+      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
+      secure: true,
       signed: true,
     });
   } else {
     res.cookie("token", "", {
       httpOnly: true,
-      secure: isProduction,
       expires: new Date(0),
-      sameSite: isProduction ? "Lax" : "None", // Set SameSite attribute to "Lax" for CSRF protection
+      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
+      secure: true,
       signed: true,
     });
   }
