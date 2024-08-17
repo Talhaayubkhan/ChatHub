@@ -56,9 +56,7 @@ const Login = () => {
     };
 
     try {
-      // console.log(server);
-
-      const response = await axios.post(
+      const { response } = await axios.post(
         `${server}/api/v1/auth/login`,
         {
           usernameOrEmail: usernameOrEmail.value,
@@ -66,17 +64,67 @@ const Login = () => {
         },
         config
       );
-      if (response) {
+      if (response.success) {
         dispatch(userExists(true));
-        // console.log("Login Successful");
         toast.success("Login Successful");
       } else {
-        // console.log("Login Failed");
-        toast.error("Login Failed", response);
+        toast.error(
+          "Login failed. Please check your credentials and try again."
+        );
       }
     } catch (error) {
-      toast.error("Failed to Login");
-      // console.error("Login Failed");
+      // Define user-friendly messages based on the error status code or message
+      const errorMessage =
+        error?.response?.status === 401
+          ? "Incorrect username or password. Please try again."
+          : error?.response?.status === 500
+          ? "Server error. Please try again later."
+          : "Something went wrong. Please try again.";
+
+      toast.error(errorMessage);
+    }
+  };
+
+  const regitserUser = async (e) => {
+    e.preventDefault();
+    console.log("I am Register Now...!");
+
+    const formData = new FormData();
+    formData.append("name", name.value);
+    formData.append("username", username.value);
+    formData.append("email", email.value);
+    formData.append("password", password.value);
+    formData.append("bio", bio.value);
+    formData.append("avatar", avatar.file);
+
+    if (!formData) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    const config = {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    };
+    try {
+      const { response } = await axios.post(
+        `${server}/api/v1/auth/register`,
+        formData,
+        config
+      );
+
+      dispatch(userExists(true));
+      toast.success("Registration Successful", response.message);
+    } catch (error) {
+      const errorMessage =
+        error?.response?.status === 400
+          ? "Invalid credentials. Please check your details and try again."
+          : error?.response?.status === 500
+          ? "Server error. Please try again later."
+          : "Something went wrong. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -84,7 +132,7 @@ const Login = () => {
     <div
       style={{
         backgroundImage:
-          "linear-gradient(rgba(200, 200, 200,0.5),rgba(120, 110, 220,0.5)",
+          "linear-gradient(rgba(180, 100, 220,0.5),rgba(110, 90, 190,0.5)",
       }}
     >
       <Container
@@ -209,6 +257,7 @@ const Login = () => {
                   marginTop: "10px",
                   marginBottom: "10px",
                 }}
+                onSubmit={regitserUser}
               >
                 <Stack position={"relative"} width={"10rem"} margin={"auto"}>
                   <Avatar

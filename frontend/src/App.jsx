@@ -42,6 +42,23 @@ const App = () => {
       });
   }, [dispatch]);
 
+  // useEffect(() => {
+  //   axios
+  //     .get(`${server}/api/v1/auth/user`, { withCredentials: true })
+  //     .then((res) => {
+  //       console.log(res);
+  //       // Assuming you have a userExists action to update the user state
+  //       if (res.data.success) {
+  //         dispatch(userExists(res.data.user));
+  //       } else {
+  //         dispatch(userNotExists());
+  //       }
+  //     })
+  //     .catch(() => {
+  //       dispatch(userNotExists());
+  //     });
+  // }, [dispatch]);
+
   return loader ? (
     <LayoutLoaders />
   ) : (
