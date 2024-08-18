@@ -16,6 +16,7 @@ import { NEW_REQUEST } from "../constants/events.js";
 import { getOtherMembers } from "../lib/helper.js";
 
 const registerUser = async (req, res) => {
+  // console.log("User Register Successfully", req?.body);
   const { name, username, email, password, bio } = req.body;
 
   // Validate Email
@@ -84,12 +85,12 @@ const registerUser = async (req, res) => {
     user: tokenUser,
     avatar: avatar,
     success: true,
-    message: "User registered successfully",
+    message: "User registered successfully, Please Log In",
   });
 };
 
 const loginUser = async (req, res) => {
-  // console.log("Login request received:", req.body);
+  console.log("Login request received:", req.body);
 
   const { usernameOrEmail, password } = req.body;
   // Validate inputs

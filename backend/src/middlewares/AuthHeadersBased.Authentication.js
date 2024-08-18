@@ -41,14 +41,4 @@ const isAuthenticated = async (req, res, next) => {
   }
 };
 
-//  Middleware to restrict access based on user roles
-// const authPermisson = (...roles) => {
-//   return (req, res, next) => {
-//     if (!roles.includes(req.user?.role)) {
-//       throw new Unauthorized("You are not Access to this resource!");
-//     }
-//     next();
-//   };
-// };
-
 export { isAuthenticated };
