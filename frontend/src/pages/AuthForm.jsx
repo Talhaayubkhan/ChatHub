@@ -56,7 +56,7 @@ const Login = () => {
     };
 
     try {
-      const { response } = await axios.post(
+      const response = await axios.post(
         `${server}/api/v1/auth/login`,
         {
           usernameOrEmail: usernameOrEmail.value,
@@ -64,7 +64,7 @@ const Login = () => {
         },
         config
       );
-      if (response.success) {
+      if (response.data.success) {
         dispatch(userExists(true));
         toast.success("Login Successful");
       } else {
@@ -109,11 +109,12 @@ const Login = () => {
       },
     };
     try {
-      const { response } = await axios.post(
+      const response = await axios.post(
         `${server}/api/v1/auth/register`,
         formData,
         config
       );
+      console.log("Response: ", response);
 
       dispatch(userExists(true));
       toast.success("Registration Successful", response.message);
@@ -125,6 +126,7 @@ const Login = () => {
           ? "Server error. Please try again later."
           : "Something went wrong. Please try again.";
       toast.error(errorMessage);
+      // console.error("Error: " + error.message);
     }
   };
 
