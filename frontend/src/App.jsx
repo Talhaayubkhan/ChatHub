@@ -1,14 +1,17 @@
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 import axios from "axios";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { LayoutLoaders } from "./components/layout/Loaders";
 import server from "./constants/config.js";
-import { userNotExists } from "./redux-toolkit/reducers/reducerAuth.js";
+import {
+  userExists,
+  userNotExists,
+} from "./redux-toolkit/reducers/reducerAuth.js";
 
 // Lazy loading components
 const Home = lazy(() => import("./pages/Home"));
@@ -36,9 +39,19 @@ const App = () => {
 
     axios
       .get(`${server}/api/v1/auth/user`, { withCredentials: true })
-      .then((res) => console.log(res))
+      .then((res) => {
+        const userData = res.data.user;
+        // console.log(userData);
+
+        if (!userData) {
+          toast.error("User data is not available", userData);
+          return;
+        }
+        dispatch(userExists(userData));
+      })
       .catch(() => {
         dispatch(userNotExists());
+        // console.error("Error fetching user:", error.message);
       });
   }, [dispatch]);
 

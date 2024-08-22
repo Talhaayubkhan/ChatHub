@@ -1,4 +1,4 @@
-import React from "react";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import { CssBaseline } from "@mui/material";
@@ -21,10 +21,12 @@ import store from "./redux-toolkit/store";
 // );
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <Provider store={store}>
-    <HelmetProvider>
-      <CssBaseline />
-      <App />
-    </HelmetProvider>
-  </Provider>
+  <StrictMode>
+    <Provider store={store}>
+      <HelmetProvider>
+        <CssBaseline />
+        <App />
+      </HelmetProvider>
+    </Provider>
+  </StrictMode>
 );

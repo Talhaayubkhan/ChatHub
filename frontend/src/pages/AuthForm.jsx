@@ -29,7 +29,7 @@ const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
 
   const toggleButton = () => {
-    console.log("Clicking toggle button");
+    // console.log("Clicking toggle button");
     setIsLogin((prev) => !prev);
   };
 
@@ -48,6 +48,8 @@ const Login = () => {
     e.preventDefault();
     console.log("I am Login Now...!");
 
+    // Configuration for login requests
+    // Sends JSON data for username and password, includes cookies for session management
     const config = {
       withCredentials: true,
       headers: {
@@ -87,7 +89,7 @@ const Login = () => {
 
   const regitserUser = async (e) => {
     e.preventDefault();
-    console.log("I am Register Now...!");
+    // console.log("I am Register Now...!");
 
     const formData = new FormData();
     formData.append("name", name.value);
@@ -102,6 +104,8 @@ const Login = () => {
       return;
     }
 
+    // Configuration for registration requests
+    // Handles file uploads and form data, includes cookies for authentication
     const config = {
       withCredentials: true,
       headers: {
@@ -114,10 +118,10 @@ const Login = () => {
         formData,
         config
       );
-      console.log("Response: ", response);
+      // console.log("Response: ", response);
 
       dispatch(userExists(true));
-      toast.success("Registration Successful", response.message);
+      toast.success("User Register Successfully", response?.message);
     } catch (error) {
       const errorMessage =
         error?.response?.status === 400
