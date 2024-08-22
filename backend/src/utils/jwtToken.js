@@ -54,16 +54,16 @@ const cookieResponse = ({ res, user, expireToken = false }) => {
     res.cookie("token", token, {
       httpOnly: true,
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
-      secure: true,
+      sameSite: "lax", // Set SameSite attribute to "Lax" for CSRF protection
+      secure: false, // false for local development only
       signed: true,
     });
   } else {
     res.cookie("token", "", {
       httpOnly: true,
       expires: new Date(0),
-      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
-      secure: true,
+      sameSite: "lax", // Set SameSite attribute to "Lax" for CSRF protection
+      secure: false,
       signed: true,
     });
   }

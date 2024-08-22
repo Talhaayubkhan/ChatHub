@@ -85,7 +85,7 @@ const registerUser = async (req, res) => {
     user: tokenUser,
     avatar: avatar,
     success: true,
-    message: "User registered successfully, Please Log In",
+    message: "User Registered Successfully!",
   });
 };
 
@@ -128,7 +128,7 @@ const loginUser = async (req, res) => {
 };
 
 const logoutUser = async (req, res) => {
-  console.log("Logout request received:", req.body);
+  // console.log("Logout request received:", req.body);
 
   cookieResponse({ res, expireToken: true });
 
@@ -139,10 +139,10 @@ const logoutUser = async (req, res) => {
 };
 
 const getUserProfile = async (req, res) => {
-  console.log("Get user profile request received:", req.user);
+  // console.log("Get user profile request received:", req.user);
   const { userId } = req.user;
 
-  console.log("Querying user with ID:", userId);
+  // console.log("Querying user with ID:", userId);
 
   const getUser = await User.findById(userId);
   if (!getUser) {

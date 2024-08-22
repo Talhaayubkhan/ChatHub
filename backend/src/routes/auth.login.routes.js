@@ -36,8 +36,7 @@ router
 router
   .route("/login")
   .post(loginLimiter, loginValidator(), handleValidationErrors, loginUser);
-
-router.route("/logout").post(logoutUser); // Consider adding authentication if necessary
+router.route("/logout").post(logoutUser);
 
 // Apply isAuthenticated to routes that need authentication
 router.use(isAuthenticated);

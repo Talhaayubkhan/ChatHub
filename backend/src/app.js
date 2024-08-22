@@ -6,7 +6,6 @@ import express from "express";
 import "express-async-errors";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import session from "express-session";
 import { v2 as cloudinary } from "cloudinary";
 
 const app = express();
