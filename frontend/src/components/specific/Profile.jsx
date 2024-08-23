@@ -13,16 +13,17 @@ const Profile = () => {
     <Stack spacing={"2rem"} direction={"column"} alignItems={"center"}>
       <Avatar
         sx={{
-          width: "100px",
-          height: "100px",
+          width: "150px",
+          height: "150px",
           // bgcolor: "primary.main",
           // color: "white",
-          fontSize: "2rem",
+          fontSize: "1.5rem",
           fontWeight: "bold",
           objectFit: "contain",
           marginBottom: "1rem",
           "&:hover": {
             boxShadow: "0px 0px 10px 0px rgba(0, 0, 0, 0.5)",
+            border: "1px solid black",
           },
         }}
       />

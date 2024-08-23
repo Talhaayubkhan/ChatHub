@@ -1,28 +1,58 @@
 // import React from "react";
 import Header from "./Header";
 import Title from "../shared/Title";
-import { Grid } from "@mui/material";
+import { Drawer, Grid, Skeleton } from "@mui/material";
 import ChatList from "../specific/ChatList";
 import { sampleChats } from "../../constants/sampleData";
 import { useParams } from "react-router-dom";
 import Profile from "../specific/Profile";
+import { useMyChatsQuery } from "../../redux-toolkit/api/apiSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsMobileMenu } from "../../redux-toolkit/reducers/misc";
+import ErrorHook from "../../hooks/ErrorHook";
 
 // This High Order Function
 // Higher-order components (HOCs) in React are used to enhance components with reusable logic, providing a way to share functionality across multiple components without repeating code
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
     const params = useParams();
+    const dispatch = useDispatch();
     const chatId = params.chatId;
+
+    const { isMobileMenu } = useSelector((state) => state.misc);
+    console.log(isMobileMenu);
+
+    const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
+
+    ErrorHook([{ isError, error }]);
 
     const handleDeleteChat = (event, _id, groupChat) => {
       event.preventDefault();
       console.log("deleteChat", _id, groupChat);
     };
 
+    const handleMobileClose = () => {
+      dispatch(setIsMobileMenu(false));
+    };
+
     return (
       <>
         <Title />
+
         <Header />
+
+        {isLoading ? (
+          <Skeleton />
+        ) : (
+          <Drawer open={isMobileMenu} onClose={handleMobileClose}>
+            <ChatList
+              width="75vw"
+              chats={data?.chats}
+              chatId={chatId}
+              handleDeleteChat={handleDeleteChat}
+            />
+          </Drawer>
+        )}
 
         <Grid container height={"calc(100vh - 4rem)"}>
           <Grid
@@ -34,11 +64,15 @@ const AppLayout = () => (WrappedComponent) => {
             }}
             height={"100%"}
           >
-            <ChatList
-              chats={sampleChats}
-              chatId={chatId}
-              handleDeleteChat={handleDeleteChat}
-            />
+            {isLoading ? (
+              <Skeleton />
+            ) : (
+              <ChatList
+                chats={data?.chats}
+                chatId={chatId}
+                handleDeleteChat={handleDeleteChat}
+              />
+            )}
           </Grid>
           <Grid item xs={12} sm={8} md={5} lg={6} height={"100vh"}>
             <WrappedComponent {...props} />
