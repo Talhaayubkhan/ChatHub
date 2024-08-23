@@ -21,7 +21,7 @@ const createUser = async (numUsers) => {
     }
 
     await Promise.all(userPromise);
-    // process.exit(1);
+    process.exit(1);
   } catch (error) {
     console.error("Error creating users:", error);
     process.exit(1);

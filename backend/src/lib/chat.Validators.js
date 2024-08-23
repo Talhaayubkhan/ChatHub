@@ -1,13 +1,35 @@
 import { body, check, param, validationResult } from "express-validator";
 import { BadRequest } from "../errors/index.js";
+import mongoose from "mongoose";
 
 const newGroupChatValidator = () => [
-  body("name").notEmpty().withMessage("Please enter your Name").trim(),
-  body("members")
+  body("name")
     .notEmpty()
-    .withMessage("Please enter Members")
-    .isArray({ min: 2, max: 40 })
-    .withMessage("Members must be between 2-40"),
+    .withMessage("Chat name is required.")
+    .trim()
+    .isLength({ min: 3 })
+    .withMessage("Chat name must be at least 3 characters long.")
+    .isLength({ max: 50 })
+    .withMessage("Chat name must not exceed 50 characters."),
+
+  body("members")
+    .isArray()
+    .withMessage("Members should be an array.")
+    .notEmpty()
+    .withMessage("At least one member is required.")
+    .isLength({ min: 2 })
+    .withMessage("At least two members are required.")
+    .isLength({ max: 40 })
+    .withMessage("No more than 40 members allowed.")
+    .custom((members) => {
+      // Check if all members are valid ObjectIds (if applicable)
+      for (const member of members) {
+        if (!mongoose.Types.ObjectId.isValid(member)) {
+          throw new Error("Invalid member ID.");
+        }
+      }
+      return true;
+    }),
 ];
 
 const addGroupMemberValidator = () => [

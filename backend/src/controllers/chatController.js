@@ -1,6 +1,11 @@
 import crypto from "crypto";
 import { Chat, Message, User } from "../models/index.js";
-import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
+import {
+  BadRequest,
+  CustomApiError,
+  NotFound,
+  Unauthorized,
+} from "../errors/index.js";
 import { emitEvent } from "../utils/eventEmit.js";
 import {
   ALERT,
@@ -13,33 +18,53 @@ import { getOtherMembers } from "../lib/helper.js";
 import { deleteFilesFromCloudinary } from "../utils/cloudinary.js";
 
 const newGroupChat = async (req, res) => {
-  const { name, members } = req.body;
+  // console.log("New group chat", req.body);
+  // console.log("User ID:", req.user);
+  // members are userId when we enter in postman!
+  const { name, members = [] } = req.body;
+  // console.log("Members:", members);
+  const allMembers = [...members, req.user.userId].filter(
+    (member) => member !== null
+  );
+  // console.log("All Members:", allMembers);
 
-  const allMembers = [...members, req.user];
+  try {
+    const creatChatMembers = await Chat.create({
+      name,
+      groupChat: true,
+      members: allMembers,
+      creator: req.user.userId, // Ensure this is set correctly
+    });
 
-  const creatChatMembers = await Chat.create({
-    name,
-    groupChat: true,
-    members: allMembers,
-    creator: req.user,
-  });
+    emitEvent(req, ALERT, allMembers, `Wlcome to ${name} group`);
+    emitEvent(
+      req,
+      REFETCH_ALERT,
+      `Welcome all ${members} to the ${name} group`
+    );
 
-  emitEvent(req, ALERT, allMembers, `Wlcome to ${name} group`);
-  emitEvent(req, REFETCH_ALERT, members);
-
-  return res.status(StatusCodes.CREATED).json({
-    message: "Group chat created successfully",
-    // creatChatMembers,
-    success: true,
-  });
+    return res.status(StatusCodes.CREATED).json({
+      success: true,
+      createdChat: creatChatMembers,
+      message: "Group chat created successfully",
+    });
+  } catch (error) {
+    console.error("Error creating group chat:", error);
+    throw new CustomApiError("Error creating group chat.");
+  }
 };
 
 const getMyChats = async (req, res) => {
+  // console.log("My Chats Received!", req.body);
+  // console.log("User ID:", req.user.userId);
+
   // Find chats where the current user is a member, and populate 'avatar' and 'name' fields of members
-  const chats = await Chat.find({ members: req.user }).populate(
+  const chats = await Chat.find({ members: req.user.userId }).populate(
     "members",
     "avatar name"
   );
+
+  // console.log("Chats are Found!", chats);
 
   if (!chats || chats.length === 0) {
     throw new BadRequest("No Chats found..");
@@ -70,9 +95,9 @@ const getMyChats = async (req, res) => {
   });
 
   return res.status(StatusCodes.OK).json({
-    message: "Chats fetched successfully",
     success: true,
     chats: transformChats,
+    message: "Chats fetched successfully",
   });
 };
 

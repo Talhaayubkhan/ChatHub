@@ -4,6 +4,7 @@ import { app } from "./src/app.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import { handleNewMessage, handleDisconnect } from "./socketEvents.js";
+import { createUser } from "./src/seeders/userSeeders.js";
 
 const PORT = process.env.PORT || 8000;
 
@@ -34,3 +35,5 @@ connectDB()
   .catch((err) => {
     console.log("Error While Connecting to Database", err.message);
   });
+
+// createUser(10);
