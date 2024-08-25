@@ -90,7 +90,7 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  console.log("Login request received:", req.body);
+  // console.log("Login request received:", req.body);
 
   const { usernameOrEmail, password } = req.body;
   // Validate inputs
@@ -204,20 +204,22 @@ const searchUser = async (req, res) => {
 };
 
 const sendFriendRequest = async (req, res) => {
+  // console.log("Send friend request request received:", req.body);
   const { userId } = req.body;
 
   const alreadySendRequest = await Request.findOne({
+    // becuse we use userId in auth middleware, we must use also here, if not sender not send with request!
     $or: [
-      { sender: req.user, reciver: userId },
-      { sender: userId, reciver: req.user },
+      { sender: req.user.userId, receiver: userId },
+      { sender: userId, receiver: req.user.userId },
     ],
   });
   if (alreadySendRequest) {
-    throw new BadRequest("You have already sent a friend request");
+    throw new BadRequest("You have already sent a friend request to this user");
   }
 
-  await Request.create({
-    sender: req.user,
+  const newRequest = await Request.create({
+    sender: req.user.userId,
     receiver: userId,
   });
 
@@ -225,6 +227,7 @@ const sendFriendRequest = async (req, res) => {
 
   return res.status(StatusCodes.OK).json({
     sucess: true,
+    request: newRequest,
     message: "Friend request sent successfully",
   });
 };
