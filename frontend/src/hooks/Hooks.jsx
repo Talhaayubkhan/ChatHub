@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 
-const ErrorHook = (errors = []) => {
+const Hooks = (errors = []) => {
   useEffect(() => {
     errors.forEach(({ isError, error, fallback }) => {
       if (isError) {
@@ -11,4 +11,4 @@ const ErrorHook = (errors = []) => {
     });
   }, [errors]);
 };
-export default ErrorHook;
+export default Hooks;

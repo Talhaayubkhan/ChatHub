@@ -9,7 +9,7 @@ import Profile from "../specific/Profile";
 import { useMyChatsQuery } from "../../redux-toolkit/api/apiSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsMobileMenu } from "../../redux-toolkit/reducers/misc";
-import ErrorHook from "../../hooks/ErrorHook";
+import Hooks from "../../hooks/Hooks";
 
 // This High Order Function
 // Higher-order components (HOCs) in React are used to enhance components with reusable logic, providing a way to share functionality across multiple components without repeating code
@@ -24,7 +24,7 @@ const AppLayout = () => (WrappedComponent) => {
 
     const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
 
-    ErrorHook([{ isError, error }]);
+    Hooks([{ isError, error }]);
 
     const handleDeleteChat = (event, _id, groupChat) => {
       event.preventDefault();

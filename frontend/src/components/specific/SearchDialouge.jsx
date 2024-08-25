@@ -130,26 +130,69 @@ import {
 } from "@mui/icons-material";
 import { useInputValidation } from "6pp";
 import UserItem from "../shared/UserItem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sampleUsers } from "../../constants/sampleData";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsSearch } from "../../redux-toolkit/reducers/misc";
+import {
+  useLazySearchUserQuery,
+  useSendFriendRequestMutation,
+} from "../../redux-toolkit/api/apiSlice";
+import { toast } from "react-hot-toast";
 
 const SearchDialogue = () => {
   const { isSearch } = useSelector((state) => state.misc);
+
+  const [searchUser] = useLazySearchUserQuery("");
+  const [sendFriendRequest] = useSendFriendRequestMutation();
+
   const dispatch = useDispatch();
   const search = useInputValidation("");
   const [users, setUsers] = useState(sampleUsers);
 
   let isLoadingSendFriendRequest = false;
 
-  const addFriendHandler = (id) => {
-    console.log(id);
+  const addFriendHandler = async (id) => {
+    try {
+      const res = await sendFriendRequest({ userId: id });
+      if (res.data) {
+        toast.success("Friend request sent successfully");
+        // console.log(res.data.request);
+      } else {
+        // toast.error("Failed to send friend request");
+        toast.error(res?.error?.data?.message);
+      }
+    } catch (error) {
+      // console.error("Request Error:", error);
+      toast.error("Something Went Wrong...");
+    }
   };
 
   const handleSearchClose = () => {
     dispatch(setIsSearch(false));
   };
+
+  useEffect(() => {
+    // console.log("Search", search.value);
+
+    const searchTimeOut = setTimeout(() => {
+      searchUser(search.value)
+        .then(({ data }) => {
+          if (data && data.findUsersAvatar) {
+            setUsers(data.findUsersAvatar);
+          } else {
+            setUsers([]);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }, 1000);
+
+    return () => {
+      clearTimeout(searchTimeOut);
+    };
+  }, [search.value]);
 
   return (
     <Dialog
@@ -216,7 +259,7 @@ const SearchDialogue = () => {
         />
 
         <List sx={{ maxHeight: "300px", overflowY: "auto" }}>
-          {users &&
+          {users.length > 0 &&
             users.map((user) => (
               <UserItem
                 user={user}
