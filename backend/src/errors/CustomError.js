@@ -5,7 +5,7 @@ class CustomApiError extends Error {
     super(message);
     this.name = this.constructor.name;
     this.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
-    this.stack = new Error().stack;
+    this.message = message || "An unexpected error occurred";
   }
 }
 

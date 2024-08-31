@@ -21,7 +21,7 @@ const isAuthenticated = async (req, res, next) => {
     const checkTokenPayload = verifyJWT(token);
     // console.log("Token Payload:", checkTokenPayload);
 
-    if (!checkTokenPayload || !checkTokenPayload.userId) {
+    if (!checkTokenPayload?.userId) {
       // console.log("Invalid user ID in token payload");
       throw new Unauthenticated("Authentication failed: Invalid token payload");
     }

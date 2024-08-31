@@ -240,11 +240,16 @@ const acceptFriendRequest = async (req, res) => {
     .populate("sender", "name")
     .populate("receiver", "name");
 
+  console.log("Request Object:", request);
+
   if (!request) {
     throw new NotFound("Request not found");
   }
 
-  if (request.receiver._id.toString() !== req.user.toString()) {
+  console.log("Request Receiver ID:", request.receiver._id.toString());
+  console.log("Authenticated User ID:", req.user.userId.toString());
+
+  if (request.receiver._id.toString() !== req.user.userId.toString()) {
     throw new Unauthenticated("You are not authorized to accept this request");
   }
 
@@ -258,7 +263,7 @@ const acceptFriendRequest = async (req, res) => {
   }
 
   // If the accept flag is true, create an array of members for the new chat means for both sender and receiver
-  const members = [request.sender?._id, request.receiver?._id];
+  const members = [request.sender._id, request.receiver._id];
 
   // 1. Create a new chat with the sender and receiver as members
   // 2. Delete the friend request
@@ -272,17 +277,26 @@ const acceptFriendRequest = async (req, res) => {
 
   return res.status(StatusCodes.OK).json({
     success: true,
-    message: "Friend request accepted and chat created successfully",
+    senderId: request.sender.userId,
+    message: "Friend request Accepted",
   });
 };
 
 const getAllNotifications = async (req, res) => {
-  const requests = await Request.find({ receiver: req.user }).populate(
+  // Find all requests where the receiver is the authenticated user (by userId)
+  // console.log("Getting all notifications", req.user);
+
+  const userId = req.user.userId;
+  // console.log("Fetching notifications for userId:", userId);
+  const requests = await Request.find({ receiver: userId }).populate(
     "sender",
     "name avatar"
   );
 
-  if (!requests) {
+  // console.log("Found all requests", requests);
+
+  if (!requests || requests.length === 0) {
+    // Use 404 for "not found" scenarios
     throw new NotFound("No requests found");
   }
 
@@ -290,8 +304,8 @@ const getAllNotifications = async (req, res) => {
     _id,
     sender: {
       _id: sender._id,
-      name: sender.name,
-      avatar: sender.avatar?.url || "No Avatar URL Found",
+      name: sender?.name,
+      avatar: sender?.avatar?.url || "No Avatar URL Found",
     },
   }));
 
