@@ -46,7 +46,7 @@ const Login = () => {
 
   const loginUser = async (e) => {
     e.preventDefault();
-    console.log("I am Login Now...!");
+    // console.log("I am Login Now...!");
 
     // Configuration for login requests
     // Sends JSON data for username and password, includes cookies for session management
@@ -71,13 +71,14 @@ const Login = () => {
         toast.success("Login Successful");
       } else {
         toast.error(
-          "Login failed. Please check your credentials and try again."
+          response?.data?.message ||
+            "Login failed. Please check your credentials and try again."
         );
       }
     } catch (error) {
       // Define user-friendly messages based on the error status code or message
       const errorMessage =
-        error?.response?.status === 401
+        error?.response?.data?.message || error?.response?.status === 401
           ? "Incorrect username or password. Please try again."
           : error?.response?.status === 500
           ? "Server error. Please try again later."
@@ -120,11 +121,20 @@ const Login = () => {
       );
       // console.log("Response: ", response);
 
-      dispatch(userExists(true));
-      toast.success("User Register Successfully", response?.message);
+      if (response?.data?.success) {
+        dispatch(userExists(true));
+        toast.success(
+          response?.data?.message || "User Registered Successfully"
+        );
+      } else {
+        toast.error(
+          response?.data?.message ||
+            "Registration failed. Please check your details and try again."
+        );
+      }
     } catch (error) {
       const errorMessage =
-        error?.response?.status === 400
+        error?.response?.data?.message || error?.response?.status === 400
           ? "Invalid credentials. Please check your details and try again."
           : error?.response?.status === 500
           ? "Server error. Please try again later."

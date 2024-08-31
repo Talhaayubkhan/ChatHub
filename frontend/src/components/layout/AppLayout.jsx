@@ -9,7 +9,7 @@ import Profile from "../specific/Profile";
 import { useMyChatsQuery } from "../../redux-toolkit/api/apiSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsMobileMenu } from "../../redux-toolkit/reducers/misc";
-import Hooks from "../../hooks/Hooks";
+import { useErrors } from "../../hooks/hooks";
 
 // This High Order Function
 // Higher-order components (HOCs) in React are used to enhance components with reusable logic, providing a way to share functionality across multiple components without repeating code
@@ -20,11 +20,11 @@ const AppLayout = () => (WrappedComponent) => {
     const chatId = params.chatId;
 
     const { isMobileMenu } = useSelector((state) => state.misc);
-    console.log(isMobileMenu);
+    const { user } = useSelector((state) => state.auth);
 
     const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
 
-    Hooks([{ isError, error }]);
+    useErrors([{ isError, error }]);
 
     const handleDeleteChat = (event, _id, groupChat) => {
       event.preventDefault();
@@ -74,7 +74,7 @@ const AppLayout = () => (WrappedComponent) => {
               />
             )}
           </Grid>
-          <Grid item xs={12} sm={8} md={5} lg={6} height={"100vh"}>
+          <Grid item xs={12} sm={8} md={5} lg={6} height={"100%"}>
             <WrappedComponent {...props} />
           </Grid>
           <Grid
@@ -86,13 +86,12 @@ const AppLayout = () => (WrappedComponent) => {
               padding: "2rem",
               bgColor: "rgba(0,0,0,0.86)",
             }}
-            height={"100vh"}
+            height={"100%"}
             bgcolor="primary.main"
           >
-            <Profile />
+            <Profile user={user} />
           </Grid>
         </Grid>
-        <div>Footer</div>
       </>
     );
   };

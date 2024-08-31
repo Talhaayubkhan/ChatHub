@@ -26,6 +26,7 @@ import toast from "react-hot-toast";
 import { userNotExists } from "../../redux-toolkit/reducers/reducerAuth";
 import {
   setIsMobileMenu,
+  setIsNotifications,
   setIsSearch,
 } from "../../redux-toolkit/reducers/misc";
 
@@ -38,10 +39,9 @@ const Header = () => {
   const navigate = useNavigate(); // Initialize navigation
   const dispatch = useDispatch();
 
-  const { isSearch } = useSelector((state) => state.misc);
+  const { isSearch, isNotifications } = useSelector((state) => state.misc);
 
   const [isNewGroup, setIsNewGroup] = useState(false);
-  const [isNotification, setIsNotification] = useState(false);
 
   const handleOnMobile = () => {
     console.log("mobile");
@@ -56,8 +56,7 @@ const Header = () => {
     setIsNewGroup((prev) => !prev);
   };
   const seeNotification = () => {
-    console.log("notification");
-    setIsNotification((prev) => !prev);
+    dispatch(setIsNotifications(true));
   };
 
   const navigateToGroup = () => {
@@ -65,7 +64,7 @@ const Header = () => {
   };
 
   const logoutUser = async () => {
-    console.log("log out");
+    // console.log("log out");
 
     try {
       console.log("Sending logout request...");
@@ -166,7 +165,7 @@ const Header = () => {
           <SearchDialouge />
         </Suspense>
       )}
-      {isNotification && (
+      {isNotifications && (
         <Suspense fallback={<Backdrop open />}>
           <NotificationsDialouge />
         </Suspense>

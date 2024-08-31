@@ -3,7 +3,10 @@ import server from "../../constants/config";
 
 export const apiSlice = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({ baseUrl: `${server}/api/v1/` }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${server}/api/v1/`,
+    credentials: "include",
+  }),
   tagTypes: ["Chat", "User"],
   endpoints: (builder) => ({
     myChats: builder.query({
@@ -29,6 +32,23 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+
+    getNotifications: builder.query({
+      query: () => ({
+        url: "auth/notifications",
+        credentials: "include",
+      }),
+      keepUnusedDataFor: 0,
+    }),
+    acceptFriendRequest: builder.mutation({
+      query: (data) => ({
+        url: "auth/accept-request",
+        method: "POST",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["Chat"],
+    }),
   }),
 });
 
@@ -39,4 +59,6 @@ export const {
   useMyChatsQuery,
   useLazySearchUserQuery,
   useSendFriendRequestMutation,
+  useGetNotificationsQuery,
+  useAcceptFriendRequestMutation,
 } = apiSlice;
