@@ -119,7 +119,7 @@ const Notifications = () => {
   const dispatch = useDispatch();
   const { isLoading, data, error, isError } = useGetNotificationsQuery();
 
-  const [acceptFriendRequest] = useAcceptFriendRequestMutation();
+  const [acceptRequest] = useAcceptFriendRequestMutation();
 
   const friendReqNotification = async ({ _id, accept }) => {
     // console.log("friendReqNotification");
@@ -127,17 +127,32 @@ const Notifications = () => {
     dispatch(setIsNotifications(false));
 
     try {
-      const response = await acceptFriendRequest({ _id, accept });
+      const response = await acceptRequest({
+        requestId: _id,
+        accept,
+      });
 
-      if (response.data?.success) {
-        console.log("We use Socket Here");
-        toast.success(response?.data?.message);
+      if (response?.data?.success) {
+        // Display a success message using toast
+        toast.success(
+          accept
+            ? "Friend request accepted! You are now connected."
+            : "Friend request declined."
+        );
+        // Optionally, you can emit a socket event here if needed
+        // socket.emit('friendRequestResponse', { requestId: _id, accept });
       } else {
-        toast.error(response?.data?.error?.message || "Something went wrong");
+        // Display a specific error message from the server or a default one
+        toast.error(
+          response?.data?.error?.message ||
+            "Unable to process your request. Please try again."
+        );
       }
     } catch (error) {
-      toast.error("Something went wrong");
-      console.error(error?.message);
+      // Display a generic error message for unexpected issues
+      toast.error(
+        "Oops! Something went wrong. Please check your connection and try again."
+      );
     }
   };
 
@@ -183,7 +198,7 @@ const Notifications = () => {
             {data?.allRequests?.length > 0 ? (
               data?.allRequests?.map((notification) => (
                 <NotificationItem
-                  sender={notification.sender}
+                  sender={notification?.sender}
                   _id={notification._id}
                   key={notification._id}
                   handler={friendReqNotification}
@@ -193,7 +208,7 @@ const Notifications = () => {
               <Typography
                 fontWeight={"800"}
                 textAlign={"center"}
-                color={"textSecondary"}
+                color={"textPrimary"}
               >
                 No notifications yet
               </Typography>
@@ -235,8 +250,8 @@ const NotificationItem = memo(({ sender, _id, handler }) => {
           <Typography
             variant="body1"
             sx={{
-              fontWeight: "medium",
-              color: "text.primary",
+              fontWeight: "600",
+              color: "text.secondary",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",

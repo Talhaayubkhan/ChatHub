@@ -5,7 +5,6 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: `${server}/api/v1/`,
-    credentials: "include",
   }),
   tagTypes: ["Chat", "User"],
   endpoints: (builder) => ({
