@@ -233,6 +233,7 @@ const sendFriendRequest = async (req, res) => {
 };
 
 const acceptFriendRequest = async (req, res) => {
+  console.log("AcceptFriendRequest", req.body);
   const { requestId, accept } = req.body;
 
   // Find the friend request by ID and populate sender and receiver details
@@ -246,8 +247,8 @@ const acceptFriendRequest = async (req, res) => {
     throw new NotFound("Request not found");
   }
 
-  console.log("Request Receiver ID:", request.receiver._id.toString());
-  console.log("Authenticated User ID:", req.user.userId.toString());
+  // console.log("Request Receiver ID:", request.receiver._id.toString());
+  // console.log("Authenticated User ID:", req.user.userId.toString());
 
   if (request.receiver._id.toString() !== req.user.userId.toString()) {
     throw new Unauthenticated("You are not authorized to accept this request");
@@ -277,8 +278,8 @@ const acceptFriendRequest = async (req, res) => {
 
   return res.status(StatusCodes.OK).json({
     success: true,
-    senderId: request.sender.userId,
-    message: "Friend request Accepted",
+    senderId: request.sender._id,
+    message: "Friend request accepted. You're now friends!",
   });
 };
 
@@ -288,7 +289,7 @@ const getAllNotifications = async (req, res) => {
 
   const userId = req.user.userId;
   // console.log("Fetching notifications for userId:", userId);
-  const requests = await Request.find({ receiver: userId }).populate(
+  const requests = await Request.find({ sender: userId }).populate(
     "sender",
     "name avatar"
   );
@@ -304,7 +305,7 @@ const getAllNotifications = async (req, res) => {
     _id,
     sender: {
       _id: sender._id,
-      name: sender?.name,
+      name: sender.name,
       avatar: sender?.avatar?.url || "No Avatar URL Found",
     },
   }));
