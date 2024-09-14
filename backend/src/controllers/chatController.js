@@ -245,7 +245,7 @@ const removeGroupMembers = async (req, res) => {
 };
 
 const leaveGroup = async (req, res) => {
-  const chatId = req.params.chatid;
+  const chatId = req.params.chatId;
 
   const chat = await Chat.findById(chatId);
 
@@ -357,37 +357,51 @@ const sendMessageFileAttachment = async (req, res) => {
 };
 
 const chatDetails = async (req, res) => {
+  const { chatId } = req.params;
+  // console.log("Chat ID:",chatId);
+
+  if (!chatId) {
+    throw new BadRequest("Chat ID is required");
+  }
+
   // Check if the client requested to populate member details
-  if (req.query.populate === "true") {
-    const chat = await Chat.findById(req.params.chatId)
-      .populate("members", "name avatar")
-      .lean(); // Use lean() for better performance by returning plain JavaScript objects
+  try {
+    if (req.query.populate === "true") {
+      const chat = await Chat.findById(chatId)
+        .populate("members", "name avatar")
+        .lean(); // Use lean() for better performance by returning plain JavaScript objects
 
-    chat.members = chat.members.map((_id, name, avatar) => {
-      return {
-        _id,
-        name,
-        avatar: avatar?.url || "Not Available",
-      };
-    });
+      if (!chat) {
+        throw new NotFound("Chat are not Found!");
+      }
 
-    return res.status(StatusCodes.OK).json({
-      message: "Chat Details",
-      success: true,
-      chat,
-    });
-  } else {
-    // Fetch chat by ID without populating the members field
-    const chat = await Chat.findById(req.params.chatId);
+      chat.members = chat.members.map((member) => ({
+        _id: member._id,
+        name: member.name || "Not Available",
+        avatar: member.avatar?.url || "Not Available",
+      }));
 
-    if (!chat) {
-      throw new NotFound("Chats are not Found!");
+      return res.status(StatusCodes.OK).json({
+        message: "Chat Details Fetch Successfully!",
+        success: true,
+        chat,
+      });
+    } else {
+      // Fetch chat by ID without populating the members field
+      const chat = await Chat.findById(chatId);
+
+      if (!chat) {
+        throw new NotFound("Chats are not Found!");
+      }
+      return res.status(StatusCodes.OK).json({
+        message: "Chat Details Fetch Successfully!",
+        success: true,
+        allChats: chat,
+      });
     }
-    return res.status(StatusCodes.OK).json({
-      message: "Chat Details",
-      success: true,
-      allChats: chat,
-    });
+  } catch (error) {
+    console.error("Error fetching chat details:", error);
+    throw new CustomApiError("Internal Server Error");
   }
 };
 

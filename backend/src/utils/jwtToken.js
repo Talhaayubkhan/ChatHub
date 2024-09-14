@@ -70,7 +70,6 @@ const cookieResponse = ({ res, user, expireToken = false }) => {
 };
 
 // for admin only
-
 const setAdminTokenCookie = ({ res, user: adminUser, expireToken = false }) => {
   if (!expireToken) {
     const adminToken = createJWT({ payload: adminUser });

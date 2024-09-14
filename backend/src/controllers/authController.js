@@ -158,18 +158,17 @@ const getUserProfile = async (req, res) => {
 
 const searchUser = async (req, res) => {
   const { name = "" } = req.query;
-
+  // console.log("Search Query:", name);
   const allChats = await Chat.find({});
+  let allChatMembers = [];
 
-  if (!allChats || allChats.length === 0) {
-    throw new BadRequest("No chats found");
-  }
-
-  // extracting All Users From my chats
-  const allChatMembers = allChats.flatMap((chat) => chat.members);
-
-  if (!allChatMembers || allChatMembers.length === 0) {
-    throw new BadRequest("No Members found in chats");
+  if (allChats.length > 0) {
+    allChatMembers = allChats.flatMap((chat) => chat.members);
+  } else {
+    // console.log("No chats found, proceeding to search users...");
+    throw new BadRequest(
+      "No active chats found. Unable to retrieve chat members."
+    );
   }
 
   // Query to find all users who are not already members of any chat the current user is also not part
@@ -193,6 +192,8 @@ const searchUser = async (req, res) => {
     })
   );
 
+  // console.log(findUsersAvatar);
+
   if (!findUsersAvatar) {
     throw new BadRequest("No Avatar found in chats, please try again");
   }
@@ -204,11 +205,10 @@ const searchUser = async (req, res) => {
 };
 
 const sendFriendRequest = async (req, res) => {
-  // console.log("Send friend request request received:", req.body);
+  console.log("Send friend request:", req.body);
   const { userId } = req.body;
 
   const alreadySendRequest = await Request.findOne({
-    // becuse we use userId in auth middleware, we must use also here, if not sender not send with request!
     $or: [
       { sender: req.user.userId, receiver: userId },
       { sender: userId, receiver: req.user.userId },
@@ -223,6 +223,8 @@ const sendFriendRequest = async (req, res) => {
     receiver: userId,
   });
 
+  console.log("New Request received", newRequest);
+
   emitEvent(req, NEW_REQUEST, [userId]);
 
   return res.status(StatusCodes.OK).json({
@@ -233,7 +235,7 @@ const sendFriendRequest = async (req, res) => {
 };
 
 const acceptFriendRequest = async (req, res) => {
-  console.log("AcceptFriendRequest", req.body);
+  // console.log("AcceptFriendRequest", req.body);
   const { requestId, accept } = req.body;
 
   // Find the friend request by ID and populate sender and receiver details
@@ -241,18 +243,18 @@ const acceptFriendRequest = async (req, res) => {
     .populate("sender", "name")
     .populate("receiver", "name");
 
-  console.log("Request Object:", request);
+  // console.log("Request Object:", request);
 
   if (!request) {
     throw new NotFound("Request not found");
   }
 
-  // console.log("Request Receiver ID:", request.receiver._id.toString());
-  // console.log("Authenticated User ID:", req.user.userId.toString());
-
+  // Check if the request is sent by the authenticated user (by userId)
   if (request.receiver._id.toString() !== req.user.userId.toString()) {
     throw new Unauthenticated("You are not authorized to accept this request");
   }
+
+  // request.status = "accepted";
 
   // If the accept flag is false, delete the friend request
   if (!accept) {
@@ -265,7 +267,7 @@ const acceptFriendRequest = async (req, res) => {
 
   // If the accept flag is true, create an array of members for the new chat means for both sender and receiver
   const members = [request.sender._id, request.receiver._id];
-
+  // console.log("create members", members);
   // 1. Create a new chat with the sender and receiver as members
   // 2. Delete the friend request
   await Promise.all([
@@ -289,7 +291,7 @@ const getAllNotifications = async (req, res) => {
 
   const userId = req.user.userId;
   // console.log("Fetching notifications for userId:", userId);
-  const requests = await Request.find({ sender: userId }).populate(
+  const requests = await Request.find({ receiver: userId }).populate(
     "sender",
     "name avatar"
   );
@@ -298,7 +300,7 @@ const getAllNotifications = async (req, res) => {
 
   if (!requests || requests.length === 0) {
     // Use 404 for "not found" scenarios
-    throw new NotFound("No requests found");
+    throw new NotFound("No notifications found for this user");
   }
 
   const allRequests = requests.map(({ _id, sender }) => ({
@@ -306,9 +308,17 @@ const getAllNotifications = async (req, res) => {
     sender: {
       _id: sender._id,
       name: sender.name,
-      avatar: sender?.avatar?.url || "No Avatar URL Found",
+      avatar: sender.avatar?.url || "No Avatar URL Available",
     },
   }));
+
+  // console.log("All requests", allRequests);
+
+  if (!allRequests || allRequests.length === 0) {
+    throw new NotFound(
+      "Notifications found, but no valid sender data available."
+    );
+  }
 
   return res.status(StatusCodes.OK).json({
     sucess: true,

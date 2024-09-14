@@ -1,4 +1,5 @@
-import { Unauthenticated, Unauthorized } from "../errors/index.js";
+import { BadRequest, Unauthenticated, Unauthorized } from "../errors/index.js";
+import { User } from "../models/User.Models.js";
 import { verifyJWT } from "../utils/index.js";
 
 const isAuthenticated = async (req, res, next) => {
@@ -41,4 +42,62 @@ const isAuthenticated = async (req, res, next) => {
   }
 };
 
-export { isAuthenticated };
+const socketAuthentication = async (err, socket, next) => {
+  try {
+    if (err) {
+      return next(err);
+    }
+    const authSocket = socket.request.signedCookies?.token;
+    if (!authSocket) {
+      console.warn(
+        "Socket Authentication Failed: No token provided in signed cookies"
+      );
+      return next(
+        new Unauthenticated("Authentication failed: No token provided.")
+      );
+    }
+
+    let socketTokenDecoded;
+    try {
+      socketTokenDecoded = verifyJWT(authSocket, process.env.JWT_SECRET);
+    } catch (tokenError) {
+      console.error(
+        "Invalid Token during socket authentication:",
+        tokenError?.message
+      );
+      return next(
+        new Unauthorized("Authentication failed: Invalid or expired token.")
+      );
+    }
+
+    const { userId } = socketTokenDecoded;
+    if (!userId) {
+      console.error(
+        "Socket Authentication Failed: No userId in the token payload."
+      );
+      return next(
+        new Unauthenticated("Authentication failed: Invalid token payload.")
+      );
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      console.error(
+        "Socket Authentication Failed: User not found for the provided token."
+      );
+      return next(new Unauthorized("Authentication failed: User not found."));
+    }
+
+    socket.user = user;
+    // console.info(
+    //   `Socket Authentication Success: User ${user.name} authenticated successfully.`
+    // );
+
+    return next();
+  } catch (error) {
+    console.error("Error during socket authentication:", error.message);
+    return next(new BadRequest("Authentication failed. Please try again."));
+  }
+};
+
+export { isAuthenticated, socketAuthentication };

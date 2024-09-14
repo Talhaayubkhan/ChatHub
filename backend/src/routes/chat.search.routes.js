@@ -43,7 +43,7 @@ router
     removeGroupMembers
   );
 router
-  .route("/leave/:chatid")
+  .route("/leave/:chatId")
   .delete(chatIdGroupValidator(), handleGroupValidationErrors, leaveGroup);
 router
   .route("/message")
