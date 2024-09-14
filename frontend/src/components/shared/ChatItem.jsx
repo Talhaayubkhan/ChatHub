@@ -11,7 +11,7 @@ const ChatItem = ({
   isOnline,
   handleDeleteChat,
   sameSender,
-  groupChat,
+  groupChat = false,
   index = 0,
 }) => {
   return (
@@ -32,9 +32,9 @@ const ChatItem = ({
           style={{
             display: "flex",
             alignItems: "center",
-            padding: "15px 20px",
+            padding: 30,
             // borderBottom: "1px solid lightgray",
-            backgroundColor: sameSender ? "black" : "unset",
+            backgroundColor: sameSender ? "gray" : "unset",
             color: sameSender ? "black" : "unset",
             position: "relative",
             gap: "1rem",
@@ -43,7 +43,18 @@ const ChatItem = ({
           {/* Avatar Card */}
           <AvatarCard avatar={avatar} />
           <Stack>
-            <Typography>{name}</Typography>
+            <Typography
+              sx={{
+                fontWeight: "bold",
+                fontSize: "1.2rem",
+                maxWidth: "15rem",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                textTransform: "capitalize",
+              }}
+            >
+              {name}
+            </Typography>
             {newMessageAlert && (
               <Typography>{newMessageAlert.count} New Message</Typography>
             )}

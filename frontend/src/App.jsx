@@ -12,6 +12,7 @@ import {
   userExists,
   userNotExists,
 } from "./redux-toolkit/reducers/reducerAuth.js";
+import { SocketProvider } from "./socket.jsx";
 
 // Lazy loading components
 const Home = lazy(() => import("./pages/Home"));
@@ -62,9 +63,15 @@ const App = () => {
       <Suspense fallback={<LayoutLoaders />}>
         <Routes>
           {/* Protected Routes */}
-          <Route element={<ProtectedRoute user={user} />}>
+          <Route
+            element={
+              <SocketProvider>
+                <ProtectedRoute user={user} />{" "}
+              </SocketProvider>
+            }
+          >
             <Route path="/" element={<Home />} />
-            <Route path="/chat/:chatid" element={<Chat />} />
+            <Route path="/chat/:chatId" element={<Chat />} />
             <Route path="/groups" element={<Group />} />
           </Route>
           {/* Route for AuthForm (Login/Signup) */}

@@ -161,10 +161,10 @@ const SearchDialogue = () => {
 
   useEffect(() => {
     // console.log("Search", search.value);
-
     const searchTimeOut = setTimeout(() => {
       searchUser(search.value)
         .then(({ data }) => {
+          // console.log("API Response:", data);
           if (data && data.findUsersAvatar) {
             setUsers(data.findUsersAvatar);
           } else {
@@ -236,12 +236,14 @@ const SearchDialogue = () => {
               padding: "12px 14px",
             },
           }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: "#888" }} />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "#888" }} />
+                </InputAdornment>
+              ),
+            },
           }}
         />
 

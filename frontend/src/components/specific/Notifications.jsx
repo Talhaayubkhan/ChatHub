@@ -122,8 +122,6 @@ const Notifications = () => {
   const [acceptRequest] = useAcceptFriendRequestMutation();
 
   const friendReqNotification = async ({ _id, accept }) => {
-    // console.log("friendReqNotification");
-
     dispatch(setIsNotifications(false));
 
     try {
@@ -131,6 +129,7 @@ const Notifications = () => {
         requestId: _id,
         accept,
       });
+      // console.log(response);
 
       if (response?.data?.success) {
         // Display a success message using toast
@@ -158,9 +157,13 @@ const Notifications = () => {
 
   useErrors([{ error, isError }]);
 
+  // console.log("All data has been processed", data);
+
   const handleClose = () => {
     dispatch(setIsNotifications(false));
   };
+
+  console.log(data);
 
   return (
     <Dialog
@@ -175,10 +178,10 @@ const Notifications = () => {
         },
       }}
     >
-      <Stack p={2} spacing={2}>
+      <Stack p={1} spacing={1}>
         <Stack direction="row" alignItems="center" justifyContent="center">
           <NotificationsIcon
-            sx={{ fontSize: "2.5rem", color: "#1976d2", mr: 1 }} // Styling the icon
+            sx={{ fontSize: "3em", color: "#1976d2", mr: 1 }} // Styling the icon
           />
           <DialogTitle
             sx={{
@@ -210,7 +213,7 @@ const Notifications = () => {
                 textAlign={"center"}
                 color={"textPrimary"}
               >
-                No notifications yet
+                No notifications yet....
               </Typography>
             )}
           </>
@@ -226,7 +229,7 @@ const NotificationItem = memo(({ sender, _id, handler }) => {
   return (
     <ListItem
       sx={{
-        p: "10px",
+        p: 2,
         borderRadius: "20px",
         // border: "2px solid #183411",
         boxShadow: "0 5px 12px rgba(0, 0, 0, 0.08)",
@@ -241,9 +244,9 @@ const NotificationItem = memo(({ sender, _id, handler }) => {
         <Avatar
           src={avatar}
           sx={{
-            width: 55,
-            height: 55,
-            border: "2px solid #112199",
+            width: 60,
+            height: 60,
+            border: "2px solid #000012",
           }}
         />
         <Stack direction="row" spacing={1} alignItems="center" flexGrow={1}>
