@@ -15,6 +15,8 @@ const PORT = process.env.PORT || 8000;
 const server = createServer(app);
 const io = new Server(server, { cors: corsOptions });
 
+app.set("io", io);
+
 // Middleware for socket authentication
 io.use((socket, next) => {
   cookieParser(process.env.JWT_SECRET)(
@@ -28,6 +30,8 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
+  console.log(`Socket connected: ${socket.id}`);
+
   socket.on(NEW_MESSAGE, (data) => handleNewMessage(io, socket, data));
   socket.on("disconnect", () => handleDisconnect(socket));
 });
@@ -41,6 +45,3 @@ connectDB()
   .catch((err) => {
     console.log("Error While Connecting to Database", err.message);
   });
-
-// createUser(10);
-// createSingleChats(10);

@@ -5,10 +5,10 @@ import {
   newGroupChatValidator,
   addGroupMemberValidator,
   removeGroupValidator,
-  multipleFilesUploadGroupValidator,
   chatIdGroupValidator,
   handleGroupValidationErrors,
   renameGroupValidator,
+  validateMessageAttachments,
 } from "../lib/chat.Validators.js";
 import {
   newGroupChat,
@@ -24,7 +24,7 @@ import {
   getMessages,
 } from "../controllers/chatController.js";
 import { isAuthenticated } from "../middlewares/AuthHeadersBased.Authentication.js";
-import { multipleFilesUpload } from "../utils/multerConfig.js";
+import { multipleAttachmentsUpload } from "../utils/multerConfig.js";
 
 router.use(isAuthenticated);
 router
@@ -48,8 +48,8 @@ router
 router
   .route("/message")
   .post(
-    multipleFilesUpload,
-    multipleFilesUploadGroupValidator(),
+    multipleAttachmentsUpload,
+    validateMessageAttachments(),
     handleGroupValidationErrors,
     sendMessageFileAttachment
   );

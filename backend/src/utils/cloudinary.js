@@ -12,61 +12,44 @@ const uploadFileToCloudinary = async (file) => {
         "Unsupported file format. Please use a supported format like JPG, PNG, or GIF."
       );
     }
+
     const result = await cloudinary.uploader.upload(base64Data, {
       resource_type: "auto", // Automatically handles image, video, etc.
       public_id: uuid(),
     });
+
     return {
       public_id: result.public_id,
       url: result.secure_url,
     };
   } catch (error) {
-    console.error("Cloudinary upload error:", error);
+    console.error("Cloudinary upload error:", error.message || error);
     throw new CloudinaryFileUploadError(
-      "Failed to upload file to Cloudinary. Please ensure your file is in the correct format and try again later."
+      error?.message ||
+        "Failed to upload file to Cloudinary. Please ensure your file is in the correct format and try again later."
     );
   }
 };
 
 const uploadFilesToCloudinary = async (files = []) => {
   try {
+    // File validation (optional)
+    if (!files.length) {
+      throw new CloudinaryFileUploadError("No files provided for upload.");
+    }
+
+    // Process uploads concurrently with Promise.all
     const results = await Promise.all(files.map(uploadFileToCloudinary));
+
     return results; // Results are already formatted
   } catch (error) {
-    console.error("Cloudinary upload error:", error);
+    console.error("Cloudinary batch upload error:", error.message || error);
     throw new CloudinaryFileUploadError(
-      "Failed to upload files to Cloudinary. Please try again later."
+      error?.message ||
+        "Failed to upload files to Cloudinary. Please try again later."
     );
   }
 };
-
-// const cloudinaryUpload = async (files = []) => {
-//   const uploadPromise = files.map((file) => {
-//     return new Promise((resolve, reject) => {
-//       cloudinary.uploader.upload(
-//         file.path,
-//         {
-//           resource_type: "auto",
-//           public_id: uuid(),
-//         },
-//         (error, result) => {
-//           if (error) return reject(error);
-//           resolve(result);
-//         }
-//       );
-//     });
-//   });
-
-//   try {
-//     const result = await Promise.all(uploadPromise);
-//     return result.map((res) => ({
-//       public_id: res.public_id,
-//       url: res.secure_url,
-//     }));
-//   } catch (error) {
-//     console.error("Cloudinary upload error:", error);
-//   }
-// };
 
 // delete files from cloudinary!
 const deleteFilesFromCloudinary = async (public_ids) => {};

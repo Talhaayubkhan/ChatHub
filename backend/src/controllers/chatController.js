@@ -10,12 +10,16 @@ import { emitEvent } from "../utils/eventEmit.js";
 import {
   ALERT,
   NEW_ATTACHMENT,
+  NEW_MESSAGE,
   NEW_MESSAGE_ALERT,
   REFETCH_ALERT,
 } from "../constants/events.js";
 import { StatusCodes } from "http-status-codes";
 import { getOtherMembers } from "../lib/helper.js";
-import { deleteFilesFromCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteFilesFromCloudinary,
+  uploadFilesToCloudinary,
+} from "../utils/cloudinary.js";
 
 const newGroupChat = async (req, res) => {
   // console.log("New group chat", req.body);
@@ -290,69 +294,92 @@ const leaveGroup = async (req, res) => {
 };
 
 const sendMessageFileAttachment = async (req, res) => {
-  const chatId = req.body.chatId;
+  const { chatId } = req.body;
 
-  const files = req.files || [];
+  const files = req.files;
 
-  if (files.length < 1) {
-    throw new BadRequest("Please Upload attachment");
+  if (files.length === 0) {
+    throw new BadRequest("Please upload at least one file.");
   }
   if (files.length > 5) {
-    throw new BadRequest("You can't send more than 5 attachments");
+    throw new BadRequest("You can't upload more than 5 files");
   }
 
-  const [chat, userfind] = await Promise.all([
+  // Fetch chat and user data in parallel
+  const [chat, user] = await Promise.all([
     Chat.findById(chatId),
-    User.findById(req.user, "name avatar"),
+    User.findById(req.user.userId, "name"),
   ]);
+
+  // Check if the chat exists
   if (!chat) {
-    throw new NotFound("Chats are not Found!");
-  }
-  if (!userfind) {
-    throw new NotFound("User are not Found!");
+    throw new NotFound(
+      "Chat not found. Please check the chat ID and try again."
+    );
   }
 
-  // upload filer from here
-  // Initialize attachments array to hold file details
-  const attachments = [];
+  // Check if the user exists
+  if (!user) {
+    throw new NotFound(
+      "User not found. Please ensure you are logged in and try again."
+    );
+  }
 
-  const messageForDB = {
-    content: "Attachments",
+  // Upload files to cloud storage (like Cloudinary)
+  const attachments = await uploadFilesToCloudinary(files);
+  console.log("Uploading" + attachments);
+
+  const newMessageForDB = {
+    content: "",
     attachments,
-    sender: userfind._id,
+    sender: user._id,
     chat: chatId,
   };
-  //  Prepare message object for real-time communication to notify users
-  const messageForRealTime = {
-    ...messageForDB,
-    sender: {
-      _id: userfind._id,
-      name: userfind.name,
-    },
-  };
+  // console.log(newMessageForDB);
 
-  // Create a message object for database storage
-  const createMessage = await Message.create(messageForDB);
+  // Save message to the database
+  const savedMessage = await Message.create(newMessageForDB);
 
-  if (!createMessage) {
-    throw new BadRequest("Message not created");
+  if (!savedMessage) {
+    throw new BadRequest(
+      "Failed to create the message. Please try again later."
+    );
   }
 
+  // Prepare message object for real-time updates (to emit events)
+  const messageForRealTime = {
+    ...newMessageForDB,
+    sender: {
+      _id: user._id,
+      name: user.name,
+    },
+  };
+  // console.log(messageForRealTime);
+
   // Emit an event to notify chat members about the new attachment in real-time
-  emitEvent(req, NEW_ATTACHMENT, chat.members, {
-    message: messageForRealTime,
-    chatId,
-  });
+  emitEvent(
+    req,
+    chat.members,
+    {
+      message: messageForRealTime,
+      chatId,
+    },
+    NEW_MESSAGE
+  );
 
   // Emit an event to notify chat members about a new message alert in real-time
-  emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
-    chatId,
-  });
+  emitEvent(
+    req,
+    chat.members,
+    {
+      chatId,
+    },
+    NEW_MESSAGE_ALERT
+  );
 
   return res.status(StatusCodes.OK).json({
-    message: "Send attachment Successfully",
     success: true,
-    createMessage,
+    message: "File(s) uploaded successfully",
   });
 };
 
@@ -527,6 +554,7 @@ const getMessages = async (req, res) => {
   }
 
   const totalPages = Math.ceil(totalMessageCounts / chatsPerPage) || 0;
+
   return res.status(StatusCodes.OK).json({
     success: true,
     messages: messages.reverse(),

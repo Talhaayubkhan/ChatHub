@@ -2,11 +2,9 @@ import mongoose, { Schema } from "mongoose";
 
 const MessageSchema = new Schema(
   {
-    content: {
-      type: String,
-      required: true,
-    },
-    attachment: [
+    content: String,
+
+    attachments: [
       {
         public_id: {
           type: String,
@@ -18,6 +16,7 @@ const MessageSchema = new Schema(
         },
       },
     ],
+
     sender: {
       type: Schema.Types.ObjectId,
       ref: "User",
