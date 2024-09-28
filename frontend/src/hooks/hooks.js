@@ -1,16 +1,29 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
-const useErrors = (errors = []) => {
+const useErrors = (errorList = []) => {
   useEffect(() => {
-    errors.forEach(({ isError, error, fallback }) => {
-      if (isError) {
-        if (fallback) fallback();
-        else toast.error(error?.data?.message || "Something went wrong");
+    // Iterate over each error object in the array
+    errorList.forEach(({ isError, error, fallback }) => {
+      // If there's an error
+      if (isError && error) {
+        // If a fallback function is provided, execute it
+        if (fallback) {
+          fallback();
+        } else {
+          // Display error notification
+          const errorMessage =
+            error?.data?.message || error?.message || "Something went wrong";
+          toast.error(errorMessage);
+
+          // Optionally log the error for debugging (you can remove this if not needed)
+          // console.error("Error:", error);
+        }
       }
     });
-  }, [errors]);
+  }, [errorList]);
 };
+
 // Custom hook for handling friend request mutations with feedback and error handling
 const useSendFriendRequest = (mutationHook) => {
   // State to track whether the friend request process is loading
@@ -69,4 +82,31 @@ const useSendFriendRequest = (mutationHook) => {
   return [executeSendFriendRequest, isRequestLoading, responseData];
 };
 
-export { useErrors, useSendFriendRequest };
+// Custom hook to manage socket event listeners
+// Parameters:
+// - socket: The socket instance
+// - eventHandlers: An object mapping socket events to handler functions
+const useSocketEventListeners = (socket, eventHandlers) => {
+  useEffect(() => {
+    if (!socket || !eventHandlers) {
+      toast.error("Socket or event handlers are not provided!"); // Display toast error
+      return;
+    }
+    // Convert the eventHandlers object into an array of [event, handler] pairs
+    const handlerEntries = Object.entries(eventHandlers);
+
+    // Attach event listeners to the socket
+    handlerEntries.forEach(([event, handler]) => {
+      socket.on(event, handler);
+    });
+
+    // Cleanup function to remove the event listeners when the component unmounts or dependencies change
+    return () => {
+      handlerEntries.forEach(([event, handler]) => {
+        socket.off(event, handler);
+      });
+    };
+  }, [socket, eventHandlers]);
+};
+
+export { useErrors, useSendFriendRequest, useSocketEventListeners };

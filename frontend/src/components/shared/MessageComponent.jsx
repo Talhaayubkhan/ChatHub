@@ -5,7 +5,7 @@ import { fileFormat } from "../../lib/features";
 import RenderAttachMent from "./RenderAttachMent";
 
 const MessageComponent = ({ message, user }) => {
-  const { sender, content, attachment = [], timestamp } = message;
+  const { sender, content, attachments = [], timestamp } = message;
 
   const sameSender = sender?._id === user?._id;
   const timeAgo = moment(timestamp).fromNow();
@@ -26,7 +26,7 @@ const MessageComponent = ({ message, user }) => {
         </Typography>
       )}
       {content && <Typography>{content}</Typography>}
-      {attachment.map((currentAttachment, i) => {
+      {attachments.map((currentAttachment, i) => {
         const url = currentAttachment.url;
         const file = fileFormat(url);
         return (

@@ -32,12 +32,12 @@ const ChatItem = ({
           style={{
             display: "flex",
             alignItems: "center",
-            padding: 30,
-            // borderBottom: "1px solid lightgray",
-            backgroundColor: sameSender ? "gray" : "unset",
-            color: sameSender ? "black" : "unset",
+            padding: 15,
+            // borderBottom: "2px solid lightgray",
+            borderRadius: "2px",
+            backgroundColor: sameSender ? "#42a5f5" : "unset",
+            color: sameSender ? "#03071e" : "unset",
             position: "relative",
-            gap: "1rem",
           }}
         >
           {/* Avatar Card */}
@@ -47,7 +47,7 @@ const ChatItem = ({
               sx={{
                 fontWeight: "bold",
                 fontSize: "1.2rem",
-                maxWidth: "15rem",
+                maxWidth: "30rem",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 textTransform: "capitalize",
@@ -60,17 +60,16 @@ const ChatItem = ({
             )}
           </Stack>
 
-          {isOnline && (
+          {!isOnline && (
             <Box
               sx={{
                 width: "10px",
                 height: "10px",
-                borderRadius: "50%",
+                borderRadius: "55%",
                 position: "absolute",
-                right: "1rem",
+                right: "1.5rem",
                 top: "50%",
                 backgroundColor: "green",
-                //     borderRadius: "50%",
                 transform: "translateY(-50%)",
               }}
             />

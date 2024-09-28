@@ -18,8 +18,8 @@ const AvatarCard = ({ avatar = [], max = 4 }) => {
               src={transformImage(src)}
               alt={`Avatar ${index}`}
               style={{
-                width: "2rem",
-                height: "2rem",
+                width: "50px",
+                height: "50px",
                 position: "absolute",
                 left: {
                   xs: `${0.5 + index}rem`,

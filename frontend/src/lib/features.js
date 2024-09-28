@@ -22,7 +22,12 @@ const fileFormat = (url = "") => {
 
   return "file";
 };
-const transformImage = (url = "", width = 100) => url;
+//res.cloudinary.com/talha-ayub/image/upload/dpr_auto/w_200/v1726827382/eeaaf4ab-9e1d-405f-aa19-c45757949430.png
+
+const transformImage = (url = "", width = 100) => {
+  const newUrl = url.replace("upload/", `upload/dpr_auto/w_${width}/`);
+  return newUrl;
+};
 const getLastSevenDays = () => {
   const currentDay = moment();
   const last7Days = [];

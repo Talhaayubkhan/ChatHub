@@ -6,7 +6,7 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${server}/api/v1/`,
   }),
-  tagTypes: ["Chat", "User"],
+  tagTypes: ["Chat", "User", "Message"],
   endpoints: (builder) => ({
     myChats: builder.query({
       query: () => ({
@@ -48,7 +48,6 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Chat"],
     }),
-
     membersChatDetails: builder.query({
       query: ({ chatId, populate = false }) => {
         let url = `chat/${chatId}`;
@@ -60,6 +59,22 @@ export const apiSlice = createApi({
         };
       },
       providesTags: ["Chat"],
+    }),
+    getMessages: builder.query({
+      query: ({ chatId, page }) => ({
+        url: `chat/message/${chatId}?page=${page}`,
+        credentials: "include",
+      }),
+      providesTags: ["Message"],
+    }),
+
+    sendFileAttachments: builder.mutation({
+      query: (data) => ({
+        url: "chat/message",
+        method: "POST",
+        body: data,
+        credentials: "include",
+      }),
     }),
   }),
 });
@@ -74,4 +89,6 @@ export const {
   useGetNotificationsQuery,
   useAcceptFriendRequestMutation,
   useMembersChatDetailsQuery,
+  useGetMessagesQuery,
+  useSendFileAttachmentsMutation,
 } = apiSlice;

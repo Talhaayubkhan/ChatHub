@@ -9,8 +9,10 @@ import Profile from "../specific/Profile";
 import { useMyChatsQuery } from "../../redux-toolkit/api/apiSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsMobileMenu } from "../../redux-toolkit/reducers/misc";
-import { useErrors } from "../../hooks/hooks";
+import { useErrors, useSocketEventListeners } from "../../hooks/hooks";
 import { useSocket } from "../../socket";
+import { NEW_MESSAGE_ALERT, NEW_REQUEST } from "../../constants/events";
+import { useCallback } from "react";
 
 // This High Order Function
 // Higher-order components (HOCs) in React are used to enhance components with reusable logic, providing a way to share functionality across multiple components without repeating code
@@ -39,6 +41,20 @@ const AppLayout = () => (WrappedComponent) => {
     const handleMobileClose = () => {
       dispatch(setIsMobileMenu(false));
     };
+
+    // const handleNewMessageAlert = useCallback(() => {}, []);
+    // const handleNewRequest = useCallback(() => {}, []);
+
+    // const socketEventHandlers = useMemo(
+    //   () => ({
+    //     [NEW_MESSAGE_ALERT]: handleNewMessageAlert, // Listen for the "NEW_MESSAGE" event
+    //     [NEW_REQUEST]: handleNewRequest,
+    //   }),
+    //   [handleNewMessageReceived]
+    // );
+
+    // // Attach socket event listeners when the component mounts
+    // useSocketEventListeners(socket, socketEventHandlers);
 
     return (
       <>
@@ -79,7 +95,7 @@ const AppLayout = () => (WrappedComponent) => {
             )}
           </Grid>
           <Grid item xs={12} sm={8} md={5} lg={6} height={"100%"}>
-            <WrappedComponent {...props} chatId={chatId} />
+            <WrappedComponent {...props} chatId={chatId} user={user} />
           </Grid>
           <Grid
             item
