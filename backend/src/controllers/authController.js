@@ -159,43 +159,41 @@ const getUserProfile = async (req, res) => {
 const searchUser = async (req, res) => {
   const { name = "" } = req.query;
   // console.log("Search Query:", name);
-  const allChats = await Chat.find({});
-  let allChatMembers = [];
+  const chats = await Chat.find({});
+  let chatMemberIds = [];
 
-  if (allChats.length > 0) {
-    allChatMembers = allChats.flatMap((chat) => chat.members);
+  if (chats.length > 0) {
+    chatMemberIds = chats.flatMap((chat) => chat.members);
   } else {
     // console.log("No chats found, proceeding to search users...");
-    throw new BadRequest(
-      "No active chats found. Unable to retrieve chat members."
+    throw new BadRequestError(
+      "No active chats available. Unable to retrieve chat members."
     );
   }
 
   // Query to find all users who are not already members of any chat the current user is also not part
-  const findAllUsersExceptMeAndMyFriends = await User.find({
+  const potentialFriends = await User.find({
     _id: {
       //ensuring the search results are only new potential contacts or users the current user is not already connected with.
-      $nin: allChatMembers,
+      $nin: chatMemberIds,
     },
     name: { $regex: name, $options: "i" },
   });
 
-  if (findAllUsersExceptMeAndMyFriends.length === 0) {
-    throw new BadRequest("No Members found in chats");
+  if (potentialFriends.length === 0) {
+    throw new BadRequest("No users found matching your search criteria.");
   }
 
-  const findUsersAvatar = findAllUsersExceptMeAndMyFriends.map(
-    ({ _id, name, avatar }) => ({
-      _id,
-      name,
-      avatar: avatar?.url || "No Avatar URL Found",
-    })
-  );
+  const findUsersAvatar = potentialFriends.map(({ _id, name, avatar }) => ({
+    _id,
+    name,
+    avatar: avatar?.url || "Avatar not available",
+  }));
 
   // console.log(findUsersAvatar);
 
   if (!findUsersAvatar) {
-    throw new BadRequest("No Avatar found in chats, please try again");
+    throw new BadRequest("No users with avatars found. Please try again.");
   }
 
   return res.status(StatusCodes.OK).json({
@@ -205,7 +203,7 @@ const searchUser = async (req, res) => {
 };
 
 const sendFriendRequest = async (req, res) => {
-  console.log("Send friend request:", req.body);
+  // console.log("Send friend request:", req.body);
   const { userId } = req.body;
 
   const alreadySendRequest = await Request.findOne({
@@ -223,7 +221,7 @@ const sendFriendRequest = async (req, res) => {
     receiver: userId,
   });
 
-  console.log("New Request received", newRequest);
+  // console.log("New Request received", newRequest);
 
   emitEvent(req, NEW_REQUEST, [userId]);
 
@@ -267,8 +265,9 @@ const acceptFriendRequest = async (req, res) => {
 
   // If the accept flag is true, create an array of members for the new chat means for both sender and receiver
   const members = [request.sender._id, request.receiver._id];
-  // console.log("create members", members);
-  // 1. Create a new chat with the sender and receiver as members
+  console.log("create members", members);
+
+  // 1. Create a new chat with the sender and receiver as membersP
   // 2. Delete the friend request
   await Promise.all([
     Chat.create({
@@ -280,7 +279,6 @@ const acceptFriendRequest = async (req, res) => {
 
   return res.status(StatusCodes.OK).json({
     success: true,
-    senderId: request.sender._id,
     message: "Friend request accepted. You're now friends!",
   });
 };

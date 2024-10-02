@@ -77,7 +77,7 @@ const getMyChats = async (req, res) => {
   // Transform the chats to a more suitable format for the front-end
   const transformChats = chats.map(({ _id, name, members, groupChat }) => {
     // Get the other members in the chat, excluding the current user
-    const otherMembers = getOtherMembers(members, req.user);
+    const otherMembers = getOtherMembers(members, req.user.userId);
 
     // Return the transformed chat object
     return {
@@ -90,7 +90,7 @@ const getMyChats = async (req, res) => {
       // Determine the name for the chat
       name: groupChat ? name : otherMembers?.name, // For group chats, use the chat name; for direct chats, use the other member's name
       members: members.reduce((prev, curr) => {
-        if (curr._id.toString() !== req.user.toString()) {
+        if (curr._id.toString() !== req.user.userId.toString()) {
           prev.push(curr._id);
         }
         return prev;
@@ -109,9 +109,9 @@ const getMyChats = async (req, res) => {
 const getMyGroups = async (req, res) => {
   // Find group chats where the current user is a member and the creator
   const groupsChats = await Chat.find({
-    members: req.user, // Query to find group chats where the current user is a member
+    members: req.user.userId, // Query to find group chats where the current user is a member
     groupChat: true, // Ensure it's a group chat
-    creator: req.user, // Ensure the current user is the creator of the group chat
+    creator: req.user.userId, // Ensure the current user is the creator of the group chat
   }).populate("members", "name avatar"); // Populate 'members' field with 'name' and 'avatar' fields of user documents
 
   if (!groupsChats || groupsChats.length === 0) {
@@ -392,43 +392,39 @@ const chatDetails = async (req, res) => {
   }
 
   // Check if the client requested to populate member details
-  try {
-    if (req.query.populate === "true") {
-      const chat = await Chat.findById(chatId)
-        .populate("members", "name avatar")
-        .lean(); // Use lean() for better performance by returning plain JavaScript objects
 
-      if (!chat) {
-        throw new NotFound("Chat are not Found!");
-      }
+  if (req.query.populate === "true") {
+    const chat = await Chat.findById(chatId)
+      .populate("members", "name avatar")
+      .lean(); // Use lean() for better performance by returning plain JavaScript objects
 
-      chat.members = chat.members.map((member) => ({
-        _id: member._id,
-        name: member.name || "Not Available",
-        avatar: member.avatar?.url || "Not Available",
-      }));
-
-      return res.status(StatusCodes.OK).json({
-        message: "Chat Details Fetch Successfully!",
-        success: true,
-        chat,
-      });
-    } else {
-      // Fetch chat by ID without populating the members field
-      const chat = await Chat.findById(chatId);
-
-      if (!chat) {
-        throw new NotFound("Chats are not Found!");
-      }
-      return res.status(StatusCodes.OK).json({
-        message: "Chat Details Fetch Successfully!",
-        success: true,
-        allChats: chat,
-      });
+    if (!chat) {
+      throw new NotFound("Chat are not Found!");
     }
-  } catch (error) {
-    console.error("Error fetching chat details:", error);
-    throw new CustomApiError("Internal Server Error");
+
+    chat.members = chat.members.map((member) => ({
+      _id: member._id,
+      name: member.name || "Not Available",
+      avatar: member.avatar?.url || "Not Available",
+    }));
+
+    return res.status(StatusCodes.OK).json({
+      message: "Chat Details Fetch Successfully!",
+      success: true,
+      chat,
+    });
+  } else {
+    // Fetch chat by ID without populating the members field
+    const chat = await Chat.findById(chatId);
+
+    if (!chat) {
+      throw new NotFound("Chats are not Found!");
+    }
+    return res.status(StatusCodes.OK).json({
+      message: "Chat Details Fetch Successfully!",
+      success: true,
+      allChats: chat,
+    });
   }
 };
 
