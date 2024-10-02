@@ -23,10 +23,10 @@ const ChatItem = ({
         to={`/chat/${_id}`}
         onContextMenu={(e) => {
           e.preventDefault();
-          console.log("Right-click event detected for chat:", _id);
+          // console.log("Right-click event detected for chat:", _id);
           handleDeleteChat(e, _id, groupChat);
         }}
-        onClick={() => console.log("Click event detected for chat:", _id)}
+        // onClick={() => console.log("Click event detected for chat:", _id)}
       >
         <div
           style={{

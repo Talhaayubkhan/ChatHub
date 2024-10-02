@@ -1,4 +1,5 @@
 // import React from "react";
+import { useCallback, useMemo } from "react";
 import Header from "./Header";
 import Title from "../shared/Title";
 import { Drawer, Grid, Skeleton } from "@mui/material";
@@ -12,7 +13,7 @@ import { setIsMobileMenu } from "../../redux-toolkit/reducers/misc";
 import { useErrors, useSocketEventListeners } from "../../hooks/hooks";
 import { useSocket } from "../../socket";
 import { NEW_MESSAGE_ALERT, NEW_REQUEST } from "../../constants/events";
-import { useCallback } from "react";
+import { incrementNotificationCount } from "../../redux-toolkit/reducers/chat";
 
 // This High Order Function
 // Higher-order components (HOCs) in React are used to enhance components with reusable logic, providing a way to share functionality across multiple components without repeating code
@@ -42,19 +43,19 @@ const AppLayout = () => (WrappedComponent) => {
       dispatch(setIsMobileMenu(false));
     };
 
-    // const handleNewMessageAlert = useCallback(() => {}, []);
-    // const handleNewRequest = useCallback(() => {}, []);
+    const handleNewMessageAlert = useCallback(() => {}, []);
 
-    // const socketEventHandlers = useMemo(
-    //   () => ({
-    //     [NEW_MESSAGE_ALERT]: handleNewMessageAlert, // Listen for the "NEW_MESSAGE" event
-    //     [NEW_REQUEST]: handleNewRequest,
-    //   }),
-    //   [handleNewMessageReceived]
-    // );
+    const handleNewRequest = useCallback(() => {
+      dispatch(incrementNotificationCount());
+    }, [dispatch]);
 
-    // // Attach socket event listeners when the component mounts
-    // useSocketEventListeners(socket, socketEventHandlers);
+    const socketEventHandlers = {
+      [NEW_MESSAGE_ALERT]: handleNewMessageAlert, // Listen for the "NEW_MESSAGE" event
+      [NEW_REQUEST]: handleNewRequest,
+    };
+
+    // Attach socket event listeners when the component mounts
+    useSocketEventListeners(socket, socketEventHandlers);
 
     return (
       <>

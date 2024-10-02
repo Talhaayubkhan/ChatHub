@@ -519,22 +519,22 @@ const Notifications = () => {
       </Stack>
 
       {/* Notification Items */}
-      <List sx={{ maxHeight: "60vh", overflowY: "auto", py: 0 }}>
+      <List sx={{ maxHeight: "50vh", overflowY: "auto", py: 0 }}>
         {isLoading ? (
-          [...Array(3)].map((_, index) => (
+          [...Array(1)].map((_, index) => (
             <Skeleton
               key={index}
               variant="rectangular"
-              height={80}
-              sx={{ borderRadius: "16px", mb: 2 }}
+              height={70}
+              sx={{ borderRadius: "20px", mb: 3 }}
             />
           ))
         ) : (
           <>
             {data?.allRequests?.length > 0 ? (
-              data.allRequests.map((notification) => (
+              data?.allRequests?.map((notification) => (
                 <NotificationItem
-                  sender={notification?.sender}
+                  sender={notification.sender}
                   _id={notification._id}
                   key={notification._id}
                   handler={friendReqNotification}
@@ -600,7 +600,7 @@ const NotificationItem = memo(({ sender, _id, handler }) => {
             variant="body2"
             sx={{
               color: "text.secondary",
-              fontSize: "0.95rem",
+              fontSize: "0.75rem",
             }}
           >
             Sent you a friend request

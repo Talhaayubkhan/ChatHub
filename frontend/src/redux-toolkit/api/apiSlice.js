@@ -26,8 +26,8 @@ export const apiSlice = createApi({
       query: (data) => ({
         url: "auth/send-request",
         method: "POST",
-        body: data,
         credentials: "include",
+        body: data,
       }),
       invalidatesTags: ["User"],
     }),
@@ -39,6 +39,7 @@ export const apiSlice = createApi({
       }),
       keepUnusedDataFor: 0,
     }),
+
     acceptFriendRequest: builder.mutation({
       query: (data) => ({
         url: "auth/accept-request",
