@@ -4,10 +4,15 @@ import { app } from "./src/app.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import { handleNewMessage, handleDisconnect } from "./socketEvents.js";
-import { NEW_MESSAGE } from "./src/constants/events.js";
+import {
+  NEW_MESSAGE,
+  START_TYPING_MESSAGE,
+  STOP_TYPING_MESSAGE,
+} from "./src/constants/events.js";
 import { corsOptions } from "./src/constants/config.js";
 import cookieParser from "cookie-parser";
 import { socketAuthentication } from "./src/middlewares/AuthHeadersBased.Authentication.js";
+import { getAllSocketIDs } from "./src/constants/sockets.js";
 
 const PORT = process.env.PORT || 8000;
 
@@ -30,9 +35,21 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
+  // console.log(`Socket connected: ${socket.id}`);
 
   socket.on(NEW_MESSAGE, (data) => handleNewMessage(io, socket, data));
+  socket.on(START_TYPING_MESSAGE, ({ members, chatId }) => {
+    // console.log("typing", members, chatId);
+    const socketMembers = getAllSocketIDs(members);
+
+    socket.to(socketMembers).emit(START_TYPING_MESSAGE, { chatId });
+  });
+  socket.on(STOP_TYPING_MESSAGE, ({ members, chatId }) => {
+    // console.log("typing", members, chatId);
+    const socketMembers = getAllSocketIDs(members);
+
+    socket.to(socketMembers).emit(STOP_TYPING_MESSAGE, { chatId });
+  });
   socket.on("disconnect", () => handleDisconnect(socket));
 });
 

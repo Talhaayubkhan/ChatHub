@@ -34,13 +34,13 @@ const UserSchema = new Schema(
       trim: true,
       unique: true,
       sparse: true,
-      // validate: {
-      //   validator: (value) => {
-      //     const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
-      //     return !value || usernameRegex.test(value);
-      //   },
-      //   message: (props) => `${props.value} is not a valid username`,
-      // },
+      validate: {
+        validator: (value) => {
+          const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+          return !value || usernameRegex.test(value);
+        },
+        message: (props) => `${props.value} is not a valid username`,
+      },
     },
     password: {
       type: String,

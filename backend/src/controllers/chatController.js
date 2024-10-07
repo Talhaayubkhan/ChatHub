@@ -40,7 +40,7 @@ const newGroupChat = async (req, res) => {
       creator: req.user.userId, // Ensure this is set correctly
     });
 
-    emitEvent(req, ALERT, allMembers, `Wlcome to ${name} group`);
+    emitEvent(req, ALERT, allMembers, `Welcome to ${name} group`);
     emitEvent(
       req,
       REFETCH_ALERT,
@@ -107,6 +107,8 @@ const getMyChats = async (req, res) => {
 
 // show user own groups!!!
 const getMyGroups = async (req, res) => {
+  // console.log("my groups user id ", req.user.userId);
+
   // Find group chats where the current user is a member and the creator
   const groupsChats = await Chat.find({
     members: req.user.userId, // Query to find group chats where the current user is a member
@@ -114,11 +116,9 @@ const getMyGroups = async (req, res) => {
     creator: req.user.userId, // Ensure the current user is the creator of the group chat
   }).populate("members", "name avatar"); // Populate 'members' field with 'name' and 'avatar' fields of user documents
 
-  if (!groupsChats || groupsChats.length === 0) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "No groups available for this user!!", success: false });
-  }
+  // if (!groupsChats || groupsChats.length === 0) {
+  //   throw new BadRequest("No groups available for this user!");
+  // }
 
   // Transform the group chat data into a suitable format for the front-end
   const transformedGroupChats = groupsChats.map(
@@ -150,7 +150,7 @@ const addGroupMembers = async (req, res) => {
     throw new BadRequest("This chat is not a group chat");
   }
   // Ensure that the current user is the creator of the group chat
-  if (chat.creator.toString() !== req.user.toString()) {
+  if (chat.creator.toString() !== req.user.userId.toString()) {
     throw new Unauthorized("You are not allowed to add Members to this group!");
   }
 
@@ -307,7 +307,7 @@ const sendMessageFileAttachment = async (req, res) => {
 
   // Fetch chat and user data in parallel
   const [chat, user] = await Promise.all([
-    Chat.findById(chatId),
+    Chat.findById(chatId).populate("members"),
     User.findById(req.user.userId, "name"),
   ]);
 
@@ -327,7 +327,7 @@ const sendMessageFileAttachment = async (req, res) => {
 
   // Upload files to cloud storage (like Cloudinary)
   const attachments = await uploadFilesToCloudinary(files);
-  console.log("Uploading" + attachments);
+  // console.log("Uploading" + attachments);
 
   const newMessageForDB = {
     content: "",
@@ -354,28 +354,19 @@ const sendMessageFileAttachment = async (req, res) => {
       name: user.name,
     },
   };
+
   // console.log(messageForRealTime);
 
   // Emit an event to notify chat members about the new attachment in real-time
-  emitEvent(
-    req,
-    chat.members,
-    {
-      message: messageForRealTime,
-      chatId,
-    },
-    NEW_MESSAGE
-  );
+  emitEvent(req, NEW_MESSAGE, chat.members, {
+    message: messageForRealTime,
+    chatId,
+  });
 
   // Emit an event to notify chat members about a new message alert in real-time
-  emitEvent(
-    req,
-    chat.members,
-    {
-      chatId,
-    },
-    NEW_MESSAGE_ALERT
-  );
+  emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
+    chatId,
+  });
 
   return res.status(StatusCodes.OK).json({
     success: true,
@@ -402,10 +393,10 @@ const chatDetails = async (req, res) => {
       throw new NotFound("Chat are not Found!");
     }
 
-    chat.members = chat.members.map((member) => ({
-      _id: member._id,
-      name: member.name || "Not Available",
-      avatar: member.avatar?.url || "Not Available",
+    chat.members = chat.members?.map((member) => ({
+      _id: member?._id,
+      name: member?.name || "Not Available",
+      avatar: member?.avatar?.url || "Not Available",
     }));
 
     return res.status(StatusCodes.OK).json({

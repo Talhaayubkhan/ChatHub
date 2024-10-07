@@ -9,9 +9,9 @@ const handleNewMessage = async (io, socket, { chatId, members, message }) => {
   const user = socket?.user;
   // console.log(user);
   if (!user) {
-    console.error(
-      `Connection attempt failed: No user attached to socket with ID ${socket.id}`
-    );
+    // console.error(
+    //   `Connection attempt failed: No user attached to socket with ID ${socket.id}`
+    // );
 
     throw new Unauthenticated(
       "Authentication failed: No user found in socket. Please ensure the user is authenticated."
@@ -22,31 +22,31 @@ const handleNewMessage = async (io, socket, { chatId, members, message }) => {
 
   const messageForRealTime = {
     chat: chatId,
-    id: uuid(),
+    _id: uuid(),
     sender: {
       _id: user._id,
       name: user.name,
     },
     content: message,
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   };
-  // console.log("Emitting the message", messageForRealTime);
+  // console.log("Message being emitted to frontend:", messageForRealTime);
 
   const messageForDatabse = {
     chat: chatId,
     sender: user._id,
     content: message,
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   };
 
   const memberSocket = getAllSocketIDs(members);
-  // console.log(memberSocket);
+  // console.log("Socket IDs for members:", memberSocket);
 
   if (!memberSocket) {
     throw new NotFound("Not found member socket IDs");
   }
   io.to(memberSocket).emit(NEW_MESSAGE, {
-    chat: chatId,
+    chatId,
     message: messageForRealTime,
   });
   io.to(memberSocket).emit(NEW_MESSAGE_ALERT, {
@@ -64,6 +64,10 @@ const handleNewMessage = async (io, socket, { chatId, members, message }) => {
     );
   }
 };
+
+// const handleTypingMessages = ({ members, chatId }) => {
+//   console.log(members, chatId);
+// };
 
 const handleDisconnect = (socket) => {
   console.log("User disconnected");

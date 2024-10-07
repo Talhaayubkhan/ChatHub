@@ -49,9 +49,9 @@ const socketAuthentication = async (err, socket, next) => {
     }
     const authSocket = socket.request.signedCookies?.token;
     if (!authSocket) {
-      console.warn(
-        "Socket Authentication Failed: No token provided in signed cookies"
-      );
+      // console.warn(
+      //   "Socket Authentication Failed: No token provided in signed cookies"
+      // );
       return next(
         new Unauthenticated("Authentication failed: No token provided.")
       );

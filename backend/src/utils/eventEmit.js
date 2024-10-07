@@ -1,22 +1,15 @@
 import { getAllSocketIDs } from "../constants/sockets.js";
 
 export const emitEvent = (req, users, data, event) => {
-  // console.log("emitEvent", req, users, data, event);
+  // console.log("Users passed to emitEvent:", users); // Debugging
+  const io = req.app?.get("io");
 
   if (!Array.isArray(users)) {
-    console.error("emitEvent error: users is not an array. Got:", users);
+    // console.error("Users is not an array", users); // Additional Debugging
     return;
   }
-
-  const io = req.app.get("io");
-  // console.log(io);
 
   const userSocket = getAllSocketIDs(users);
-
-  if (userSocket.length === 0) {
-    console.error("emitEvent error: No socket IDs found for users.");
-    return;
-  }
 
   io.to(userSocket).emit(event, data);
 };

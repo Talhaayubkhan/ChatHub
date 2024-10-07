@@ -158,18 +158,9 @@ const getUserProfile = async (req, res) => {
 
 const searchUser = async (req, res) => {
   const { name = "" } = req.query;
-  // console.log("Search Query:", name);
-  const chats = await Chat.find({});
-  let chatMemberIds = [];
 
-  if (chats.length > 0) {
-    chatMemberIds = chats.flatMap((chat) => chat.members);
-  } else {
-    // console.log("No chats found, proceeding to search users...");
-    throw new BadRequestError(
-      "No active chats available. Unable to retrieve chat members."
-    );
-  }
+  const chats = await Chat.find({ groupChat: false, members: req.user.userId });
+  let chatMemberIds = chats.flatMap((chat) => chat.members);
 
   // Query to find all users who are not already members of any chat the current user is also not part
   const potentialFriends = await User.find({
@@ -287,7 +278,7 @@ const getAllNotifications = async (req, res) => {
   // Find all requests where the receiver is the authenticated user (by userId)
   // console.log("Getting all notifications", req.user);
 
-  const userId = req.user.userId;
+  const { userId } = req.user;
   // console.log("Fetching notifications for userId:", userId);
   const requests = await Request.find({ receiver: userId }).populate(
     "sender",
@@ -330,7 +321,7 @@ const getMyAllFriends = async (req, res) => {
 
   // Fetch all direct (one-on-one) chats involving the current user
   const chats = await Chat.find({
-    members: req.user,
+    members: req.user.userId,
     groupChat: false,
   }).populate("members", "name avatar");
 
@@ -340,7 +331,7 @@ const getMyAllFriends = async (req, res) => {
 
   // The map function iterates over each chat (chats) and extracts the other member (friend) of each chat, excluding the current user.
   const friends = chats.map(({ members }) => {
-    const otherUsers = getOtherMembers(members, req.user);
+    const otherUsers = getOtherMembers(members, req.user.userId);
 
     // Create a friend object with necessary details
     return {
