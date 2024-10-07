@@ -444,21 +444,45 @@ import {
   useMediaQuery,
   Avatar,
   Chip,
+  Skeleton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
-import { sampleUsers } from "../../constants/sampleData";
 import UserItem from "../shared/UserItem";
 import { useInputValidation } from "6pp";
 import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  useAvailableFriendsQuery,
+  useNewGroupMutation,
+} from "../../redux-toolkit/api/apiSlice";
+import { useErrors, useSendFriendRequest } from "../../hooks/hooks";
+import { setIsNewGroup } from "../../redux-toolkit/reducers/misc";
+import toast from "react-hot-toast";
 
 const NewGroup = () => {
-  const groupName = useInputValidation();
-  const [members, setMembers] = useState(sampleUsers);
+  const { isNewGroup } = useSelector((state) => state.misc);
+  const dispatch = useDispatch();
+  const groupName = useInputValidation("");
+
+  const { isError, isLoading, error, data } = useAvailableFriendsQuery();
+  const [newGroup, isLoadingNewGroup] =
+    useSendFriendRequest(useNewGroupMutation);
+  // console.log(data);
+
   const [selectedMembers, setSelectedMembers] = useState([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const errors = [
+    {
+      isError,
+      error,
+    },
+  ];
+
+  useErrors(errors);
 
   const selectGroupMembers = (id) => {
     setSelectedMembers((prev) =>
@@ -469,16 +493,30 @@ const NewGroup = () => {
   };
 
   const submitHandler = () => {
-    // Add your submission logic here
+    if (!groupName.value) toast.error("Group Name us required!");
+    let minMembers = Math.max(2, selectedMembers.length);
+    if (selectedMembers.length < minMembers) {
+      return toast.error(`Please Select Atleast ${minMembers} Members`);
+    }
+
+    // creating group!
+
+    newGroup("Creating Group..", {
+      name: groupName.value,
+      members: selectedMembers,
+    });
+
+    closeHandlerGroup();
   };
 
   const closeHandlerGroup = () => {
     // Add your close dialog logic here
+    dispatch(setIsNewGroup(false));
   };
 
   return (
     <Dialog
-      open
+      open={isNewGroup}
       onClose={closeHandlerGroup}
       fullWidth
       maxWidth="sm"
@@ -553,7 +591,7 @@ const NewGroup = () => {
           </Typography>
           <Box display="flex" flexWrap="wrap" gap={1}>
             {selectedMembers.map((id) => {
-              const user = members.find((m) => m._id === id);
+              const user = data?.friends?.find((m) => m._id === id);
               return (
                 <Chip
                   key={id}
@@ -593,28 +631,32 @@ const NewGroup = () => {
             }}
           >
             <Stack spacing={1}>
-              {members.map((user) => (
-                <UserItem
-                  user={user}
-                  key={user._id}
-                  handler={selectGroupMembers}
-                  isAdded={selectedMembers.includes(user._id)}
-                  sx={{
-                    borderRadius: 2,
-                    padding: "0.75rem",
-                    backgroundColor: selectedMembers.includes(user._id)
-                      ? "primary.light"
-                      : "background.default",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      backgroundColor: "primary.main",
-                      color: "white",
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                    },
-                  }}
-                />
-              ))}
+              {isLoading ? (
+                <Skeleton />
+              ) : (
+                data?.friends?.map((user) => (
+                  <UserItem
+                    user={user}
+                    key={user._id}
+                    handler={selectGroupMembers}
+                    isAdded={selectedMembers.includes(user._id)}
+                    sx={{
+                      borderRadius: 2,
+                      padding: "0.75rem",
+                      backgroundColor: selectedMembers.includes(user._id)
+                        ? "primary.light"
+                        : "background.default",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        backgroundColor: "primary.main",
+                        color: "white",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      },
+                    }}
+                  />
+                ))
+              )}
             </Stack>
           </Box>
         </Box>
@@ -630,6 +672,7 @@ const NewGroup = () => {
             variant="contained"
             color="primary"
             onClick={submitHandler}
+            disabled={isLoadingNewGroup}
             fullWidth
             sx={{
               fontSize: isMobile ? "1rem" : "1.1rem",

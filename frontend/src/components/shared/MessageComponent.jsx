@@ -5,9 +5,11 @@ import { fileFormat } from "../../lib/features";
 import RenderAttachMent from "./RenderAttachMent";
 
 const MessageComponent = ({ message, user }) => {
+  // console.log("message are", message);
   const { sender, content, attachments = [], timestamp } = message;
 
   const sameSender = sender?._id === user?._id;
+
   const timeAgo = moment(timestamp).fromNow();
   return (
     <div

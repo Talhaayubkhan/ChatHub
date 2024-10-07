@@ -443,6 +443,7 @@ import toast from "react-hot-toast";
 const Notifications = () => {
   const { isNotifications } = useSelector((state) => state.misc);
   const dispatch = useDispatch();
+
   const { isLoading, data, error, isError } = useGetNotificationsQuery();
   const [acceptRequest] = useAcceptFriendRequestMutation();
 
@@ -455,12 +456,10 @@ const Notifications = () => {
     try {
       const response = await acceptRequest({ requestId: _id, accept });
       if (response?.data?.success) {
-        toast.success(
-          accept ? "Friend request accepted!" : "Friend request declined."
-        );
+        toast.success("Friend request accepted!");
       } else {
         toast.error(
-          response?.data?.error?.message || "Unable to process your request."
+          response?.data?.error?.message || "Friend request Rejected."
         );
       }
     } catch {
@@ -478,7 +477,7 @@ const Notifications = () => {
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: "24px",
+          borderRadius: "20px",
           boxShadow: "0 10px 40px rgba(0, 0, 0, 0.1)",
           padding: "1.5rem",
           background: "linear-gradient(145deg, #f6f8fa, #ffffff)",

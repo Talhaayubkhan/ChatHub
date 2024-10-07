@@ -32,7 +32,7 @@ const ChatItem = ({
           style={{
             display: "flex",
             alignItems: "center",
-            padding: 15,
+            padding: 10,
             // borderBottom: "2px solid lightgray",
             borderRadius: "2px",
             backgroundColor: sameSender ? "#42a5f5" : "unset",

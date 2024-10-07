@@ -440,6 +440,12 @@ import { Link } from "../components/styles/StyledComponent";
 import AvatarCard from "../components/shared/AvatarCard";
 import { sampleChats, sampleUsers } from "../constants/sampleData";
 import UserItem from "../components/shared/UserItem";
+import {
+  useGetMyGroupsQuery,
+  useMembersChatDetailsQuery,
+} from "../redux-toolkit/api/apiSlice";
+import { useErrors } from "../hooks/hooks";
+import { LayoutLoaders } from "../components/layout/Loaders";
 
 const ConfrimDeleteDialoge = lazy(() =>
   import("../components/dialogs/ConfrimDeleteDialoge")
@@ -453,11 +459,34 @@ const Groups = () => {
   const theme = useTheme();
   const chatId = useSearchParams()[0].get("group");
   const navigate = useNavigate();
+
+  const myGroups = useGetMyGroupsQuery("");
+
+  const groupDetails = useMembersChatDetailsQuery(
+    { chatId, populate: true },
+    {
+      skip: !chatId,
+    }
+  );
+  console.log(groupDetails.data);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [groupUpdatedValue, setGroupUpdatedValue] = useState("");
   const [confrimDeleteDialog, setConfrimDeleteDialog] = useState(false);
+
+  const errors = [
+    {
+      isError: myGroups.isError,
+      error: myGroups.error,
+    },
+    {
+      isError: groupDetails.isError,
+      error: groupDetails.error,
+    },
+  ];
+
+  useErrors(errors);
 
   const navigateBack = () => {
     navigate("/");
@@ -704,7 +733,9 @@ const Groups = () => {
     </Stack>
   );
 
-  return (
+  return myGroups.isLoading ? (
+    <LayoutLoaders />
+  ) : (
     <Grid container sx={{ height: "100vh", overflow: "hidden" }}>
       <Grid
         item
@@ -715,7 +746,7 @@ const Groups = () => {
           borderRight: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <GroupsList myGroups={sampleChats} chatId={chatId} />
+        <GroupsList myGroups={myGroups?.data?.groups} chatId={chatId} />
       </Grid>
 
       <Grid
@@ -758,7 +789,11 @@ const Groups = () => {
           "& .MuiDrawer-paper": { width: "80%" },
         }}
       >
-        <GroupsList w="100%" myGroups={sampleChats} chatId={chatId} />
+        <GroupsList
+          w="100%"
+          myGroups={myGroups?.data?.groups}
+          chatId={chatId}
+        />
       </Drawer>
 
       <Suspense fallback={<Backdrop open />}>

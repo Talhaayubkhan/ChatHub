@@ -1,5 +1,5 @@
 // import React from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import Header from "./Header";
 import Title from "../shared/Title";
 import { Drawer, Grid, Skeleton } from "@mui/material";
@@ -13,7 +13,11 @@ import { setIsMobileMenu } from "../../redux-toolkit/reducers/misc";
 import { useErrors, useSocketEventListeners } from "../../hooks/hooks";
 import { useSocket } from "../../socket";
 import { NEW_MESSAGE_ALERT, NEW_REQUEST } from "../../constants/events";
-import { incrementNotificationCount } from "../../redux-toolkit/reducers/chat";
+import {
+  incrementNotificationCount,
+  setNewMessagesAlert,
+} from "../../redux-toolkit/reducers/chat";
+import { getMessagesCountInLocalStorage } from "../../lib/features";
 
 // This High Order Function
 // Higher-order components (HOCs) in React are used to enhance components with reusable logic, providing a way to share functionality across multiple components without repeating code
@@ -29,10 +33,18 @@ const AppLayout = () => (WrappedComponent) => {
 
     const { isMobileMenu } = useSelector((state) => state.misc);
     const { user } = useSelector((state) => state.auth);
+    const { newMessagesAlert } = useSelector((state) => state.chat);
 
-    const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
+    const { isLoading, data, isError, error } = useMyChatsQuery("");
 
     useErrors([{ isError, error }]);
+
+    useEffect(() => {
+      getMessagesCountInLocalStorage({
+        key: NEW_MESSAGE_ALERT,
+        value: newMessagesAlert,
+      });
+    }, [newMessagesAlert]);
 
     const handleDeleteChat = (event, _id, groupChat) => {
       event.preventDefault();
@@ -43,11 +55,19 @@ const AppLayout = () => (WrappedComponent) => {
       dispatch(setIsMobileMenu(false));
     };
 
-    const handleNewMessageAlert = useCallback(() => {}, []);
+    const handleNewMessageAlert = useCallback(
+      (data) => {
+        // console.log("New message alert received:", data); // Log to check if event fires
+
+        if (data.chatId === chatId) return;
+        dispatch(setNewMessagesAlert(data));
+      },
+      [chatId]
+    );
 
     const handleNewRequest = useCallback(() => {
       dispatch(incrementNotificationCount());
-    }, [dispatch]);
+    }, []);
 
     const socketEventHandlers = {
       [NEW_MESSAGE_ALERT]: handleNewMessageAlert, // Listen for the "NEW_MESSAGE" event
@@ -71,6 +91,7 @@ const AppLayout = () => (WrappedComponent) => {
               chats={data?.chats}
               chatId={chatId}
               handleDeleteChat={handleDeleteChat}
+              newMessagesAlert={newMessagesAlert}
             />
           </Drawer>
         )}
@@ -92,6 +113,7 @@ const AppLayout = () => (WrappedComponent) => {
                 chats={data?.chats}
                 chatId={chatId}
                 handleDeleteChat={handleDeleteChat}
+                newMessagesAlert={newMessagesAlert}
               />
             )}
           </Grid>

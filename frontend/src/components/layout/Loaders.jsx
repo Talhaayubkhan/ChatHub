@@ -43,8 +43,9 @@
 
 import React from "react";
 import { Grid, Skeleton, Stack } from "@mui/material";
+import { BouncingSkeleton } from "../styles/StyledComponent";
 
-export const LayoutLoaders = () => {
+const LayoutLoaders = () => {
   return (
     <Grid container spacing={2} sx={{ height: "calc(100vh - 50px)" }}>
       <Grid item sm={4} md={3} sx={{ display: { xs: "none", sm: "block" } }}>
@@ -70,4 +71,27 @@ export const LayoutLoaders = () => {
   );
 };
 
-export default LayoutLoaders;
+const TypingLoader = () => {
+  return (
+    <Stack
+      spacing={"0.5rem"}
+      direction={"row"}
+      padding={"0.5rem"}
+      justifyContent={"flex-start"}
+      alignItems={"center"}
+    >
+      {[0.1, 0.2, 0.3, 0.5].map((delay, index) => (
+        <BouncingSkeleton
+          key={index}
+          variant="circular"
+          width={10}
+          height={10}
+          style={{
+            animationDelay: `${delay}s`,
+          }}
+        />
+      ))}
+    </Stack>
+  );
+};
+export { LayoutLoaders, TypingLoader };

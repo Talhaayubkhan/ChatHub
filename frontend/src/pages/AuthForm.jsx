@@ -695,15 +695,15 @@ const Login = () => {
                     color="primary"
                     type="submit"
                     sx={{
-                      marginTop: "25px",
-                      marginBottom: "20px",
+                      marginTop: "20px",
+                      marginBottom: "15px",
                     }}
                   >
                     Login
                   </Button>
                   <Typography
                     textAlign={"center"}
-                    margin={"1rem"}
+                    margin={"0.5rem"}
                     fontWeight={"600"}
                   >
                     OR
@@ -718,7 +718,7 @@ const Login = () => {
                 <Typography
                   variant="h4"
                   sx={{
-                    marginBottom: "20px",
+                    marginBottom: "10px",
                     color: "primary.main",
                   }}
                 >
@@ -739,8 +739,8 @@ const Login = () => {
                   >
                     <Avatar
                       sx={{
-                        width: "120px",
-                        height: "120px",
+                        width: "115px",
+                        height: "115px",
                         objectFit: "cover",
                       }}
                       src={avatar.preview}
@@ -804,7 +804,7 @@ const Login = () => {
                     label="Bio"
                     variant="outlined"
                     multiline
-                    rows={3}
+                    rows={2}
                     value={bio.value}
                     onChange={bio.changeHandler}
                   />
@@ -819,16 +819,12 @@ const Login = () => {
                     variant="contained"
                     color="primary"
                     type="submit"
-                    sx={{
-                      marginTop: "25px",
-                      marginBottom: "20px",
-                    }}
                   >
                     Register
                   </Button>
                   <Typography
                     textAlign={"center"}
-                    margin={"1rem"}
+                    margin={"0.5rem"}
                     fontWeight={"600"}
                   >
                     OR

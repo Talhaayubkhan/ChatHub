@@ -11,9 +11,7 @@ const store = configureStore({
     chat: chatReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
-  middleware: (defaultMiddleware) => [
-    ...defaultMiddleware().concat(apiSlice.middleware),
-  ],
+  middleware: (mid) => [...mid().concat(apiSlice.middleware)],
 });
 
 export default store;

@@ -1,123 +1,3 @@
-// import { ListItemText, Menu, MenuItem, MenuList, Tooltip } from "@mui/material";
-// import { useDispatch, useSelector } from "react-redux";
-// import { setIsFileMenuOpen } from "../../redux-toolkit/reducers/misc";
-// import {
-//   AudioFile as AudioFileIcon,
-//   Image as ImageIcon,
-//   UploadFile as UploadFileIcon,
-//   VideoFile as VideoFileIcon,
-// } from "@mui/icons-material";
-
-// const FileMenu = ({ anchorElement }) => {
-//   const { isFileMenuOpen } = useSelector((state) => state.misc);
-//   const dispatch = useDispatch();
-
-//   const closeFileMenu = () => {
-//     dispatch(setIsFileMenuOpen(false));
-//   };
-
-//   const fileChangeHandler = (e, key) => {};
-
-//   return (
-//     <>
-//       <Menu
-//         anchorEl={anchorElement}
-//         open={isFileMenuOpen}
-//         onClose={closeFileMenu}
-//       >
-//         <div
-//           style={{
-//             width: "10rem",
-//           }}
-//         >
-//           <MenuList>
-//             <MenuItem>
-//               <Tooltip title="Image">
-//                 <ImageIcon />
-//               </Tooltip>
-//               <ListItemText style={{ marginLeft: "0.5rem" }}>
-//                 Image
-//               </ListItemText>
-
-//               <input
-//                 type="file"
-//                 multiple
-//                 accept="image/png, image/jpeg, image/gif"
-//                 style={{
-//                   display: "none",
-//                 }}
-//                 onChange={(e) => fileChangeHandler(e, "Images")}
-//               />
-//             </MenuItem>
-//           </MenuList>
-//           <MenuList>
-//             <MenuItem>
-//               <Tooltip title="Audio">
-//                 <AudioFileIcon />
-//               </Tooltip>
-//               <ListItemText style={{ marginLeft: "0.5rem" }}>
-//                 Audio
-//               </ListItemText>
-
-//               <input
-//                 type="file"
-//                 multiple
-//                 accept="audio/mpeg, audio/wav"
-//                 style={{
-//                   display: "none",
-//                 }}
-//                 onChange={(e) => fileChangeHandler(e, "Audios")}
-//               />
-//             </MenuItem>
-//           </MenuList>
-//           <MenuList>
-//             <MenuItem>
-//               <Tooltip title="File">
-//                 <UploadFileIcon />
-//               </Tooltip>
-//               <ListItemText style={{ marginLeft: "0.5rem" }}>
-//                 File Upload
-//               </ListItemText>
-
-//               <input
-//                 type="file"
-//                 multiple
-//                 accept="*"
-//                 style={{
-//                   display: "none",
-//                 }}
-//                 onChange={(e) => fileChangeHandler(e, "Files")}
-//               />
-//             </MenuItem>
-//           </MenuList>
-//           <MenuList>
-//             <MenuItem>
-//               <Tooltip title="Video">
-//                 <VideoFileIcon />
-//               </Tooltip>
-//               <ListItemText style={{ marginLeft: "0.5rem" }}>
-//                 Video
-//               </ListItemText>
-
-//               <input
-//                 type="file"
-//                 multiple
-//                 accept="video/mp4, video/webm, video/ogg"
-//                 style={{
-//                   display: "none",
-//                 }}
-//                 onChange={(e) => fileChangeHandler(e, "Videos")}
-//               />
-//             </MenuItem>
-//           </MenuList>
-//         </div>
-//       </Menu>
-//     </>
-//   );
-// };
-
-// export default FileMenu;
-
 // import {
 //   ListItemText,
 //   Menu,
@@ -346,43 +226,61 @@
 import React, { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  ListItemText,
+  Menu,
+  MenuItem,
+  Stack,
+  Tooltip,
+  Typography,
+  Divider,
+  Box,
+  alpha,
+} from "@mui/material";
+import {
   setIsFileMenuOpen,
   setUploadingLoader,
 } from "../../redux-toolkit/reducers/misc";
-import { useSendFileAttachmentsMutation } from "../../redux-toolkit/api/apiSlice";
 import {
-  Menu,
-  MenuItem,
-  Typography,
-  ListItemIcon,
-  ListItemText,
-  Box,
-} from "@mui/material";
-import {
-  Image as ImageIcon,
   AudioFile as AudioFileIcon,
-  VideoFile as VideoFileIcon,
+  Image as ImageIcon,
   UploadFile as UploadFileIcon,
+  VideoFile as VideoFileIcon,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
+import { useSendFileAttachmentsMutation } from "../../redux-toolkit/api/apiSlice";
+
+// Custom color palette
+const colors = {
+  primary: "#3A0CA3",
+  secondary: "#4361EE",
+  accent: "#7209B7",
+  background: "#F0F4F8",
+  text: "#2B2D42",
+  lightText: "#FFFFFF",
+  hover: "#4CC9F0",
+};
 
 const FileUploadMenu = ({ anchorElement, chatId }) => {
   const { isFileMenuOpen } = useSelector((state) => state.misc);
   const dispatch = useDispatch();
+
+  const imageInputRef = useRef(null);
+  const audioInputRef = useRef(null);
+  const videoInputRef = useRef(null);
+  const generalFileInputRef = useRef(null);
+
   const [sendFileAttachments] = useSendFileAttachmentsMutation();
 
-  const fileInputRefs = {
-    image: useRef(null),
-    audio: useRef(null),
-    video: useRef(null),
-    file: useRef(null),
+  const closeFileMenu = () => {
+    dispatch(setIsFileMenuOpen(false));
   };
 
-  const closeFileMenu = () => dispatch(setIsFileMenuOpen(false));
+  const triggerUpload = (ref) => () => ref.current?.click();
 
   const handleFileSelection = async (e, key) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
+
     if (files.length > 5) {
       return toast.error(`You can only upload up to 5 ${key} files at a time.`);
     }
@@ -392,13 +290,15 @@ const FileUploadMenu = ({ anchorElement, chatId }) => {
     closeFileMenu();
 
     try {
+      // fetching
       const formData = new FormData();
       formData.append("chatId", chatId);
       files.forEach((file) => formData.append("files", file));
 
       const response = await sendFileAttachments(formData);
-      if (response.data) {
-        toast.success(`Successfully uploaded ${files.length} ${key} file(s)!`, {
+
+      if (response?.data) {
+        toast.success(`Successfully uploaded ${files.length} ${key} file!`, {
           id: toastId,
         });
       } else {
@@ -416,27 +316,51 @@ const FileUploadMenu = ({ anchorElement, chatId }) => {
     }
   };
 
-  const uploadOptions = [
-    {
-      key: "image",
-      icon: ImageIcon,
-      label: "Image",
-      accept: "image/png, image/jpeg, image/gif",
-    },
-    {
-      key: "audio",
-      icon: AudioFileIcon,
-      label: "Audio",
-      accept: "audio/mpeg, audio/wav",
-    },
-    {
-      key: "video",
-      icon: VideoFileIcon,
-      label: "Video",
-      accept: "video/mp4, video/webm, video/ogg",
-    },
-    { key: "file", icon: UploadFileIcon, label: "File", accept: "*" },
-  ];
+  const UploadMenuItem = ({ icon: Icon, label, inputRef, accept }) => (
+    <MenuItem
+      onClick={triggerUpload(inputRef)}
+      sx={{
+        borderRadius: "8px",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          backgroundColor: alpha(colors.hover, 0.1),
+          transform: "translateY(-2px)",
+        },
+      }}
+    >
+      <Tooltip title={`Upload ${label}`} placement="right">
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            p: 1,
+            borderRadius: "50%",
+            backgroundColor: alpha(colors.primary, 0.1),
+          }}
+        >
+          <Icon sx={{ fontSize: 25, color: colors.primary }} />
+        </Box>
+      </Tooltip>
+      <ListItemText
+        primary={label}
+        sx={{
+          ml: 2,
+          "& .MuiTypography-root": {
+            fontWeight: 500,
+            color: colors.text,
+          },
+        }}
+      />
+      <input
+        type="file"
+        multiple
+        accept={accept}
+        style={{ display: "none" }}
+        onChange={(e) => handleFileSelection(e, label)}
+        ref={inputRef}
+      />
+    </MenuItem>
+  );
 
   return (
     <Menu
@@ -446,58 +370,59 @@ const FileUploadMenu = ({ anchorElement, chatId }) => {
       PaperProps={{
         elevation: 3,
         sx: {
-          width: "280px",
+          width: "250px",
           borderRadius: "16px",
-          padding: "16px",
-          backgroundColor: "#ffffff",
+          p: 2,
+          backgroundColor: colors.background,
+          "& .MuiList-root": {
+            p: 0,
+          },
         },
       }}
     >
-      <Typography
-        variant="h6"
-        align="center"
-        sx={{ mb: 2, fontWeight: 600, color: "#333" }}
-      >
-        Upload Files
-      </Typography>
-      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-        {uploadOptions.map(({ key, icon: Icon, label, accept }) => (
-          <MenuItem
-            key={key}
-            onClick={() => fileInputRefs[key].current?.click()}
-            sx={{
-              flexDirection: "column",
-              alignItems: "center",
-              borderRadius: "12px",
-              padding: "16px",
-              transition: "all 0.3s",
-              "&:hover": {
-                backgroundColor: "#f0f7ff",
-                transform: "translateY(-2px)",
-              },
-            }}
-          >
-            <ListItemIcon sx={{ justifyContent: "center", mb: 1 }}>
-              <Icon sx={{ fontSize: 36, color: "#1976d2" }} />
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <Typography variant="body2" align="center">
-                  {label}
-                </Typography>
-              }
-            />
-            <input
-              type="file"
-              multiple
-              accept={accept}
-              style={{ display: "none" }}
-              onChange={(e) => handleFileSelection(e, key)}
-              ref={fileInputRefs[key]}
-            />
-          </MenuItem>
-        ))}
-      </Box>
+      <Stack spacing={2}>
+        <Typography
+          variant="h6"
+          align="center"
+          sx={{ fontWeight: 600, color: colors.primary, mb: 1 }}
+        >
+          Upload Files
+        </Typography>
+
+        <UploadMenuItem
+          icon={ImageIcon}
+          label="Image"
+          inputRef={imageInputRef}
+          accept="image/png, image/jpeg, image/gif"
+        />
+
+        <Divider sx={{ my: 1, borderColor: alpha(colors.text, 0.1) }} />
+
+        <UploadMenuItem
+          icon={AudioFileIcon}
+          label="Audio"
+          inputRef={audioInputRef}
+          accept="audio/mpeg, audio/wav"
+        />
+
+        <Divider sx={{ my: 1, borderColor: alpha(colors.text, 0.1) }} />
+
+        <UploadMenuItem
+          icon={UploadFileIcon}
+          label="File Upload"
+          inputRef={generalFileInputRef}
+          accept="*"
+        />
+
+        <Divider sx={{ my: 1, borderColor: alpha(colors.text, 0.1) }} />
+
+        <UploadMenuItem
+          icon={VideoFileIcon}
+          label="Video"
+          inputRef={videoInputRef}
+          accept="video/mp4, video/webm, video/ogg"
+        />
+      </Stack>
     </Menu>
   );
 };

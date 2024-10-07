@@ -50,14 +50,14 @@ const useSendFriendRequest = (mutationHook) => {
       const response = await mutateRequest(...args);
 
       // If the request is successful, show a success message and store the response data
-      if (response.data) {
+      if (response?.data) {
         toast.success(
           response.data.message || "Friend request sent successfully!",
           {
             id: toastId,
           }
         );
-        setResponseData(response.data);
+        setResponseData(response?.data);
       } else {
         // If the request fails, show the error message from the response
         toast.error(
@@ -88,21 +88,13 @@ const useSendFriendRequest = (mutationHook) => {
 // - eventHandlers: An object mapping socket events to handler functions
 const useSocketEventListeners = (socket, eventHandlers) => {
   useEffect(() => {
-    if (!socket || !eventHandlers) {
-      toast.error("Socket or event handlers are not provided!"); // Display toast error
-      return;
-    }
-    // Convert the eventHandlers object into an array of [event, handler] pairs
-    const handlerEntries = Object.entries(eventHandlers);
-
-    // Attach event listeners to the socket
-    handlerEntries.forEach(([event, handler]) => {
+    Object.entries(eventHandlers).forEach(([event, handler]) => {
       socket.on(event, handler);
     });
 
     // Cleanup function to remove the event listeners when the component unmounts or dependencies change
     return () => {
-      handlerEntries.forEach(([event, handler]) => {
+      Object.entries(eventHandlers).forEach(([event, handler]) => {
         socket.off(event, handler);
       });
     };
