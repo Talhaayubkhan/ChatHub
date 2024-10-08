@@ -214,7 +214,7 @@ const removeGroupMembers = async (req, res) => {
     throw new BadRequest("This chat is not a group chat");
   }
 
-  if (chat.creator.toString() !== req.user.toString()) {
+  if (chat.creator.toString() !== req.user.userId.toString()) {
     throw new Unauthorized(
       "You are not allowed to remove Members from this group!"
     );
@@ -259,7 +259,7 @@ const leaveGroup = async (req, res) => {
 
   // Filter out the leaving user from the members list
   const findRemainingMembers = chat.members.filter(
-    (member) => member.toString() !== req.user.toString()
+    (member) => member.toString() !== req.user.userId.toString()
   );
 
   if (findRemainingMembers.length < 2) {
@@ -269,7 +269,7 @@ const leaveGroup = async (req, res) => {
   }
 
   // If the creator (admin) is leaving, transfer admin rights
-  if (chat.creator.toString() === req.user.toString()) {
+  if (chat.creator.toString() === req.user.userId.toString()) {
     //  Handles the scenario where there are no members left
     if (findRemainingMembers.length > 0) {
       // Randomly select a new admin from the remaining members
@@ -420,7 +420,7 @@ const chatDetails = async (req, res) => {
 };
 
 const renameGroup = async (req, res) => {
-  const chatId = req.params.chatId;
+  const { chatId } = req.params;
   const { name } = req.body;
 
   const chat = await Chat.findById(chatId);
@@ -433,7 +433,7 @@ const renameGroup = async (req, res) => {
     throw new BadRequest("This chat is not a group chat");
   }
 
-  if (chat.creator.toString() !== req.user.toString()) {
+  if (chat.creator.toString() !== req.user.userId.toString()) {
     throw new Unauthorized("You are not allowed to rename this group!");
   }
 
@@ -441,7 +441,7 @@ const renameGroup = async (req, res) => {
 
   await chat.save();
 
-  emitEvent(req, REFETCH_ALERT, chat?.members);
+  emitEvent(req, REFETCH_ALERT, chat.members);
 
   return res.status(StatusCodes.OK).json({
     message: "Group renamed successfully",
@@ -462,14 +462,17 @@ const deleteGroupChats = async (req, res) => {
 
   // Authorization check for group chat
   // Only the creator of the group chat can delete the group
-  if (chat.groupChat && chat.creator.toString() !== req.user.toString()) {
+  if (
+    chat.groupChat &&
+    chat.creator.toString() !== req.user.userId.toString()
+  ) {
     throw new Unauthorized("You are not allowed to delete this group!");
   }
 
   // Authorization check for private chat
   // Only members of the private chat can delete the chat
   // One-to-One (Private) Chats
-  if (!chat.groupChat && !chat.members.includes(req.user.toString())) {
+  if (!chat.groupChat && !chat.members.includes(req.user.userId.toString())) {
     throw new Unauthorized("You are not allowed to delete this chat!");
   }
 

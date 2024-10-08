@@ -12,7 +12,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { setIsMobileMenu } from "../../redux-toolkit/reducers/misc";
 import { useErrors, useSocketEventListeners } from "../../hooks/hooks";
 import { useSocket } from "../../socket";
-import { NEW_MESSAGE_ALERT, NEW_REQUEST } from "../../constants/events";
+import {
+  NEW_MESSAGE_ALERT,
+  NEW_REQUEST,
+  REFETCH_ALERT,
+} from "../../constants/events";
 import {
   incrementNotificationCount,
   setNewMessagesAlert,
@@ -35,7 +39,7 @@ const AppLayout = () => (WrappedComponent) => {
     const { user } = useSelector((state) => state.auth);
     const { newMessagesAlert } = useSelector((state) => state.chat);
 
-    const { isLoading, data, isError, error } = useMyChatsQuery("");
+    const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
 
     useErrors([{ isError, error }]);
 
@@ -55,7 +59,7 @@ const AppLayout = () => (WrappedComponent) => {
       dispatch(setIsMobileMenu(false));
     };
 
-    const handleNewMessageAlert = useCallback(
+    const handleNewMessageListener = useCallback(
       (data) => {
         // console.log("New message alert received:", data); // Log to check if event fires
 
@@ -65,13 +69,17 @@ const AppLayout = () => (WrappedComponent) => {
       [chatId]
     );
 
-    const handleNewRequest = useCallback(() => {
+    const handleNewRequestListener = useCallback(() => {
       dispatch(incrementNotificationCount());
     }, []);
+    const refetchListener = useCallback(() => {
+      refetch();
+    }, [refetch]);
 
     const socketEventHandlers = {
-      [NEW_MESSAGE_ALERT]: handleNewMessageAlert, // Listen for the "NEW_MESSAGE" event
-      [NEW_REQUEST]: handleNewRequest,
+      [NEW_MESSAGE_ALERT]: handleNewMessageListener, // Listen for the "NEW_MESSAGE" event
+      [NEW_REQUEST]: handleNewRequestListener,
+      [REFETCH_ALERT]: refetchListener,
     };
 
     // Attach socket event listeners when the component mounts

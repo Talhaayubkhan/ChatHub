@@ -3,7 +3,12 @@ import React, { useState } from "react";
 import { sampleUsers } from "../../constants/sampleData";
 import UserItem from "../shared/UserItem";
 
-const AddMemberDialoge = ({ open, addMember, isLoadingAddMember, chatId }) => {
+const AddMemberDialoge = ({
+  open,
+  addMember,
+  isLoadingAddGroupMember,
+  chatId,
+}) => {
   const [members, setMemebers] = useState(sampleUsers);
   const [selectedMembers, setSelectedMemebers] = useState([]);
 
@@ -27,7 +32,7 @@ const AddMemberDialoge = ({ open, addMember, isLoadingAddMember, chatId }) => {
   };
   return (
     <>
-      <Dialog open onClose={closeHanlder}>
+      <Dialog open={addMember} onClose={closeHanlder}>
         <Stack p={"2rem"} width={"30rem"}>
           <DialogTitle
             textAlign={"center"}

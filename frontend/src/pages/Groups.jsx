@@ -441,11 +441,16 @@ import AvatarCard from "../components/shared/AvatarCard";
 import { sampleChats, sampleUsers } from "../constants/sampleData";
 import UserItem from "../components/shared/UserItem";
 import {
+  useAddGroupMemberMutation,
   useGetMyGroupsQuery,
   useMembersChatDetailsQuery,
+  useRemoveGroupMemberMutation,
+  useRenameGroupMutation,
 } from "../redux-toolkit/api/apiSlice";
-import { useErrors } from "../hooks/hooks";
+import { useErrors, useSendFriendRequest } from "../hooks/hooks";
 import { LayoutLoaders } from "../components/layout/Loaders";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsAddMember } from "../redux-toolkit/reducers/misc";
 
 const ConfrimDeleteDialoge = lazy(() =>
   import("../components/dialogs/ConfrimDeleteDialoge")
@@ -459,6 +464,9 @@ const Groups = () => {
   const theme = useTheme();
   const chatId = useSearchParams()[0].get("group");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { isAddMember } = useSelector((state) => state.misc);
 
   const myGroups = useGetMyGroupsQuery("");
 
@@ -468,12 +476,24 @@ const Groups = () => {
       skip: !chatId,
     }
   );
-  console.log(groupDetails.data);
+
+  const [updatingGroup, isUpdatingGroup] = useSendFriendRequest(
+    useRenameGroupMutation
+  );
+  const [addGroupMember, isLoadingAddGroupMember] = useSendFriendRequest(
+    useAddGroupMemberMutation
+  );
+  const [remvoeGroupMember, isLoadingRemoveGroupMember] = useSendFriendRequest(
+    useRemoveGroupMemberMutation
+  );
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [groupUpdatedValue, setGroupUpdatedValue] = useState("");
   const [confrimDeleteDialog, setConfrimDeleteDialog] = useState(false);
+
+  const [showMembers, setIsShowMembers] = useState([]);
 
   const errors = [
     {
@@ -487,6 +507,22 @@ const Groups = () => {
   ];
 
   useErrors(errors);
+
+  useEffect(() => {
+    const groupData = groupDetails.data;
+    if (groupData) {
+      setGroupName(groupData.chat.name);
+      setGroupUpdatedValue(groupData.chat.name);
+      setIsShowMembers(groupData.chat.members);
+    }
+
+    return () => {
+      setGroupName("");
+      setGroupUpdatedValue("");
+      setIsShowMembers([]);
+      setIsEdit(false);
+    };
+  }, [groupDetails.data]);
 
   const navigateBack = () => {
     navigate("/");
@@ -502,11 +538,16 @@ const Groups = () => {
 
   const updateGroupName = () => {
     setIsEdit(false);
+    updatingGroup("Updating Group Name....", {
+      chatId,
+      name: groupUpdatedValue,
+    });
     setGroupName(groupUpdatedValue);
   };
 
   const AddMember = () => {
-    console.log("add member");
+    dispatch(setIsAddMember(true));
+    // console.log("add member");
   };
 
   const openConfrimDeleteMember = () => {
@@ -517,7 +558,8 @@ const Groups = () => {
     setConfrimDeleteDialog(false);
   };
 
-  const removeMemberHandler = (id) => {
+  const removeMemberHandler = (userId) => {
+    remvoeGroupMember("Removing Group Member....", { chatId, userId });
     console.log("remove member", id);
   };
 
@@ -601,7 +643,11 @@ const Groups = () => {
             size="medium"
             sx={{ marginRight: "1rem" }}
           />
-          <IconButton onClick={updateGroupName} color="primary">
+          <IconButton
+            onClick={updateGroupName}
+            disabled={isUpdatingGroup}
+            color="primary"
+          >
             <Done />
           </IconButton>
         </motion.div>
@@ -624,7 +670,11 @@ const Groups = () => {
           >
             {groupName}
           </Typography>
-          <IconButton onClick={() => setIsEdit(true)} color="primary">
+          <IconButton
+            onClick={() => setIsEdit(true)}
+            disabled={isUpdatingGroup}
+            color="primary"
+          >
             <EditIcon />
           </IconButton>
         </motion.div>
@@ -661,7 +711,7 @@ const Groups = () => {
             boxShadow: theme.shadows[4],
           }}
         >
-          {sampleUsers.map((user) => (
+          {showMembers?.map((user) => (
             <UserItem
               key={user._id}
               user={user}
