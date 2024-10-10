@@ -23,16 +23,15 @@ const ChatItem = ({
         to={`/chat/${_id}`}
         onContextMenu={(e) => {
           e.preventDefault();
-          // console.log("Right-click event detected for chat:", _id);
           handleDeleteChat(e, _id, groupChat);
         }}
-        // onClick={() => console.log("Click event detected for chat:", _id)}
       >
         <div
           style={{
             display: "flex",
+            // gap: "1rem",
             alignItems: "center",
-            padding: 10,
+            padding: "0.5rem",
             // borderBottom: "2px solid lightgray",
             borderRadius: "2px",
             backgroundColor: sameSender ? "#42a5f5" : "unset",
@@ -46,7 +45,8 @@ const ChatItem = ({
             <Typography
               sx={{
                 fontWeight: "bold",
-                fontSize: "1.2rem",
+                padding: "1rem",
+                fontSize: "1.3rem",
                 maxWidth: "30rem",
                 overflow: "hidden",
                 textOverflow: "ellipsis",

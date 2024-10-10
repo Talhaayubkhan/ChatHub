@@ -17,9 +17,9 @@ const AvatarCard = ({ avatar = [], max = 4 }) => {
               key={Math.ceil(Math.random() * 100) + 1}
               src={transformImage(src)}
               alt={`Avatar ${index}`}
-              style={{
-                width: "50px",
-                height: "50px",
+              sx={{
+                width: "3rem",
+                height: "3rem",
                 position: "absolute",
                 left: {
                   xs: `${0.5 + index}rem`,

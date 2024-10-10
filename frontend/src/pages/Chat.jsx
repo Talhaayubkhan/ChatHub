@@ -26,6 +26,7 @@ import { setIsFileMenuOpen } from "../redux-toolkit/reducers/misc";
 import FileUploadMenu from "../components/dialogs/FileMenu";
 import { removeMessagesAlert } from "../redux-toolkit/reducers/chat.js";
 import { TypingLoader } from "../components/layout/Loaders.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Chat = ({ chatId, user }) => {
   // console.log(chatId, user);
@@ -40,6 +41,7 @@ const Chat = ({ chatId, user }) => {
   const socket = useSocket();
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [newMessage, setNewMessage] = useState("");
   // State for storing real-time messages received through socket
@@ -132,6 +134,10 @@ const Chat = ({ chatId, user }) => {
     if (saveBottomRef.current)
       saveBottomRef.current.scrollIntoView({ behavior: "smooth" });
   }, [realTimeMessages]);
+
+  useEffect(() => {
+    if (!members) return navigate("/");
+  }, [members]);
 
   // Callback function to handle the receipt of a new message via socket
   const newMessageListener = useCallback(

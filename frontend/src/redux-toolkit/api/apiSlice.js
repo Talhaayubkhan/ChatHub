@@ -120,20 +120,28 @@ export const apiSlice = createApi({
     }),
 
     addGroupMember: builder.mutation({
-      query: ({ chatId, userId }) => ({
+      query: ({ members, chatId }) => ({
         url: "chat/addmembers",
         method: "PUT",
+        credentials: "include",
+        body: { members, chatId },
+      }),
+      invalidatesTags: ["Chat"],
+    }),
+    removeGroupMember: builder.mutation({
+      query: ({ chatId, userId }) => ({
+        url: "chat/removemember",
+        method: "DELETE",
         credentials: "include",
         body: { chatId, userId },
       }),
       invalidatesTags: ["Chat"],
     }),
-    removeGroupMember: builder.mutation({
-      query: ({ members, chatId }) => ({
-        url: "chat/removemember",
-        method: "DELELTE",
+    deleteGroupChats: builder.mutation({
+      query: (chatId) => ({
+        url: `chat/${chatId}`,
+        method: "DELETE",
         credentials: "include",
-        body: { members, chatId },
       }),
       invalidatesTags: ["Chat"],
     }),
@@ -155,4 +163,5 @@ export const {
   useRenameGroupMutation,
   useAddGroupMemberMutation,
   useRemoveGroupMemberMutation,
+  useDeleteGroupChatsMutation,
 } = apiSlice;

@@ -16,7 +16,7 @@ const ChatList = ({
       direction={"column"}
       overflow={"auto"}
       height={"100%"}
-      spacing={1.5} // Space between chat items
+      spacing={2} // Space between chat items
       sx={{
         backgroundColor: "#ffffff", // White background for contrast
         boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)", // Deeper shadow for a card-like effect
