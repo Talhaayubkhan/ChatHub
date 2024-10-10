@@ -159,24 +159,29 @@ const addGroupMembers = async (req, res) => {
     User.findById(member, "name")
   );
 
-  if (!allNewAddMembersPromise) {
-    throw new BadRequest("Members not found");
-  }
-
   const allNewAddMembers = await Promise.all(allNewAddMembersPromise);
 
-  // make sure do not add duplicate members
-  const detectDuplicateMembers = allNewAddMembers
-    .filter((member) => !chat.members.includes(member._id.toString()))
-    .map((i) => i._id);
+  if (!allNewAddMembers || allNewAddMembers.includes(null)) {
+    throw new BadRequest("Some members were not found");
+  }
 
-  if (detectDuplicateMembers) {
+  // Detect duplicate members (those already in the chat)
+  const detectDuplicateMembers = allNewAddMembers.filter((member) =>
+    chat.members.some(
+      (existingMember) => existingMember.toString() === member._id.toString()
+    )
+  );
+
+  // If there are any duplicate members, throw an error
+  if (detectDuplicateMembers.length > 0) {
     throw new BadRequest("You can't add duplicate members to a group chat");
   }
 
-  const membersAdded = chat.members.push(...detectDuplicateMembers);
+  // Add the new members to the chat
+  chat.members.push(...allNewAddMembers.map((member) => member._id));
 
-  if (membersAdded.length > 30) {
+  // Ensure there aren't too many members
+  if (chat.members.length > 30) {
     throw new BadRequest("You can't add more than 30 members to a group chat");
   }
 
@@ -226,6 +231,8 @@ const removeGroupMembers = async (req, res) => {
     );
   }
 
+  const allChatMembers = chat.members.map((member) => member.toString());
+
   // Filter out the user to be removed from the members list
   // This creates a new array excluding the user with userId
   chat.members = chat.members.filter(
@@ -240,7 +247,7 @@ const removeGroupMembers = async (req, res) => {
     chat.members,
     `${thatUserRemove.name} has been removed`
   );
-  emitEvent(req, REFETCH_ALERT, chat.members);
+  emitEvent(req, REFETCH_ALERT, allChatMembers);
 
   return res.status(StatusCodes.OK).json({
     message: "Members removed successfully",
@@ -485,33 +492,25 @@ const deleteGroupChats = async (req, res) => {
     attachments: { $exists: true, $ne: [] },
   });
 
-  if (!messagesWithAttachments) {
-    throw new NotFound("Messages are not Found!");
-  }
-
   const public_ids = [];
 
   // Collect the public IDs of all attachments
   //  These public_ids are unique identifiers used by Cloudinary (or any other cloud storage service) to manage files
-  messagesWithAttachments.forEach(({ attachments }) => {
-    attachments.forEach(({ public_id }) => {
-      public_ids.push(public_id);
+  if (messagesWithAttachments.length > 0) {
+    // Collect public IDs for cloud attachments
+    messagesWithAttachments.forEach(({ attachments }) => {
+      attachments.forEach(({ public_id }) => {
+        public_ids.push(public_id);
+      });
     });
-  });
+  }
 
-  // Perform parallel deletion of:
-  // 1. Files from Cloudinary
-  // 2. The chat document from the database
-  // 3. All messages associated with the chat from the database
-  const filesDeleted = await Promise.all([
-    deleteFilesFromCloudinary(public_ids),
+  // Perform deletions in parallel: Cloudinary files, chat, messages
+  await Promise.all([
+    public_ids.length > 0 ? deleteFilesFromCloudinary(public_ids) : null, // Handle no files case
     chat.deleteOne(),
     Message.deleteMany({ chat: chatId }),
   ]);
-
-  if (!filesDeleted) {
-    throw new NotFound("Files are not Found!");
-  }
 
   emitEvent(req, REFETCH_ALERT, members);
 
@@ -528,6 +527,16 @@ const getMessages = async (req, res) => {
 
   const chatsPerPage = 20;
   const skip = (page - 1) * chatsPerPage;
+
+  const chat = await Chat.findById(chatId);
+
+  if (!chat) {
+    throw new NotFound("Chats are not Found!");
+  }
+
+  if (!chat.members.includes(req.user.userId.toString())) {
+    throw new Unauthorized("You are not allowed to view this chat!");
+  }
 
   const [messages, totalMessageCounts] = await Promise.all([
     Message.find({ chat: chatId })
