@@ -3,6 +3,7 @@ import moment from "moment";
 import { memo } from "react";
 import { fileFormat } from "../../lib/features";
 import RenderAttachMent from "./RenderAttachMent";
+import { motion } from "framer-motion";
 
 const MessageComponent = ({ message, user }) => {
   // console.log("message are", message);
@@ -12,7 +13,11 @@ const MessageComponent = ({ message, user }) => {
 
   const timeAgo = moment(timestamp).fromNow();
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, x: "-100%" }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      whileInView={{ opacity: 1, x: 0 }}
       style={{
         alignSelf: sameSender ? "flex-end" : "flex-start",
         backgroundColor: "white",
@@ -52,7 +57,7 @@ const MessageComponent = ({ message, user }) => {
       <Typography variant="caption" color={"text.secondary"}>
         {timeAgo}
       </Typography>
-    </div>
+    </motion.div>
   );
 };
 

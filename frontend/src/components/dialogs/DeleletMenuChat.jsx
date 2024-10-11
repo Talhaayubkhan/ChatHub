@@ -36,24 +36,55 @@
 
 // export default DeleletMenuChat;
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsDeleteMenu } from "../../redux-toolkit/reducers/misc";
 import { Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
-import { Delete as DeleteIcon } from "lucide-react";
+import {
+  Delete as DeleteIcon,
+  ExitToApp as ExitToAppIcon,
+} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { useSendFriendRequest } from "../../hooks/hooks";
+import {
+  useDeleteGroupChatsMutation,
+  useLeaveGroupMutation,
+} from "../../redux-toolkit/api/apiSlice";
 
 const DeleteMenuChat = ({ deleteMenuAnchor }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isDeleteMenu } = useSelector((state) => state.misc);
+  const { isDeleteMenu, selectedDeleteChat } = useSelector(
+    (state) => state.misc
+  );
 
+  const [deleteChat, _, deleteChatData] = useSendFriendRequest(
+    useDeleteGroupChatsMutation
+  );
+  const [leaveGroup, __, leaveGroupData] = useSendFriendRequest(
+    useLeaveGroupMutation
+  );
+
+  const isGroup = selectedDeleteChat.groupChat;
   const closeHandler = () => {
     dispatch(setIsDeleteMenu(false));
+    deleteMenuAnchor.current = null;
   };
 
-  const handleDelete = () => {
+  const deleteChatHandler = () => {
     // Add your delete logic here
     closeHandler();
+    deleteChat("Deleting Chat....", selectedDeleteChat.chatId);
   };
+
+  const leaveChatHandler = () => {
+    closeHandler();
+    leaveGroup("Leaving Group Chat....", selectedDeleteChat.chatId);
+  };
+
+  useEffect(() => {
+    if (deleteChatData || leaveGroupData) navigate("/");
+  }, [deleteChatData, leaveGroupData]);
 
   return (
     <Menu
@@ -70,13 +101,20 @@ const DeleteMenuChat = ({ deleteMenuAnchor }) => {
       }}
     >
       <MenuItem
-        onClick={handleDelete}
+        onClick={isGroup ? leaveChatHandler : deleteChatHandler}
         className="hover:bg-gray-100 transition-colors duration-200"
       >
         <ListItemIcon>
-          <DeleteIcon className="text-red-500" size={20} />
+          {selectedDeleteChat.groupChat ? (
+            <ExitToAppIcon className="text-yellow-500" size={20} />
+          ) : (
+            <DeleteIcon className="text-red-500" size={20} />
+          )}
         </ListItemIcon>
-        <ListItemText primary="Delete Chat" className="text-red-500" />
+        <ListItemText
+          primary={isGroup ? "Leave Group" : "Delete Chat"}
+          className={isGroup ? "text-yellow-500" : "text-red-500"}
+        />{" "}
       </MenuItem>
     </Menu>
   );

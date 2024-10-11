@@ -2,6 +2,7 @@ import React, { memo } from "react";
 import { Link } from "../styles/StyledComponent";
 import { Box, Stack, Typography } from "@mui/material";
 import AvatarCard from "./AvatarCard";
+import { motion } from "framer-motion";
 
 const ChatItem = ({
   avatar = [],
@@ -26,7 +27,12 @@ const ChatItem = ({
           handleDeleteChat(e, _id, groupChat);
         }}
       >
-        <div
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          whileHover={{ scale: 1.05 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           style={{
             display: "flex",
             // gap: "1rem",
@@ -45,8 +51,8 @@ const ChatItem = ({
             <Typography
               sx={{
                 fontWeight: "bold",
-                padding: "1rem",
-                fontSize: "1.3rem",
+                padding: "0.8rem",
+                fontSize: "1.4rem",
                 maxWidth: "30rem",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -74,7 +80,7 @@ const ChatItem = ({
               }}
             />
           )}
-        </div>
+        </motion.div>
       </Link>
     </>
   );

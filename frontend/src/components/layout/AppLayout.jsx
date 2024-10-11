@@ -4,7 +4,6 @@ import Header from "./Header";
 import Title from "../shared/Title";
 import { Drawer, Grid, Skeleton } from "@mui/material";
 import ChatList from "../specific/ChatList";
-// import { sampleChats } from "../../constants/sampleData";
 import { useNavigate, useParams } from "react-router-dom";
 import Profile from "../specific/Profile";
 import { useMyChatsQuery } from "../../redux-toolkit/api/apiSlice";
@@ -12,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   setIsDeleteMenu,
   setIsMobileMenu,
+  setSelectedDeleteChat,
 } from "../../redux-toolkit/reducers/misc";
 import { useErrors, useSocketEventListeners } from "../../hooks/hooks";
 import { useSocket } from "../../socket";
@@ -56,8 +56,9 @@ const AppLayout = () => (WrappedComponent) => {
       });
     }, [newMessagesAlert]);
 
-    const handleDeleteChat = (e, _id, groupChat) => {
+    const handleDeleteChat = (e, chatId, groupChat) => {
       dispatch(setIsDeleteMenu(true));
+      dispatch(setSelectedDeleteChat({ chatId, groupChat }));
       deleteMenuAnchor.current = e.currentTarget;
     };
 
