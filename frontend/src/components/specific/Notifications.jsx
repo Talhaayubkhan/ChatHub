@@ -437,15 +437,14 @@ import {
   useGetNotificationsQuery,
   useAcceptFriendRequestMutation,
 } from "../../redux-toolkit/api/apiSlice";
-import { useErrors } from "../../hooks/hooks";
-import toast from "react-hot-toast";
+import { useErrors, useSendFriendRequest } from "../../hooks/hooks";
 
 const Notifications = () => {
   const { isNotifications } = useSelector((state) => state.misc);
   const dispatch = useDispatch();
 
   const { isLoading, data, error, isError } = useGetNotificationsQuery();
-  const [acceptRequest] = useAcceptFriendRequestMutation();
+  const [acceptRequest] = useSendFriendRequest(useAcceptFriendRequestMutation);
 
   const handleClose = () => {
     dispatch(setIsNotifications(false));
@@ -453,18 +452,21 @@ const Notifications = () => {
 
   const friendReqNotification = async ({ _id, accept }) => {
     dispatch(setIsNotifications(false));
-    try {
-      const response = await acceptRequest({ requestId: _id, accept });
-      if (response?.data?.success) {
-        toast.success("Friend request accepted!");
-      } else {
-        toast.error(
-          response?.data?.error?.message || "Friend request Rejected."
-        );
-      }
-    } catch {
-      toast.error("Oops! Something went wrong.");
-    }
+
+    await acceptRequest("Accepting Request...", { requestId: _id, accept });
+
+    // try {
+    //   const response = await acceptRequest({ requestId: _id, accept });
+    //   if (response?.data?.success) {
+    //     toast.success("Friend request accepted!");
+    //   } else {
+    //     toast.error(
+    //       response?.data?.error?.message || "Friend request Rejected."
+    //     );
+    //   }
+    // } catch {
+    //   toast.error("Oops! Something went wrong.");
+    // }
   };
 
   useErrors([{ error, isError }]);

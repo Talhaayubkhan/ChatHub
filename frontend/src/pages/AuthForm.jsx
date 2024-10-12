@@ -517,6 +517,7 @@ const theme = createTheme({
 });
 
 const Login = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -536,6 +537,11 @@ const Login = () => {
 
   const loginUser = async (e) => {
     e.preventDefault();
+
+    const toastId = toast.loading("Logging In...");
+
+    setIsLoading(true);
+
     const config = {
       withCredentials: true,
       headers: {
@@ -553,8 +559,10 @@ const Login = () => {
         config
       );
       if (response.data.success) {
-        dispatch(userExists(true));
-        toast.success("Login Successful");
+        dispatch(userExists(response?.data?.user));
+        toast.success("Login Successful", {
+          id: toastId,
+        });
       } else {
         toast.error(
           response?.data?.message ||
@@ -569,12 +577,21 @@ const Login = () => {
           ? "Server error. Please try again later."
           : "Something went wrong. Please try again.";
 
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+        id: toastId,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const regitserUser = async (e) => {
     e.preventDefault();
+
+    const toastId = toast.loading("Registering User....");
+
+    setIsLoading(true);
+
     const formData = new FormData();
     formData.append("name", name.value);
     formData.append("username", username.value);
@@ -602,9 +619,12 @@ const Login = () => {
       );
 
       if (response?.data?.success) {
-        dispatch(userExists(true));
+        dispatch(userExists(response?.data?.user));
         toast.success(
-          response?.data?.message || "User Registered Successfully"
+          response?.data?.message || "User Registered Successfully",
+          {
+            id: toastId,
+          }
         );
       } else {
         toast.error(
@@ -619,7 +639,11 @@ const Login = () => {
           : error?.response?.status === 500
           ? "Server error. Please try again later."
           : "Something went wrong. Please try again.";
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+        id: toastId,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -694,6 +718,7 @@ const Login = () => {
                     variant="contained"
                     color="primary"
                     type="submit"
+                    disabled={isLoading}
                     sx={{
                       marginTop: "20px",
                       marginBottom: "15px",
@@ -708,7 +733,12 @@ const Login = () => {
                   >
                     OR
                   </Typography>
-                  <Button color="secondary" fullWidth onClick={toggleButton}>
+                  <Button
+                    disabled={isLoading}
+                    color="secondary"
+                    fullWidth
+                    onClick={toggleButton}
+                  >
                     Create an Account
                   </Button>
                 </form>
@@ -819,6 +849,7 @@ const Login = () => {
                     variant="contained"
                     color="primary"
                     type="submit"
+                    disabled={isLoading}
                   >
                     Register
                   </Button>
@@ -829,7 +860,12 @@ const Login = () => {
                   >
                     OR
                   </Typography>
-                  <Button color="secondary" fullWidth onClick={toggleButton}>
+                  <Button
+                    disabled={isLoading}
+                    color="secondary"
+                    fullWidth
+                    onClick={toggleButton}
+                  >
                     Login Instead
                   </Button>
                 </form>

@@ -82,11 +82,11 @@ const ChatManagement = () => {
         id: user._id,
         avatar: user.avatar.map((user) => transformImage(user, 80)),
         // show member with avatar images
-        members: user.members.map((user) => transformImage(user.avatar, 80)),
+        members: user.members.map((user) => transformImage(user?.avatar, 80)),
         // show creator with avatar images
         creator: {
           name: user.creator.name,
-          avatar: transformImage(user.creator.avatar, 80),
+          avatar: transformImage(user?.creator?.avatar, 80),
         },
       }))
     );

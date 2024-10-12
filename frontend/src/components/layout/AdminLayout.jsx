@@ -17,6 +17,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { useLocation, Link as RouterLink, Navigate } from "react-router-dom";
 
 const Link = styled(RouterLink)`
@@ -131,9 +132,9 @@ const Sidebar = ({ w = "100%" }) => {
   );
 };
 
-const isAdmin = true;
-
 const AdminLayout = ({ children }) => {
+  const { isAdmin } = useSelector((state) => state.auth);
+
   const [isMobile, setIsMobile] = useState(false);
   const handleMobile = () => {
     setIsMobile(!isMobile);

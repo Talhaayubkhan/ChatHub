@@ -171,11 +171,12 @@ const Chat = ({ chatId, user }) => {
 
   // TODO: Fix later
   const alertListener = useCallback(
-    (content) => {
-      console.log("ALERT received:", content); // Debugging line
+    (data) => {
+      // console.log("ALERT received:", content); // Debugging line
+      if (data.chatId !== chatId) return;
 
       const messageForAlert = {
-        content,
+        content: data.message,
         sender: {
           _id: "aq342easda21232kadsm",
           name: "Admin",
