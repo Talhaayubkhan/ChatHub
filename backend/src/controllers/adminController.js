@@ -5,12 +5,15 @@ import { setAdminTokenCookie } from "../utils/index.js";
 
 // const
 const adminLogin = async (req, res) => {
-  const { secretKey } = req.body;
+  console.log("admin login", req.body);
+  const { secretKey, username } = req.body;
 
   const adminSecretKey = process.env.ADMIN_SECRET_KEY || "khakhanhellokhan";
 
-  if (!adminSecretKey) {
-    throw new BadRequest("Admin secret key not set in environment variables");
+  console.log(adminSecretKey);
+
+  if (!username || !secretKey) {
+    throw new BadRequest("Please provide username and secret key");
   }
 
   if (secretKey !== adminSecretKey) {
@@ -22,7 +25,7 @@ const adminLogin = async (req, res) => {
   if (!isMatchedSecretKey) {
     throw new Unauthorized("Invalid secret key");
   }
-  const tokenPayload = { secretKey: adminSecretKey };
+  const tokenPayload = { username };
   setAdminTokenCookie({ res, user: tokenPayload });
 
   return res.status(StatusCodes.OK).json({

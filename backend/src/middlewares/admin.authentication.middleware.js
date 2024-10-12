@@ -25,13 +25,18 @@ const isAuthenticatedAdmin = (req, res, next) => {
       throw new Unauthenticated("Admin Payload Token Invalid");
     }
 
-    const secretKey = checkAdminTokenPayload?.secretKey;
+    const { secretKey, username } = checkAdminTokenPayload;
 
-    if (!secretKey || !secretKey !== process.env.ADMIN_SECRET_KEY) {
+    if (!secretKey || secretKey !== process.env.ADMIN_SECRET_KEY) {
       throw new Unauthorized("Unauthorized to access admin resource");
+    }
+
+    if (!username) {
+      throw new Unauthorized("Username is required");
     }
     req.user = {
       secretKey,
+      username,
     };
 
     next();
@@ -42,15 +47,15 @@ const isAuthenticatedAdmin = (req, res, next) => {
   }
 };
 
-//  Middleware to restrict access based on user roles
-const authPermisson = (...roles) => {
-  return (req, res, next) => {
-    // console.log(req.user?.role);
-    if (!roles.includes(req.user?.role)) {
-      throw new Unauthorized("You are not Access to this resource!");
-    }
-    next();
-  };
-};
+// //  Middleware to restrict access based on user roles
+// const authPermisson = (...roles) => {
+//   return (req, res, next) => {
+//     // console.log(req.user?.role);
+//     if (!roles.includes(req.user?.role)) {
+//       throw new Unauthorized("You are not Access to this resource!");
+//     }
+//     next();
+//   };
+// };
 
-export { isAuthenticatedAdmin, authPermisson };
+export { isAuthenticatedAdmin };

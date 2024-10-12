@@ -82,7 +82,7 @@ const registerUser = async (req, res) => {
   cookieResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.CREATED).json({
-    user: tokenUser,
+    user,
     avatar: avatar,
     success: true,
     message: "User Registered Successfully!",
@@ -122,7 +122,7 @@ const loginUser = async (req, res) => {
 
   res.status(StatusCodes.OK).json({
     success: true,
-    user: tokenUser,
+    user,
     message: "User Login Successfully",
   });
 };

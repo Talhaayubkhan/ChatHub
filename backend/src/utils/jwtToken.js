@@ -73,25 +73,20 @@ const cookieResponse = ({ res, user, expireToken = false }) => {
 const setAdminTokenCookie = ({ res, user: adminUser, expireToken = false }) => {
   if (!expireToken) {
     const adminToken = createJWT({ payload: adminUser });
-
-    if (!adminToken) {
-      throw new Unauthenticated("Failed to Create JWT Token");
-    }
-
     res.cookie("admin-token", adminToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      sameSite: "lax", // Set SameSite attribute to "Lax" for CSRF protection
+      secure: false, // false for local development only
       signed: true,
     });
   } else {
     res.cookie("admin-token", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
       expires: new Date(0),
-      sameSite: "None", // Set SameSite attribute to "Lax" for CSRF protection
-      signed: true, // Mark cookie as signed
+      sameSite: "lax", // Set SameSite attribute to "Lax" for CSRF protection
+      secure: false,
+      signed: true,
     });
   }
 };

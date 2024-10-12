@@ -13,10 +13,7 @@ import {
   handleAdminValidationError,
 } from "../lib/admin.Validator.js";
 
-import {
-  isAuthenticatedAdmin,
-  authPermisson,
-} from "../middlewares/admin.authentication.middleware.js";
+import { isAuthenticatedAdmin } from "../middlewares/admin.authentication.middleware.js";
 const router = express.Router();
 
 router
@@ -26,10 +23,7 @@ router
 // Apply isAuthenticated middleware to all subsequent routes
 router.use(isAuthenticatedAdmin);
 
-// Apply authPermission middleware to restrict access to admin-only routes
-// router.use(authPermisson("admin"));
-
-router.route("/logout").get(isAuthenticatedAdmin, adminLogout);
+router.route("/logout").get(adminLogout);
 router.route("/").get(getAdminData);
 router.route("/users").get(getAllUsers);
 router.route("/chats").get(getAllChats);
