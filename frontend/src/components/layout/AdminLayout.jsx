@@ -17,8 +17,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, Link as RouterLink, Navigate } from "react-router-dom";
+import { adminLogOut } from "../../redux-toolkit/thunks/admin";
 
 const Link = styled(RouterLink)`
   text-decoration: none;
@@ -63,10 +64,12 @@ const adminTabs = [
 
 const Sidebar = ({ w = "100%" }) => {
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const logoutHandler = () => {
     // Add your logout logic here
     console.log("Logout clicked");
+    dispatch(adminLogOut());
   };
 
   return (
@@ -133,7 +136,7 @@ const Sidebar = ({ w = "100%" }) => {
 };
 
 const AdminLayout = ({ children }) => {
-  const { isAdmin } = useSelector((state) => state.auth);
+  const { admin: isAdmin } = useSelector((state) => state.auth);
 
   const [isMobile, setIsMobile] = useState(false);
   const handleMobile = () => {

@@ -14,8 +14,26 @@ import {
   CurveButton,
 } from "../../components/styles/StyledComponent";
 import { DoughnutChart, LineChart } from "../../components/specific/Chart";
-
+import { useFetchData } from "6pp";
+import server from "../../constants/config";
+import { LayoutLoaders } from "../../components/layout/Loaders";
+import { useErrors } from "../../hooks/hooks";
 const Dashboard = () => {
+  const { data, isLoading, error } = useFetchData(
+    `${server}/api/v1/admin/stats`,
+    "dashboard-stats"
+  );
+
+  console.log(data);
+
+  const { dashboardStats } = data || {};
+
+  useErrors([
+    {
+      isError: error,
+      error: error,
+    },
+  ]);
   const Appbar = (
     <Paper
       elevation={2}
@@ -54,13 +72,27 @@ const Dashboard = () => {
       spacing={"2rem"}
       marginTop={"2rem"}
     >
-      <Widget title={"Users"} value={40} Icon={<PersonIcon />} />
-      <Widget title={"Messages"} value={10} Icon={<GroupIcon />} />
-      <Widget title={"Chats"} value={23} Icon={<MessageIcon />} />
+      <Widget
+        title={"Users"}
+        value={dashboardStats?.usersCount}
+        Icon={<PersonIcon />}
+      />
+      <Widget
+        title={"Messages"}
+        value={dashboardStats?.totalChatsCount}
+        Icon={<GroupIcon />}
+      />
+      <Widget
+        title={"Chats"}
+        value={dashboardStats?.messagesCount}
+        Icon={<MessageIcon />}
+      />
     </Stack>
   );
 
-  return (
+  return isLoading ? (
+    <LayoutLoaders />
+  ) : (
     <AdminLayout>
       <Container component={"main"}>
         {Appbar}
@@ -84,7 +116,7 @@ const Dashboard = () => {
             <Typography variant="h6" fontWeight={"bold"}>
               Last Seven Days Messages
             </Typography>
-            <LineChart chartDataArray={[10, 2, 30]} />
+            <LineChart values={dashboardStats?.messagesChart || []} />
           </Paper>
           <Paper
             elevation={3}
@@ -102,7 +134,11 @@ const Dashboard = () => {
           >
             <DoughnutChart
               labels={["Single Chats", "Group Chats"]}
-              chartDataArray={[45, 60]}
+              chartDataArray={[
+                dashboardStats?.totalChatsCount - dashboardStats?.groupsCount ||
+                  0,
+                dashboardStats?.groupsCount || 0,
+              ]}
             />
             <Stack
               position={"absolute"}

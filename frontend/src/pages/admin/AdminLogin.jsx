@@ -111,7 +111,7 @@
 // };
 
 // export default AdminLogin;
-
+// AdminLogin.js
 import {
   Avatar,
   Button,
@@ -121,32 +121,37 @@ import {
   Typography,
   Box,
   CssBaseline,
-  Grid,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { useInputValidation } from "6pp";
+import { useInputValidation } from "6pp"; // Custom hook for input validation
 import { useDispatch, useSelector } from "react-redux";
-import { adminLogin } from "../../redux-toolkit/thunks/admin";
-const AdminLogin = () => {
-  const { isAdmin } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+import { adminLogin, getVerifiedAdmin } from "../../redux-toolkit/thunks/admin";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-  const username = useInputValidation("");
-  const secretKey = useInputValidation("");
+const AdminLogin = () => {
+  const { admin: isAdmin } = useSelector((state) => state.auth); // Get admin status from state
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const secretKey = useInputValidation(""); // Only handle secretKey now
 
   const submitHandler = (e) => {
     e.preventDefault();
     dispatch(
-      adminLogin({ secretKey: secretKey.value, username: username.value })
+      adminLogin({ secretKey: secretKey.value }) // Only dispatch secretKey
     );
   };
+  useEffect(() => {
+    dispatch(getVerifiedAdmin());
+  }, [dispatch]);
 
-  if (isAdmin) navigate("/admin/dashboard");
+  if (isAdmin) navigate("/admin/dashboard"); // Redirect to admin dashboard if login is successful
 
   return (
     <div
       style={{
-        backgroundImage: "linear-gradient(135deg, #14213d 30%, #000000 100%)", // Vibrant gradient background
+        backgroundImage: "linear-gradient(135deg, #14213d 30%, #000000 100%)",
         height: "100vh",
         display: "flex",
         alignItems: "center",
@@ -161,7 +166,7 @@ const AdminLogin = () => {
             padding: { xs: 2, sm: 2 },
             borderRadius: 3,
             boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
-            backgroundColor: "#ffffff", // Clean background for form
+            backgroundColor: "#ffffff",
           }}
         >
           <Box
@@ -191,20 +196,6 @@ const AdminLogin = () => {
               margin="normal"
               required
               fullWidth
-              name="username"
-              label="Username"
-              type="text"
-              id="username"
-              autoComplete="username"
-              value={username.value}
-              onChange={username.changeHandler}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
               label="Secret Key"
               name="password"
               type="password"
@@ -223,7 +214,7 @@ const AdminLogin = () => {
                 padding: { xs: "10px", sm: "12px" },
                 fontSize: { xs: "0.9rem", sm: "1rem" },
                 mb: 2,
-                background: "linear-gradient(90deg, #1E88E5, #43A047)", // Gradient button for visual interest
+                background: "linear-gradient(90deg, #1E88E5, #43A047)",
               }}
             >
               Log In

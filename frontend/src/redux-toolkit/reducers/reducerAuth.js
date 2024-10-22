@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { adminLogin } from "../thunks/admin";
+import { adminLogin, adminLogOut, getVerifiedAdmin } from "../thunks/admin";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -24,7 +24,7 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(adminLogin.fulfilled, (state, action) => {
-        console.log("Admin login successful:", action.payload); // Check this log
+        // console.log("Admin login successful:", action.payload); // Check this log
 
         state.admin = true;
         // state.loader = false;
@@ -34,6 +34,25 @@ const authSlice = createSlice({
         state.admin = false;
         // state.loader = false;
         const errorMessage = action.error.message || "Error While Login!";
+        toast.error(errorMessage);
+      })
+      .addCase(getVerifiedAdmin.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.admin = true;
+        } else {
+          state.admin = false;
+        }
+      })
+      .addCase(getVerifiedAdmin.rejected, (state, action) => {
+        state.admin = false;
+      })
+      .addCase(adminLogOut.fulfilled, (state, action) => {
+        state.admin = false;
+        toast.success("Logout Successful!", action.payload);
+      })
+      .addCase(adminLogOut.rejected, (state, action) => {
+        state.admin = true;
+        const errorMessage = action.error.message || "Error While Logout!";
         toast.error(errorMessage);
       });
   },

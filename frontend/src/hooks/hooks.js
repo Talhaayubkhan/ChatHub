@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 const useErrors = (errorList = []) => {
   useEffect(() => {
     // Iterate over each error object in the array
-    errorList.forEach(({ isError, error, fallback }) => {
+    errorList?.forEach(({ isError, error, fallback }) => {
       // If there's an error
       if (isError && error) {
         // If a fallback function is provided, execute it
