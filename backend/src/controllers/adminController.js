@@ -5,14 +5,11 @@ import { setAdminTokenCookie } from "../utils/index.js";
 
 // const
 const adminLogin = async (req, res) => {
-  console.log("admin login", req.body);
-  const { secretKey, username } = req.body;
+  const { secretKey } = req.body;
 
   const adminSecretKey = process.env.ADMIN_SECRET_KEY || "khakhanhellokhan";
 
-  console.log(adminSecretKey);
-
-  if (!username || !secretKey) {
+  if (!secretKey) {
     throw new BadRequest("Please provide username and secret key");
   }
 
@@ -20,12 +17,7 @@ const adminLogin = async (req, res) => {
     throw new Unauthorized("Invalid secret key");
   }
 
-  const isMatchedSecretKey = secretKey === adminSecretKey;
-
-  if (!isMatchedSecretKey) {
-    throw new Unauthorized("Invalid secret key");
-  }
-  const tokenPayload = { username };
+  const tokenPayload = { secretKey: adminSecretKey };
   setAdminTokenCookie({ res, user: tokenPayload });
 
   return res.status(StatusCodes.OK).json({
@@ -167,7 +159,6 @@ const adminDashboardStats = async (req, res) => {
     ]);
 
   // show last seven days messages history on admin dashboard
-
   const todayDate = new Date();
 
   const lastSevenDays = new Date();

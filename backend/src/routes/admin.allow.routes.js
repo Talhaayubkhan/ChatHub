@@ -19,11 +19,11 @@ const router = express.Router();
 router
   .route("/login")
   .post(adminLoginVerifyValidator(), handleAdminValidationError, adminLogin);
+router.route("/logout").get(adminLogout);
 
 // Apply isAuthenticated middleware to all subsequent routes
 router.use(isAuthenticatedAdmin);
 
-router.route("/logout").get(adminLogout);
 router.route("/").get(getAdminData);
 router.route("/users").get(getAllUsers);
 router.route("/chats").get(getAllChats);

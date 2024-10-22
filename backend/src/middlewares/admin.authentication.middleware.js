@@ -25,18 +25,17 @@ const isAuthenticatedAdmin = (req, res, next) => {
       throw new Unauthenticated("Admin Payload Token Invalid");
     }
 
-    const { secretKey, username } = checkAdminTokenPayload;
+    const { secretKey } = checkAdminTokenPayload;
 
     if (!secretKey || secretKey !== process.env.ADMIN_SECRET_KEY) {
       throw new Unauthorized("Unauthorized to access admin resource");
     }
 
-    if (!username) {
-      throw new Unauthorized("Username is required");
-    }
+    // if (!username) {
+    //   throw new Unauthorized("Username is required");
+    // }
     req.user = {
       secretKey,
-      username,
     };
 
     next();
