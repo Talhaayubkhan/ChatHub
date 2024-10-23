@@ -136,7 +136,7 @@ const getAllMessages = async (req, res) => {
         chat: {
           _id: chat._id,
           name: chat.name,
-          groupChat: chat.groupChat,
+          groupChat: chat?.groupChat,
         },
       };
     }
