@@ -90,69 +90,72 @@ const Dashboard = () => {
     </Stack>
   );
 
-  return isLoading ? (
-    <LayoutLoaders />
-  ) : (
+  return (
     <AdminLayout>
-      <Container component={"main"}>
-        {Appbar}
-        <Stack
-          direction={{ xs: "column", lg: "row" }}
-          spacing={"3rem"}
-          justifyContent={"center"}
-          alignItems={{
-            xs: "center",
-            lg: "stretch",
-          }}
-        >
-          <Paper
-            elevation={3}
-            sx={{
-              padding: "1.5rem",
-              width: { xs: "100%", lg: "50rem" },
-              borderRadius: "2rem",
+      {/* add this height in all  */}
+      {isLoading ? (
+        <Skeleton height={"100vh"} />
+      ) : (
+        <Container component={"main"}>
+          {Appbar}
+          <Stack
+            direction={{ xs: "column", lg: "row" }}
+            spacing={"3rem"}
+            justifyContent={"center"}
+            alignItems={{
+              xs: "center",
+              lg: "stretch",
             }}
           >
-            <Typography variant="h6" fontWeight={"bold"}>
-              Last Seven Days Messages
-            </Typography>
-            <LineChart values={dashboardStats?.messagesChart || []} />
-          </Paper>
-          <Paper
-            elevation={3}
-            sx={{
-              padding: "1.5rem",
-              width: { xs: "100%", sm: "50%" },
-              maxWidth: "30rem",
-              borderRadius: "1rem",
-              height: "25rem",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              // position: "relative",
-            }}
-          >
-            <DoughnutChart
-              labels={["Single Chats", "Group Chats"]}
-              chartDataArray={[
-                dashboardStats?.totalChatsCount - dashboardStats?.groupsCount ||
-                  0,
-                dashboardStats?.groupsCount || 0,
-              ]}
-            />
-            <Stack
-              position={"absolute"}
-              direction={"row"}
-              justifyContent={"center"}
-              alignItems={"center"}
-              spacing={"1rem"}
+            <Paper
+              elevation={3}
+              sx={{
+                padding: "1.5rem",
+                width: { xs: "100%", lg: "50rem" },
+                borderRadius: "2rem",
+              }}
             >
-              <GroupIcon /> <Typography>Vs</Typography> <PersonIcon />
-            </Stack>
-          </Paper>
-        </Stack>
-        {Wedgets}
-      </Container>
+              <Typography variant="h6" fontWeight={"bold"}>
+                Last Seven Days Messages
+              </Typography>
+              <LineChart values={dashboardStats?.messagesChart} />
+            </Paper>
+            <Paper
+              elevation={3}
+              sx={{
+                padding: "1.5rem",
+                width: { xs: "100%", sm: "50%" },
+                maxWidth: "30rem",
+                borderRadius: "1rem",
+                height: "25rem",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                // position: "relative",
+              }}
+            >
+              <DoughnutChart
+                labels={["Single Chats", "Group Chats"]}
+                chartDataArray={[
+                  dashboardStats?.totalChatsCount -
+                    dashboardStats?.groupsCount || 0,
+                  dashboardStats?.groupsCount || 0,
+                ]}
+              />
+              <Stack
+                position={"absolute"}
+                direction={"row"}
+                justifyContent={"center"}
+                alignItems={"center"}
+                spacing={"1rem"}
+              >
+                <GroupIcon /> <Typography>Vs</Typography> <PersonIcon />
+              </Stack>
+            </Paper>
+          </Stack>
+          {Wedgets}
+        </Container>
+      )}
     </AdminLayout>
   );
 };

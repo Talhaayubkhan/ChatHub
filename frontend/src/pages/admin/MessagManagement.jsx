@@ -7,6 +7,9 @@ import Table from "../../components/shared/Table";
 import { dashboardData } from "../../constants/sampleData";
 import { fileFormat, transformImage } from "../../lib/features";
 import RenderAttachMent from "../../components/shared/RenderAttachMent";
+import { useFetchData } from "6pp";
+import server from "../../constants/config";
+import { useErrors } from "../../hooks/hooks";
 
 const columns = [
   {
@@ -21,7 +24,7 @@ const columns = [
     headerName: "Attachments",
     headerClassName: "table-header",
     flex: 0.5,
-    minWidth: 180,
+    minWidth: 100,
     renderCell: (params) => {
       const { attachments } = params.row;
       return attachments?.length > 0
@@ -54,15 +57,15 @@ const columns = [
     field: "content",
     headerName: "Content",
     headerClassName: "table-header",
-    flex: 1,
-    minWidth: 100,
+    flex: 0.5,
+    minWidth: 50,
   },
   {
     field: "sender",
     headerName: "Sent By",
     headerClassName: "table-header",
     flex: 1,
-    minWidth: 150,
+    minWidth: 50,
     renderCell: (params) => (
       <Stack direction="row" spacing={"1rem"} alignItems="center">
         <Avatar src={params.row.sender.avatar} alt={params.row.sender.name} />
@@ -82,14 +85,14 @@ const columns = [
     headerName: "Group Chat",
     headerClassName: "table-header",
     flex: 1,
-    minWidth: 150,
+    minWidth: 100,
   },
   {
     field: "createdAt",
     headerName: "Time",
     headerClassName: "table-header",
     flex: 0.75,
-    minWidth: 120,
+    minWidth: 100,
     renderCell: (params) => (
       <Typography variant="body1">
         {moment(params.row.createdAt).format("MMMM Do YYYY")}
@@ -98,28 +101,47 @@ const columns = [
   },
 ];
 const MessageManagement = () => {
+  const { data, isLoading, error } = useFetchData(
+    `${server}/api/v1/admin/messages`,
+    "dashboard-messages"
+  );
+
+  console.log(data);
+
+  useErrors([
+    {
+      isError: error,
+      error: error,
+    },
+  ]);
   const [rows, setRows] = useState([]);
   useEffect(() => {
-    setRows(
-      dashboardData.messages.map((message) => ({
-        ...message,
-        id: message._id,
-        sender: {
-          name: message.sender.name,
-          avatar: transformImage(message.sender.avatar, 80),
-        },
-      }))
-    );
-  }, []);
+    if (data) {
+      setRows(
+        data?.messages?.map((message) => ({
+          ...message,
+          id: message._id,
+          sender: {
+            name: message.sender.name,
+            avatar: transformImage(message.sender.avatar, 80),
+          },
+        }))
+      );
+    }
+  }, [data]);
   return (
     <>
       <AdminLayout>
-        <Table
-          heading={"All Messages"}
-          columns={columns}
-          rows={rows}
-          rowHeight={200}
-        />
+        {isLoading ? (
+          <Skeleton />
+        ) : (
+          <Table
+            heading={"All Messages"}
+            columns={columns}
+            rows={rows}
+            rowHeight={200}
+          />
+        )}
       </AdminLayout>
     </>
   );
