@@ -1,6 +1,10 @@
+/**
+ * Main Server Entry Point
+ * Sets up HTTP server, Socket.IO, and starts the application
+ */
+
 import connectDB from "./src/db/connect.js";
 import { app } from "./src/app.js";
-
 import { Server } from "socket.io";
 import { createServer } from "http";
 import { handleNewMessage, handleDisconnect } from "./socketEvents.js";
@@ -18,11 +22,16 @@ const PORT = process.env.PORT || 8000;
 
 // Create HTTP server and integrate with Socket.IO
 const server = createServer(app);
-const io = new Server(server, { cors: corsOptions });
+const io = new Server(server, { 
+  cors: corsOptions,
+  pingTimeout: 60000,
+  pingInterval: 25000
+});
 
+// Make io instance available to routes
 app.set("io", io);
 
-// Middleware for socket authentication
+// Socket.IO authentication middleware
 io.use((socket, next) => {
   cookieParser(process.env.JWT_SECRET)(
     socket.request,
@@ -34,25 +43,31 @@ io.use((socket, next) => {
   );
 });
 
+// Handle socket connections
 io.on("connection", (socket) => {
-  // console.log(`Socket connected: ${socket.id}`);
+  console.log(`Socket connected: ${socket.id}`);
 
+  // Handle new messages
   socket.on(NEW_MESSAGE, (data) => handleNewMessage(io, socket, data));
+  
+  // Handle typing indicators
   socket.on(START_TYPING_MESSAGE, ({ members, chatId }) => {
-    // console.log("typing", members, chatId);
     const socketMembers = getAllSocketIDs(members);
-
-    socket.to(socketMembers).emit(START_TYPING_MESSAGE, { chatId });
+    const validSockets = socketMembers.filter(id => id !== undefined);
+    socket.to(validSockets).emit(START_TYPING_MESSAGE, { chatId });
   });
+  
   socket.on(STOP_TYPING_MESSAGE, ({ members, chatId }) => {
-    // console.log("typing", members, chatId);
     const socketMembers = getAllSocketIDs(members);
-
-    socket.to(socketMembers).emit(STOP_TYPING_MESSAGE, { chatId });
+    const validSockets = socketMembers.filter(id => id !== undefined);
+    socket.to(validSockets).emit(STOP_TYPING_MESSAGE, { chatId });
   });
+  
+  // Handle disconnection
   socket.on("disconnect", () => handleDisconnect(socket));
 });
 
+// Start server after database connection
 connectDB()
   .then(() => {
     server.listen(PORT, () => {
@@ -60,5 +75,6 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.log("Error While Connecting to Database", err.message);
+    console.error("Error while connecting to database:", err.message);
+    process.exit(1);
   });
