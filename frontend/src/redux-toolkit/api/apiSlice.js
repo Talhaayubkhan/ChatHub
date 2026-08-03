@@ -1,6 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import server from "../../constants/config";
 
+/**
+ * API slice for managing all backend API calls using RTK Query.
+ * Defines endpoints and provides auto-generated hooks for data fetching.
+ */
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
@@ -8,6 +12,7 @@ export const apiSlice = createApi({
   }),
   tagTypes: ["Chat", "User", "Message"],
   endpoints: (builder) => ({
+    // Fetch current user's chats
     myChats: builder.query({
       query: () => ({
         url: "chat/mychats",
@@ -15,6 +20,7 @@ export const apiSlice = createApi({
       }),
       providesTags: ["Chat"],
     }),
+    // Search users by name
     searchUser: builder.query({
       query: (name) => ({
         url: `auth/search?name=${name}`,
@@ -22,6 +28,7 @@ export const apiSlice = createApi({
       }),
       providesTags: ["User"],
     }),
+    // Send friend request
     sendFriendRequest: builder.mutation({
       query: (data) => ({
         url: "auth/send-request",
@@ -31,7 +38,7 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-
+    // Get user notifications
     getNotifications: builder.query({
       query: () => ({
         url: "auth/notifications",
@@ -39,7 +46,7 @@ export const apiSlice = createApi({
       }),
       keepUnusedDataFor: 0,
     }),
-
+    // Accept friend request
     acceptFriendRequest: builder.mutation({
       query: (data) => ({
         url: "auth/accept-request",
@@ -49,12 +56,11 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Chat"],
     }),
-
+    // Get chat details with members
     membersChatDetails: builder.query({
       query: ({ chatId, populate = false }) => {
         let url = `chat/${chatId}`;
         if (populate) url += "?populate=true";
-
         return {
           url,
           credentials: "include",
@@ -62,6 +68,7 @@ export const apiSlice = createApi({
       },
       providesTags: ["Chat"],
     }),
+    // Get messages for a chat with pagination
     getMessages: builder.query({
       query: ({ chatId, page }) => ({
         url: `chat/message/${chatId}?page=${page}`,
@@ -69,7 +76,7 @@ export const apiSlice = createApi({
       }),
       keepUnusedDataFor: 0,
     }),
-
+    // Send file attachments
     sendFileAttachments: builder.mutation({
       query: (data) => ({
         url: "chat/message",
@@ -78,7 +85,7 @@ export const apiSlice = createApi({
         credentials: "include",
       }),
     }),
-
+    // Get user's groups
     getMyGroups: builder.query({
       query: () => ({
         url: "chat/mychats/mygroups",
@@ -86,12 +93,11 @@ export const apiSlice = createApi({
       }),
       providesTags: ["Chat"],
     }),
-
+    // Get available friends for adding to group
     availableFriends: builder.query({
       query: (chatId) => {
         let url = `auth/friends`;
         if (chatId) url += `?chatId=${chatId}`;
-
         return {
           url,
           credentials: "include",
@@ -99,7 +105,7 @@ export const apiSlice = createApi({
       },
       providesTags: ["Chat"],
     }),
-
+    // Create new group
     newGroup: builder.mutation({
       query: ({ name, members }) => ({
         url: "chat/groupchat",
@@ -109,7 +115,7 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Chat"],
     }),
-
+    // Rename group
     renameGroup: builder.mutation({
       query: ({ chatId, name }) => ({
         url: `chat/${chatId}`,
@@ -118,7 +124,7 @@ export const apiSlice = createApi({
         credentials: "include",
       }),
     }),
-
+    // Add member to group
     addGroupMember: builder.mutation({
       query: ({ members, chatId }) => ({
         url: "chat/addmembers",
@@ -128,6 +134,7 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Chat"],
     }),
+    // Remove member from group
     removeGroupMember: builder.mutation({
       query: ({ chatId, userId }) => ({
         url: "chat/removemember",
@@ -137,6 +144,7 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Chat"],
     }),
+    // Delete group chat
     deleteGroupChats: builder.mutation({
       query: (chatId) => ({
         url: `chat/${chatId}`,
@@ -145,6 +153,7 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Chat"],
     }),
+    // Leave group
     leaveGroup: builder.mutation({
       query: (chatId) => ({
         url: `chat/leave/${chatId}`,
@@ -156,6 +165,7 @@ export const apiSlice = createApi({
   }),
 });
 
+// Export auto-generated hooks for use in components
 export const {
   useMyChatsQuery,
   useLazySearchUserQuery,

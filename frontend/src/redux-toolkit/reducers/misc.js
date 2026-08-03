@@ -1,5 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+/**
+ * Initial state for miscellaneous UI states.
+ * Controls dialogs, menus, and other UI-related flags.
+ */
 const initialState = {
   isNewGroup: false,
   isAddMember: false,
@@ -15,6 +19,10 @@ const initialState = {
   },
 };
 
+/**
+ * Misc slice manages various UI states for dialogs and menus.
+ * Each reducer toggles a specific UI element's visibility.
+ */
 const miscSlice = createSlice({
   name: "misc",
   initialState,
