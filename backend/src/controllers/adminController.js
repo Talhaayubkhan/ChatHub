@@ -150,7 +150,7 @@ const getAllMessages = async (req, res) => {
 };
 
 const adminDashboardStats = async (req, res) => {
-  const [usersCount, groupsCount, messagesCount, totalChatsCount] =
+  const [groupsCount, usersCount, messagesCount, totalChatsCount] =
     await Promise.all([
       Chat.countDocuments({ groupChat: true }),
       User.countDocuments({}),
@@ -158,9 +158,8 @@ const adminDashboardStats = async (req, res) => {
       Chat.countDocuments({}),
     ]);
 
-  // show last seven days messages history on admin dashboard
+  // Show last seven days messages history on admin dashboard
   const todayDate = new Date();
-
   const lastSevenDays = new Date();
   lastSevenDays.setDate(lastSevenDays.getDate() - 7);
 
@@ -172,7 +171,6 @@ const adminDashboardStats = async (req, res) => {
   }).select("createdAt");
 
   const messages = new Array(7).fill(0);
-
   const daysInMilliSeconds = 1000 * 60 * 60 * 24;
 
   lastSevenDaysMessages.forEach((message) => {

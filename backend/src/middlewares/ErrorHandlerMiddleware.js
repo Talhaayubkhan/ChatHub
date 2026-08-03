@@ -1,6 +1,10 @@
+/**
+ * Error Handler Middleware
+ * Centralized error handling for all routes
+ */
+
 import { StatusCodes } from "http-status-codes";
 import { logger } from "../logger.js";
-import { ValidationError } from "express-validation";
 import mongoose from "mongoose";
 
 const errorHandlerMiddleware = (err, req, res, next) => {
@@ -11,18 +15,6 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     message: "An unexpected error occurred. Please try again later.",
     success: false,
   };
-
-  // Express-validation error
-  if (err instanceof ValidationError) {
-    const messages = err.details?.body
-      ?.map((detail) => detail.message)
-      .join(", ");
-    return res.status(StatusCodes.BAD_REQUEST).json({
-      message:
-        messages || "Invalid input. Please check your data and try again.",
-      success: false,
-    });
-  }
 
   // Mongoose validation error
   if (err instanceof mongoose.Error.ValidationError) {

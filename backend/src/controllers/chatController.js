@@ -255,7 +255,7 @@ const leaveGroup = async (req, res) => {
   const chat = await Chat.findById(chatId);
 
   if (!chat) {
-    throw new NotFound("Chats not found");
+    throw new NotFound("Chat not found");
   }
 
   // Filter out the leaving user from the members list
@@ -265,26 +265,20 @@ const leaveGroup = async (req, res) => {
 
   if (findRemainingMembers.length < 2) {
     throw new BadRequest(
-      "You can't remove members from a group chat with less than 2 members"
+      "You can't leave a group chat with less than 2 remaining members"
     );
   }
 
-  // If the creator (admin) is leaving, transfer admin rights
+  // If the creator (admin) is leaving, transfer admin rights to a random member
   if (chat.creator.toString() === req.user.userId.toString()) {
-    //  Handles the scenario where there are no members left
-    if (findRemainingMembers.length > 0) {
-      // Randomly select a new admin from the remaining members
-      const randomInt = crypto.randomInt(findRemainingMembers.length);
-      const newCreator = removeGroupMembers[randomInt];
-      chat.creator = newCreator;
-    }
-  } else {
-    // If no members are left, the chat creator should be set to nul
-    chat.creator = null;
+    // Randomly select a new admin from the remaining members
+    const randomIndex = crypto.randomInt(findRemainingMembers.length);
+    chat.creator = findRemainingMembers[randomIndex];
   }
-  chat.members = findRemainingMembers;
 
+  chat.members = findRemainingMembers;
   await chat.save();
+
   emitEvent(req, ALERT, chat.members, {
     chatId,
     message: `${req.user.name} has left the group`,
