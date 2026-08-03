@@ -1,32 +1,41 @@
 ```
 # Dependencies
 node_modules/
+package-lock.json
 
-# Environment variables
-.env
-.env.local
-.env.*
-
-# Build artifacts
-dist/
-build/
-
-# Python cache
+# Python
 __pycache__/
 *.pyc
-
-# Logs
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
 *.log
-
-# Temporary files
-*.tmp
-*.swp
-
-# IDE settings
-.vscode/
-.idea/
-
-# OS generated files
+*.pot
+*.pyc
+*.pyo
+*.pyd
+.MF
+.TemporaryItems
+.trash
+*~
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 ```
