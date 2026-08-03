@@ -214,7 +214,7 @@ const sendFriendRequest = async (req, res) => {
 
   // console.log("New Request received", newRequest);
 
-  emitEvent(req, NEW_REQUEST, [userId]);
+  emitEvent(req, NEW_REQUEST, [userId], newRequest);
 
   return res.status(StatusCodes.OK).json({
     sucess: true,

@@ -41,11 +41,7 @@ const newGroupChat = async (req, res) => {
     });
 
     emitEvent(req, ALERT, allMembers, `Welcome to ${name} group`);
-    emitEvent(
-      req,
-      REFETCH_ALERT,
-      `Welcome all ${members} to the ${name} group`
-    );
+    emitEvent(req, REFETCH_ALERT, allMembers, `Welcome all to the ${name} group`);
 
     return res.status(StatusCodes.CREATED).json({
       success: true,
