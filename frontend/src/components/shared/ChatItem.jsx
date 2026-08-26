@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import { Link } from "../styles/StyledComponent";
 import { Box, Stack, Typography } from "@mui/material";
 import AvatarCard from "./AvatarCard";
@@ -13,7 +13,6 @@ const ChatItem = ({
   handleDeleteChat,
   sameSender,
   groupChat = false,
-  index = 0,
 }) => {
   return (
     <>
@@ -22,6 +21,7 @@ const ChatItem = ({
           padding: "0",
         }}
         to={`/chat/${_id}`}
+        aria-label={`Open chat with ${name}`}
         onContextMenu={(e) => {
           e.preventDefault();
           handleDeleteChat(e, _id, groupChat);
@@ -31,17 +31,17 @@ const ChatItem = ({
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.01 }}
           whileInView={{ opacity: 1, scale: 1 }}
           style={{
             display: "flex",
             // gap: "1rem",
             alignItems: "center",
-            padding: "0.5rem",
+            padding: "0.65rem",
             // borderBottom: "2px solid lightgray",
-            borderRadius: "2px",
-            backgroundColor: sameSender ? "#42a5f5" : "unset",
-            color: sameSender ? "#03071e" : "unset",
+            borderRadius: "0.75rem",
+            backgroundColor: sameSender ? "#dbeafe" : "transparent",
+            color: "#0f172a",
             position: "relative",
           }}
         >
@@ -51,8 +51,8 @@ const ChatItem = ({
             <Typography
               sx={{
                 fontWeight: "bold",
-                padding: "0.8rem",
-                fontSize: "1.4rem",
+                padding: "0.25rem 0.75rem",
+                fontSize: "1rem",
                 maxWidth: "30rem",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -66,16 +66,16 @@ const ChatItem = ({
             )}
           </Stack>
 
-          {!isOnline && (
+          {isOnline && (
             <Box
               sx={{
                 width: "10px",
                 height: "10px",
-                borderRadius: "55%",
+                borderRadius: "50%",
                 position: "absolute",
                 right: "1.5rem",
                 top: "50%",
-                backgroundColor: "green",
+                backgroundColor: "#16a34a",
                 transform: "translateY(-50%)",
               }}
             />

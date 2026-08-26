@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Skeleton, Stack, Typography } from "@mui/material";
 import moment from "moment";
 // import { AvatarCard } from "../../components/shared/AvatarCard";
 import Table from "../../components/shared/Table";
-import { dashboardData } from "../../constants/sampleData";
 import { fileFormat, transformImage } from "../../lib/features";
 import RenderAttachMent from "../../components/shared/RenderAttachMent";
 import { useFetchData } from "6pp";
@@ -37,6 +36,7 @@ const columns = [
                   href={url}
                   download
                   target="_blank"
+                  rel="noreferrer"
                   style={{
                     color: "black",
                     display: "flex",
@@ -106,7 +106,6 @@ const MessageManagement = () => {
     "dashboard-messages"
   );
 
-  console.log(data);
 
   useErrors([
     {

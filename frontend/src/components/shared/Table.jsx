@@ -1,16 +1,22 @@
 // Table.js
-import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Container, Paper, Typography } from "@mui/material";
 
 const Table = ({ rows, columns, heading, rowHeight = 52 }) => {
   return (
-    <Container sx={{ height: "80vh", paddingTop: "2rem" }}>
+    <Container
+      maxWidth={false}
+      sx={{
+        height: "calc(100dvh - 6rem)",
+        py: { xs: 1, sm: 2 },
+        px: { xs: 1, sm: 2 },
+      }}
+    >
       <Paper
         elevation={3}
         sx={{
           margin: "auto",
-          padding: "1rem",
+          padding: { xs: "0.5rem", sm: "1rem" },
           borderRadius: "1rem",
           width: "100%",
           height: "100%",
@@ -20,7 +26,8 @@ const Table = ({ rows, columns, heading, rowHeight = 52 }) => {
         <Typography
           variant="h4"
           sx={{
-            margin: "1rem 0",
+            margin: { xs: "0.5rem 0", sm: "1rem 0" },
+            fontSize: { xs: "1.35rem", sm: "2rem" },
             textTransform: "uppercase",
             textAlign: "center",
           }}

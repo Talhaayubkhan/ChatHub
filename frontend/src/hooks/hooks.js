@@ -1,24 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 
 const useErrors = (errorList = []) => {
+  const reportedErrors = useRef(new Map());
+
   useEffect(() => {
     // Iterate over each error object in the array
-    errorList?.forEach(({ isError, error, fallback }) => {
+    errorList?.forEach(({ isError, error, fallback }, index) => {
       // If there's an error
       if (isError && error) {
         // If a fallback function is provided, execute it
+        const errorMessage =
+          error?.data?.message || error?.message || "Something went wrong";
+
+        if (reportedErrors.current.get(index) === errorMessage) return;
+        reportedErrors.current.set(index, errorMessage);
+
         if (fallback) {
           fallback();
         } else {
-          // Display error notification
-          const errorMessage =
-            error?.data?.message || error?.message || "Something went wrong";
           toast.error(errorMessage);
-
-          // Optionally log the error for debugging (you can remove this if not needed)
-          // console.error("Error:", error);
         }
+      } else {
+        reportedErrors.current.delete(index);
       }
     });
   }, [errorList]);

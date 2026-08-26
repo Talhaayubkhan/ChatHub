@@ -20,6 +20,7 @@ import {
   deleteFilesFromCloudinary,
   uploadFilesToCloudinary,
 } from "../utils/cloudinary.js";
+import { parsePositiveInteger } from "../utils/requestValidation.js";
 
 const newGroupChat = async (req, res) => {
   // console.log("New group chat", req.body);
@@ -520,7 +521,7 @@ const deleteGroupChats = async (req, res) => {
 const getMessages = async (req, res) => {
   const chatId = req.params.chatId;
 
-  const { page = 1 } = req.query;
+  const page = parsePositiveInteger(req.query.page, 1, 100000);
 
   const chatsPerPage = 20;
   const skip = (page - 1) * chatsPerPage;
@@ -531,7 +532,10 @@ const getMessages = async (req, res) => {
     throw new NotFound("Chats are not Found!");
   }
 
-  if (!chat.members.includes(req.user.userId.toString())) {
+  const isMember = chat.members.some(
+    (member) => String(member) === String(req.user.userId)
+  );
+  if (!isMember) {
     throw new Unauthorized("You are not allowed to view this chat!");
   }
 
@@ -544,10 +548,6 @@ const getMessages = async (req, res) => {
       .lean(),
     Message.countDocuments({ chat: chatId }),
   ]);
-
-  if (!messages) {
-    throw new NotFound("Messages are not Found!");
-  }
 
   const totalPages = Math.ceil(totalMessageCounts / chatsPerPage) || 0;
 

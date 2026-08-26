@@ -7,7 +7,11 @@ import connectDB from "./src/db/connect.js";
 import { app } from "./src/app.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
-import { handleNewMessage, handleDisconnect } from "./socketEvents.js";
+import {
+  handleNewMessage,
+  handleTyping,
+  handleDisconnect,
+} from "./socketEvents.js";
 import {
   NEW_MESSAGE,
   START_TYPING_MESSAGE,
@@ -16,7 +20,7 @@ import {
 import { corsOptions } from "./src/constants/config.js";
 import cookieParser from "cookie-parser";
 import { socketAuthentication } from "./src/middlewares/AuthHeadersBased.Authentication.js";
-import { getAllSocketIDs } from "./src/constants/sockets.js";
+import { socketRegistry } from "./src/constants/sockets.js";
 
 const PORT = process.env.PORT || 8000;
 
@@ -45,26 +49,28 @@ io.use((socket, next) => {
 
 // Handle socket connections
 io.on("connection", (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
+  const userId = socket.user._id.toString();
+  socketRegistry.addSocket(userId, socket.id);
 
   // Handle new messages
-  socket.on(NEW_MESSAGE, (data) => handleNewMessage(io, socket, data));
+  socket.on(NEW_MESSAGE, (data, callback) =>
+    handleNewMessage(io, socket, data, callback)
+  );
   
   // Handle typing indicators
-  socket.on(START_TYPING_MESSAGE, ({ members, chatId }) => {
-    const socketMembers = getAllSocketIDs(members);
-    const validSockets = socketMembers.filter(id => id !== undefined);
-    socket.to(validSockets).emit(START_TYPING_MESSAGE, { chatId });
-  });
+  socket.on(START_TYPING_MESSAGE, (data) =>
+    handleTyping(socket, START_TYPING_MESSAGE, data)
+  );
   
-  socket.on(STOP_TYPING_MESSAGE, ({ members, chatId }) => {
-    const socketMembers = getAllSocketIDs(members);
-    const validSockets = socketMembers.filter(id => id !== undefined);
-    socket.to(validSockets).emit(STOP_TYPING_MESSAGE, { chatId });
-  });
+  socket.on(STOP_TYPING_MESSAGE, (data) =>
+    handleTyping(socket, STOP_TYPING_MESSAGE, data)
+  );
   
   // Handle disconnection
-  socket.on("disconnect", () => handleDisconnect(socket));
+  socket.on("disconnect", () => {
+    socketRegistry.removeSocket(userId, socket.id);
+    handleDisconnect(socket);
+  });
 });
 
 // Start server after database connection

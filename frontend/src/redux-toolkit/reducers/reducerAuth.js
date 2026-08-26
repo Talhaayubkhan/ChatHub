@@ -43,7 +43,7 @@ const authSlice = createSlice({
           state.admin = false;
         }
       })
-      .addCase(getVerifiedAdmin.rejected, (state, action) => {
+      .addCase(getVerifiedAdmin.rejected, (state) => {
         state.admin = false;
       })
       .addCase(adminLogOut.fulfilled, (state, action) => {

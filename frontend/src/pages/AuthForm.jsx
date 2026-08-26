@@ -454,6 +454,7 @@ import {
   usernameOrEmailValidator,
   usernameValidator,
 } from "../utils/validators.js";
+import { getApiErrorMessage } from "../lib/apiErrors.js";
 
 // Create a custom theme
 const theme = createTheme({
@@ -566,16 +567,15 @@ const Login = () => {
       } else {
         toast.error(
           response?.data?.message ||
-            "Login failed. Please check your credentials and try again."
+            "Login failed. Please check your credentials and try again.",
+          { id: toastId }
         );
       }
     } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message || error?.response?.status === 401
-          ? "Incorrect username or password. Please try again."
-          : error?.response?.status === 500
-          ? "Server error. Please try again later."
-          : "Something went wrong. Please try again.";
+      const errorMessage = getApiErrorMessage(error, {
+        401: "Incorrect username or password. Please try again.",
+        500: "Server error. Please try again later.",
+      });
 
       toast.error(errorMessage, {
         id: toastId,
@@ -585,8 +585,19 @@ const Login = () => {
     }
   };
 
-  const regitserUser = async (e) => {
+  const registerUser = async (e) => {
     e.preventDefault();
+
+    if (
+      !name.value.trim() ||
+      !username.value.trim() ||
+      !email.value.trim() ||
+      !password.value ||
+      !avatar.file
+    ) {
+      toast.error("Complete all required fields and choose a profile photo.");
+      return;
+    }
 
     const toastId = toast.loading("Registering User....");
 
@@ -599,11 +610,6 @@ const Login = () => {
     formData.append("password", password.value);
     formData.append("bio", bio.value);
     formData.append("avatar", avatar.file);
-
-    if (!formData) {
-      toast.error("Please fill all required fields");
-      return;
-    }
 
     const config = {
       withCredentials: true,
@@ -629,16 +635,15 @@ const Login = () => {
       } else {
         toast.error(
           response?.data?.message ||
-            "Registration failed. Please check your details and try again."
+            "Registration failed. Please check your details and try again.",
+          { id: toastId }
         );
       }
     } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message || error?.response?.status === 400
-          ? "Invalid credentials. Please check your details and try again."
-          : error?.response?.status === 500
-          ? "Server error. Please try again later."
-          : "Something went wrong. Please try again.";
+      const errorMessage = getApiErrorMessage(error, {
+        400: "Invalid registration details. Please check the form.",
+        500: "Server error. Please try again later.",
+      });
       toast.error(errorMessage, {
         id: toastId,
       });
@@ -652,7 +657,7 @@ const Login = () => {
       <div
         style={{
           backgroundImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          minHeight: "100vh",
+          minHeight: "100dvh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -666,6 +671,7 @@ const Login = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
+            px: 0,
           }}
         >
           <Paper
@@ -676,7 +682,7 @@ const Login = () => {
               alignItems: "center",
               width: "100%",
               overflowY: "auto",
-              maxHeight: "90vh",
+              maxHeight: "calc(100dvh - 2rem)",
             }}
           >
             {isLogin ? (
@@ -759,7 +765,7 @@ const Login = () => {
                     width: "100%",
                     marginTop: "10px",
                   }}
-                  onSubmit={regitserUser}
+                  onSubmit={registerUser}
                 >
                   <Stack
                     position={"relative"}
@@ -776,6 +782,7 @@ const Login = () => {
                       src={avatar.preview}
                     />
                     <IconButton
+                      aria-label="Choose profile photo"
                       sx={{
                         position: "absolute",
                         bottom: "0",

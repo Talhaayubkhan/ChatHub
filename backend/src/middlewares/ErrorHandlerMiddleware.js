@@ -2,15 +2,10 @@ import { StatusCodes } from "http-status-codes";
 import { logger } from "../logger.js";
 import { ValidationError } from "express-validation";
 import mongoose from "mongoose";
+import { toErrorResponse } from "../utils/errorResponse.js";
 
 const errorHandlerMiddleware = (err, req, res, next) => {
   logger.error(err?.message, { stack: err.stack });
-
-  // Default error response
-  let defaultErrorResponse = {
-    message: "An unexpected error occurred. Please try again later.",
-    success: false,
-  };
 
   // Express-validation error
   if (err instanceof ValidationError) {
@@ -49,11 +44,8 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     });
   }
 
-  // Fallback for other errors
-  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    ...defaultErrorResponse,
-    message: err.message || defaultErrorResponse.message,
-  });
+  const response = toErrorResponse(err);
+  return res.status(response.statusCode).json(response.body);
 };
 
 export default errorHandlerMiddleware;

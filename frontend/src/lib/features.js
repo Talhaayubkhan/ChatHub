@@ -1,4 +1,5 @@
 import moment from "moment";
+import { readStoredJson, writeStoredJson } from "./chatState";
 
 const fileFormat = (url = "") => {
   const fileExtension = url.split(".").pop();
@@ -44,11 +45,8 @@ const getLastSevenDays = () => {
 };
 
 const getMessagesCountInLocalStorage = ({ key, value, get }) => {
-  if (get)
-    return localStorage.getItem(key)
-      ? JSON.parse(localStorage.getItem(key))
-      : null;
-  else localStorage.setItem(key, JSON.stringify(value));
+  if (get) return readStoredJson(localStorage, key, null);
+  return writeStoredJson(localStorage, key, value);
 };
 
 export {

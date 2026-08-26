@@ -20,8 +20,6 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     incrementNotificationCount: (state) => {
-      console.log("incrementNotificationCount triggered");
-
       state.notificationCount++;
     },
     resetNotificationCount: (state) => {
@@ -29,8 +27,7 @@ const chatSlice = createSlice({
     },
 
     setNewMessagesAlert: (state, action) => {
-      let { chatId } = action.payload;
-      console.log("setNewMessagesAlert triggered for chatId:", chatId); // log here
+      const { chatId } = action.payload;
 
       const index = state.newMessagesAlert.findIndex(
         (item) => item.chatId === chatId

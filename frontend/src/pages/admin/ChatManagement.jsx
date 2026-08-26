@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import Table from "../../components/shared/Table";
-import { Stack, Avatar, Typography, Skeleton } from "@mui/material";
+import { Stack, Avatar, Skeleton } from "@mui/material";
 // latter we use this moment
 // import moment from "moment";
 // import { dashboardData } from "../../constants/sampleData";
 import AvatarCard from "../../components/shared/AvatarCard";
-import { dashboardData } from "../../constants/sampleData";
 import { transformImage } from "../../lib/features";
 import { useErrors } from "../../hooks/hooks";
 import server from "../../constants/config";
@@ -101,8 +100,10 @@ const ChatManagement = () => {
         data?.chats?.map((user) => ({
           ...user,
           id: user._id,
-          avatar: user?.avatar?.map((i) => transformImage(i, 50)), // show creator with avatar images
-          avatar: user?.members?.map((i) => transformImage(i?.avatar, 50)), // show creator with avatar images
+          avatar: user?.avatar?.map((image) => transformImage(image, 50)),
+          members: user?.members?.map((member) =>
+            transformImage(member?.avatar, 50)
+          ),
           creator: {
             name: user.creator.name,
             avatar: transformImage(user?.creator?.avatar, 80),
