@@ -1,6 +1,12 @@
-import React from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
-import { Box, Container, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Container,
+  Paper,
+  Skeleton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import {
   AdminPanelSettings as AdminPanelSettingsIcon,
   Group as GroupIcon,
@@ -16,15 +22,12 @@ import {
 import { DoughnutChart, LineChart } from "../../components/specific/Chart";
 import { useFetchData } from "6pp";
 import server from "../../constants/config";
-import { LayoutLoaders } from "../../components/layout/Loaders";
 import { useErrors } from "../../hooks/hooks";
 const Dashboard = () => {
   const { data, isLoading, error } = useFetchData(
     `${server}/api/v1/admin/stats`,
     "dashboard-stats"
   );
-
-  console.log(data);
 
   const { dashboardStats } = data || {};
 

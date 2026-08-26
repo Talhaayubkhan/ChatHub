@@ -1,4 +1,3 @@
-import React from "react";
 import { Line, Doughnut } from "react-chartjs-2";
 
 import {
@@ -11,8 +10,6 @@ import {
   LineElement,
   ArcElement,
   Legend,
-  plugins,
-  scales,
 } from "chart.js";
 import { getLastSevenDays } from "../../lib/features";
 
@@ -104,7 +101,7 @@ const DoughnutChart = ({ chartDataArray = [], labels = [] }) => {
         label: "Total Chats vs Group Chats",
         backgroundColor: ["#423ae0", "#1d15bd"],
         hoverBackgroundColor: ["orange", "#1da3b8"],
-        borderColor: ["#3sa123"],
+        borderColor: ["#3a123f"],
         offset: 35,
       },
     ],

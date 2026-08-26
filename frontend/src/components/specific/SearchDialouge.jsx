@@ -329,7 +329,7 @@ const SearchDialogue = () => {
     return () => {
       clearTimeout(searchTimeOut);
     };
-  }, [search.value]);
+  }, [search.value, searchUser]);
 
   return (
     <Dialog

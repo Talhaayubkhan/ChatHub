@@ -68,7 +68,6 @@ const DeleteMenuChat = ({ deleteMenuAnchor }) => {
   const isGroup = selectedDeleteChat.groupChat;
   const closeHandler = () => {
     dispatch(setIsDeleteMenu(false));
-    deleteMenuAnchor.current = null;
   };
 
   const deleteChatHandler = () => {
@@ -84,7 +83,7 @@ const DeleteMenuChat = ({ deleteMenuAnchor }) => {
 
   useEffect(() => {
     if (deleteChatData || leaveGroupData) navigate("/");
-  }, [deleteChatData, leaveGroupData]);
+  }, [deleteChatData, leaveGroupData, navigate]);
 
   return (
     <Menu

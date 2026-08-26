@@ -28,7 +28,7 @@ import DeleletMenuChat from "../dialogs/DeleletMenuChat";
 
 // Keep shared chat navigation and socket alerts in one layout wrapper.
 const AppLayout = () => (WrappedComponent) => {
-  return (props) => {
+  const AppLayoutComponent = (props) => {
     const params = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -182,6 +182,8 @@ const AppLayout = () => (WrappedComponent) => {
       </>
     );
   };
+
+  return AppLayoutComponent;
 };
 
 export default AppLayout;

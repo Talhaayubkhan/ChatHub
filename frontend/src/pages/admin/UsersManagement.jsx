@@ -7,7 +7,6 @@ import moment from "moment";
 import { useFetchData } from "6pp";
 import { useErrors } from "../../hooks/hooks";
 import server from "../../constants/config";
-import { transformImage } from "../../lib/features";
 
 const columns = [
   {
