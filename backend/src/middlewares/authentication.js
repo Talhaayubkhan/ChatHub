@@ -34,10 +34,7 @@ const authorizedPermission = (...roles) => {
   // Check if user's role is included in the list of allowed roles
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      throw new Unauthorized({
-        success: false,
-        message: "Only Admin can access this resource",
-      });
+      throw new Unauthorized("Only admins can access this resource");
     }
     next();
   };

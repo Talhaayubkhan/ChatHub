@@ -19,20 +19,32 @@ const Link = styled(LinkComponent)`
   color: black;
   padding: 1rem;
   &:hover {
-    background-color: "lightgray";
+    background-color: lightgray;
   }
 `;
 
 const InputBox = styled("input")`
   width: 100%;
-  height: 100%;
-  padding: 0 3rem;
-  /* margin: 0.5rem 0; */
-  border: 2px solid black;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem 0.7rem 3rem;
+  border: 1px solid #cbd5e1;
   outline: none;
   border-radius: 1.5rem;
-  background-color: ${grayColor};
-  color: black;
+  background-color: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+
+  &:focus-visible {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.18);
+  }
+
+  &:disabled {
+    background-color: ${grayColor};
+    cursor: wait;
+  }
 `;
 
 const SearchField = styled("input")`
@@ -42,14 +54,14 @@ const SearchField = styled("input")`
   margin: 1rem 1rem;
   border: none;
   border-radius: 0.8rem;
-  background-color: "#1976d2";
+  background-color: #f8fafc;
   color: black !important;
   outline: none;
 `;
 
 const CurveButton = styled("button")`
-  background-color: "#1976d2";
-  color: black;
+  background-color: #1976d2;
+  color: white;
   padding: 1rem 1rem;
   margin: 0.5rem 0;
   border: none;

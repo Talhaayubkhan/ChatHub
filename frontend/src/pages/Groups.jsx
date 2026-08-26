@@ -23,7 +23,6 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link } from "../components/styles/StyledComponent";
 import AvatarCard from "../components/shared/AvatarCard";
-import { sampleChats, sampleUsers } from "../constants/sampleData";
 import UserItem from "../components/shared/UserItem";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -70,9 +69,7 @@ const Groups = () => {
   const [removeGroupMember, isLoadingRemoveGroupMember] = useSendFriendRequest(
     useRemoveGroupMemberMutation
   );
-  const [deleteGroupChats, isLoadingDeleteGroupChat] = useSendFriendRequest(
-    useDeleteGroupChatsMutation
-  );
+  const [deleteGroupChats] = useSendFriendRequest(useDeleteGroupChatsMutation);
 
   // console.log(chatId);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -129,12 +126,10 @@ const Groups = () => {
       chatId,
       name: groupUpdatedValue,
     });
-    console.log("update the group name");
   };
 
-  const AddMember = () => {
+  const addMember = () => {
     dispatch(setIsAddMember(true));
-    console.log("add member");
   };
 
   const openConfrimDeleteMember = () => {
@@ -155,22 +150,6 @@ const Groups = () => {
     // console.log("remove member", id);
   };
 
-  //
-  useEffect(() => {
-    // show when chatid matches
-    if (chatId) {
-      setGroupName(`Group Name ${chatId}`);
-      setGroupUpdatedValue(`Group Name ${chatId}`);
-    }
-
-    // Cleanup functions in useEffect are essential for managing side effects and resources, ensuring proper cleanup when the component unmounts or when dependencies change, preventing memory leaks and maintaining lifecycle integrity.
-    return () => {
-      setGroupName("");
-      setGroupUpdatedValue("");
-      setIsEdit(false);
-    };
-  }, [chatId]);
-
   const IconButtons = (
     <>
       <Box
@@ -184,7 +163,7 @@ const Groups = () => {
           },
         }}
       >
-        <IconButton onClick={handleMenuMobile}>
+        <IconButton aria-label="Open groups" onClick={handleMenuMobile}>
           <MenuIcon />
         </IconButton>
       </Box>
@@ -203,6 +182,7 @@ const Groups = () => {
             },
           }}
           onClick={navigateBack}
+          aria-label="Back to chats"
         >
           <KeyboardBackspaceIcon />
         </IconButton>
@@ -225,9 +205,13 @@ const Groups = () => {
               onChange={(e) => setGroupUpdatedValue(e.target.value)}
               variant="outlined"
               fullWidth
-              size="largeZ"
+              size="small"
             />
-            <IconButton onClick={updateGroupName} disabled={isUpdatingGroup}>
+            <IconButton
+              aria-label="Save group name"
+              onClick={updateGroupName}
+              disabled={isUpdatingGroup}
+            >
               <Done />
             </IconButton>
           </>
@@ -242,6 +226,7 @@ const Groups = () => {
               {groupName}
             </Typography>
             <IconButton
+              aria-label="Edit group name"
               disabled={isUpdatingGroup}
               onClick={() => setIsEdit(true)}
             >
@@ -358,7 +343,7 @@ const Groups = () => {
               backgroundColor: "#1976d2",
             },
           }}
-          onClick={AddMember}
+          onClick={addMember}
           startIcon={<AddIcon />}
         >
           Add Members
@@ -375,6 +360,7 @@ const Groups = () => {
             },
           }}
           onClick={openConfrimDeleteMember}
+          aria-label="Delete group"
         >
           <DeleteIcon />
         </IconButton>
@@ -384,7 +370,7 @@ const Groups = () => {
 
   return (
     <>
-      <Grid container height={"100vh"}>
+      <Grid container minHeight={"100dvh"}>
         <Grid
           item
           sm={4}
@@ -408,7 +394,7 @@ const Groups = () => {
             flexDirection: "column",
             alignItems: "center",
             position: "relative",
-            padding: "1rem 3rem", // Corrected padding value
+            padding: { xs: "4.5rem 1rem 1rem", sm: "1.5rem" },
           }}
         >
           {IconButtons}
@@ -448,7 +434,7 @@ const Groups = () => {
           onClose={handleMenuMobileClose}
         >
           <GroupsList
-            w={"50vw"}
+            w={"min(82vw, 22rem)"}
             myGroups={myGroups?.data?.groups}
             chatId={chatId}
           />
@@ -459,7 +445,7 @@ const Groups = () => {
 };
 
 const GroupsList = ({ w = "100%", myGroups = [], chatId }) => (
-  <Stack width={w} sx={{ height: "100vh", overflow: "auto" }}>
+  <Stack width={w} sx={{ height: "100dvh", overflow: "auto" }}>
     {myGroups.length > 0 ? (
       myGroups.map((group) => (
         <GroupListItem group={group} chatId={chatId} key={group._id} />

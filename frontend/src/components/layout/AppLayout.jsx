@@ -1,5 +1,4 @@
-// import React from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import Header from "./Header";
 import Title from "../shared/Title";
 import { Drawer, Grid, Skeleton } from "@mui/material";
@@ -14,7 +13,7 @@ import {
   setSelectedDeleteChat,
 } from "../../redux-toolkit/reducers/misc";
 import { useErrors, useSocketEventListeners } from "../../hooks/hooks";
-import { useSocket } from "../../socket";
+import { useSocket } from "../../Socket.jsx";
 import {
   NEW_MESSAGE_ALERT,
   NEW_REQUEST,
@@ -27,8 +26,7 @@ import {
 import { getMessagesCountInLocalStorage } from "../../lib/features";
 import DeleletMenuChat from "../dialogs/DeleletMenuChat";
 
-// This High Order Function
-// Higher-order components (HOCs) in React are used to enhance components with reusable logic, providing a way to share functionality across multiple components without repeating code
+// Keep shared chat navigation and socket alerts in one layout wrapper.
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
     const params = useParams();
@@ -73,22 +71,25 @@ const AppLayout = () => (WrappedComponent) => {
         if (data.chatId === chatId) return;
         dispatch(setNewMessagesAlert(data));
       },
-      [chatId]
+      [chatId, dispatch]
     );
 
     const handleNewRequestListener = useCallback(() => {
       dispatch(incrementNotificationCount());
-    }, []);
+    }, [dispatch]);
     const refetchListener = useCallback(() => {
       refetch();
       navigate("/");
     }, [refetch, navigate]);
 
-    const socketEventHandlers = {
-      [NEW_MESSAGE_ALERT]: handleNewMessageListener, // Listen for the "NEW_MESSAGE" event
-      [NEW_REQUEST]: handleNewRequestListener,
-      [REFETCH_ALERT]: refetchListener,
-    };
+    const socketEventHandlers = useMemo(
+      () => ({
+        [NEW_MESSAGE_ALERT]: handleNewMessageListener,
+        [NEW_REQUEST]: handleNewRequestListener,
+        [REFETCH_ALERT]: refetchListener,
+      }),
+      [handleNewMessageListener, handleNewRequestListener, refetchListener]
+    );
 
     // Attach socket event listeners when the component mounts
     useSocketEventListeners(socket, socketEventHandlers);
@@ -105,9 +106,15 @@ const AppLayout = () => (WrappedComponent) => {
         {isLoading ? (
           <Skeleton />
         ) : (
-          <Drawer open={isMobileMenu} onClose={handleMobileClose}>
+          <Drawer
+            open={isMobileMenu}
+            onClose={handleMobileClose}
+            PaperProps={{
+              sx: { width: "min(88vw, 22rem)", maxWidth: "100%" },
+            }}
+          >
             <ChatList
-              width="75vw"
+              w="100%"
               chats={data?.chats}
               chatId={chatId}
               handleDeleteChat={handleDeleteChat}
@@ -116,13 +123,22 @@ const AppLayout = () => (WrappedComponent) => {
           </Drawer>
         )}
 
-        <Grid container height={"calc(100vh - 4rem)"}>
+        <Grid
+          container
+          sx={{
+            height: "calc(100dvh - 4rem)",
+            minHeight: 0,
+            overflow: "hidden",
+          }}
+        >
           <Grid
             item
             sm={4}
             md={3}
             sx={{
               display: { xs: "none", sm: "block" },
+              minHeight: 0,
+              overflow: "hidden",
             }}
             height={"100%"}
           >
@@ -137,7 +153,15 @@ const AppLayout = () => (WrappedComponent) => {
               />
             )}
           </Grid>
-          <Grid item xs={12} sm={8} md={5} lg={6} height={"100%"}>
+          <Grid
+            item
+            xs={12}
+            sm={8}
+            md={5}
+            lg={6}
+            height={"100%"}
+            sx={{ minWidth: 0, minHeight: 0, overflow: "hidden" }}
+          >
             <WrappedComponent {...props} chatId={chatId} user={user} />
           </Grid>
           <Grid
@@ -146,8 +170,8 @@ const AppLayout = () => (WrappedComponent) => {
             lg={3}
             sx={{
               display: { xs: "none", md: "block" },
-              padding: "2rem",
-              bgColor: "rgba(0,0,0,0.86)",
+              padding: { md: "1.25rem", lg: "2rem" },
+              overflowY: "auto",
             }}
             height={"100%"}
             bgcolor="primary.main"

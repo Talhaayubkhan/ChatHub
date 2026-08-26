@@ -35,7 +35,7 @@ const UserItem = ({
         alignItems={"center"}
         spacing={"1rem"}
         width={"100%"}
-        {...styling}
+        sx={styling}
       >
         <Avatar
           src={avatar}

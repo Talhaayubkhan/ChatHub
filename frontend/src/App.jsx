@@ -12,7 +12,7 @@ import {
   userExists,
   userNotExists,
 } from "./redux-toolkit/reducers/reducerAuth.js";
-import { SocketProvider } from "./socket.jsx";
+import { SocketProvider } from "./Socket.jsx";
 
 // Lazy loading components
 const Home = lazy(() => import("./pages/Home"));

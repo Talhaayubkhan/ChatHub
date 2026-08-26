@@ -353,7 +353,8 @@ const Header = () => {
         <Toolbar
           sx={{
             justifyContent: "space-between",
-            height: { xs: "3rem", sm: "4rem", md: "4rem" },
+            height: "4rem",
+            minHeight: "4rem !important",
             px: { xs: 1, sm: 2, md: 4 },
           }}
         >
@@ -361,6 +362,7 @@ const Header = () => {
             <Box display="flex" alignItems="center">
               {isMobile && (
                 <IconButton
+                  aria-label="Open conversations"
                   color="inherit"
                   onClick={handleOnMobile}
                   edge="start"
@@ -373,6 +375,8 @@ const Header = () => {
                 variant={isMobile ? "h6" : "h5"}
                 noWrap
                 component="div"
+                role="link"
+                tabIndex={0}
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -388,6 +392,9 @@ const Header = () => {
                   },
                 }}
                 onClick={() => navigate("/")}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") navigate("/");
+                }}
               >
                 <ChatIcon
                   sx={{
@@ -450,6 +457,7 @@ const Header = () => {
               )}
               {(isMobile || isTablet) && (
                 <IconButton
+                  aria-label="Open actions menu"
                   color="inherit"
                   onClick={handleMenu}
                   sx={{
@@ -504,7 +512,7 @@ const Header = () => {
             </MenuItem>
             <MenuItem onClick={seeNotification}>
               <ListItemIcon>
-                <Badge value={notificationCount} color="error">
+                <Badge badgeContent={notificationCount} color="error">
                   <NotificationsIcon fontSize="small" />
                 </Badge>
               </ListItemIcon>
@@ -543,6 +551,7 @@ const IconBtn = ({ title, icon, onClick, value }) => {
   return (
     <Tooltip title={title} arrow>
       <IconButton
+        aria-label={title}
         color="inherit"
         onClick={onClick}
         sx={{

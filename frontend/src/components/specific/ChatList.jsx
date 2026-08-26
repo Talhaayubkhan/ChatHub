@@ -1,5 +1,4 @@
-import React from "react";
-import { Stack } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import ChatItem from "../shared/ChatItem";
 
 const ChatList = ({
@@ -16,12 +15,18 @@ const ChatList = ({
       direction={"column"}
       overflow={"auto"}
       height={"100%"}
-      spacing={2} // Space between chat items
+      spacing={0.5}
       sx={{
-        backgroundColor: "#ffffff", // White background for contrast
-        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)", // Deeper shadow for a card-like effect
+        backgroundColor: "#ffffff",
+        borderRight: "1px solid #e2e8f0",
+        p: 0.75,
       }}
     >
+      {!chats?.length && (
+        <Typography color="text.secondary" textAlign="center" p={3}>
+          No conversations yet
+        </Typography>
+      )}
       {chats?.map((data) => {
         const { avatar, _id, name, groupChat, members } = data;
 

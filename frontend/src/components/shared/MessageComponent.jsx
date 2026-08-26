@@ -1,17 +1,17 @@
 import { Box, Typography } from "@mui/material";
-import moment from "moment";
 import { memo } from "react";
 import { fileFormat } from "../../lib/features";
+import { formatMessageTime } from "../../lib/chatState";
 import RenderAttachMent from "./RenderAttachMent";
 import { motion } from "framer-motion";
 
 const MessageComponent = ({ message, user }) => {
   // console.log("message are", message);
-  const { sender, content, attachments = [], timestamp } = message;
+  const { sender, content, attachments = [], createdAt } = message;
 
   const sameSender = sender?._id === user?._id;
 
-  const timeAgo = moment(timestamp).fromNow();
+  const timeAgo = formatMessageTime(createdAt);
   return (
     <motion.div
       initial={{ opacity: 0, x: "-100%" }}
@@ -25,6 +25,8 @@ const MessageComponent = ({ message, user }) => {
         borderRadius: "5px",
         padding: "1rem",
         width: "fit-content",
+        maxWidth: "min(78%, 42rem)",
+        overflowWrap: "anywhere",
       }}
     >
       {!sameSender && (
@@ -33,11 +35,11 @@ const MessageComponent = ({ message, user }) => {
         </Typography>
       )}
       {content && <Typography>{content}</Typography>}
-      {attachments.map((currentAttachment, i) => {
+      {attachments.map((currentAttachment) => {
         const url = currentAttachment.url;
         const file = fileFormat(url);
         return (
-          <Box key={i}>
+          <Box key={currentAttachment._id || url}>
             <a
               href={url}
               target="_blank"
@@ -47,16 +49,17 @@ const MessageComponent = ({ message, user }) => {
                 color: "black",
               }}
             >
-              {/* hello */}
-              {RenderAttachMent && RenderAttachMent(file, url)}
+              {RenderAttachMent(file, url)}
             </a>
           </Box>
         );
       })}
 
-      <Typography variant="caption" color={"text.secondary"}>
-        {timeAgo}
-      </Typography>
+      {timeAgo && (
+        <Typography variant="caption" color={"text.secondary"}>
+          {timeAgo}
+        </Typography>
+      )}
     </motion.div>
   );
 };

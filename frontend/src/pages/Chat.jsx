@@ -8,7 +8,7 @@ import {
 } from "@mui/icons-material";
 import { InputBox } from "../components/styles/StyledComponent";
 import MessageComponent from "../components/shared/MessageComponent";
-import { useSocket } from "../socket.jsx";
+import { useSocket } from "../Socket.jsx";
 import {
   ALERT,
   NEW_MESSAGE,
@@ -27,6 +27,11 @@ import FileUploadMenu from "../components/dialogs/FileMenu";
 import { removeMessagesAlert } from "../redux-toolkit/reducers/chat.js";
 import { TypingLoader } from "../components/layout/Loaders.jsx";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import {
+  MAX_MESSAGE_LENGTH,
+  normalizeMessageText,
+} from "../lib/chatState.js";
 
 const Chat = ({ chatId, user }) => {
   // console.log(chatId, user);
@@ -52,6 +57,7 @@ const Chat = ({ chatId, user }) => {
 
   const [IamTyping, setIamTyping] = useState(false);
   const [userTyping, setUserTyping] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const typingTimeout = useRef(null);
 
   // Fetch chat details for the current chat, such as members
@@ -60,13 +66,13 @@ const Chat = ({ chatId, user }) => {
     isLoading,
     isError,
     error,
-  } = useMembersChatDetailsQuery({
-    chatId,
-    skip: !chatId,
-  });
+  } = useMembersChatDetailsQuery({ chatId }, { skip: !chatId });
 
   // Fetch older messages based on the current page (pagination)
-  const paginatedMessagesChunk = useGetMessagesQuery({ chatId, page });
+  const paginatedMessagesChunk = useGetMessagesQuery(
+    { chatId, page },
+    { skip: !chatId }
+  );
 
   // Hook for infinite scroll, it fetches older messages when scrolling up
   const { data: fetchedOldMessages, setData: setFetchedOldMessages } =
@@ -78,26 +84,32 @@ const Chat = ({ chatId, user }) => {
       paginatedMessagesChunk.data?.messages // The actual chunk of old messages
     );
 
-  // Extract chat members from chat details
-  const members = chatDetails?.allChats?.members || [];
+  const stopTyping = useCallback(() => {
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    typingTimeout.current = null;
+
+    if (IamTyping) {
+      socket.emit(STOP_TYPING_MESSAGE, { chatId });
+      setIamTyping(false);
+    }
+  }, [IamTyping, chatId, socket]);
 
   const messageOnChange = (e) => {
-    setNewMessage(e.target.value);
+    const nextMessage = e.target.value;
+    setNewMessage(nextMessage);
 
-    if (!IamTyping) {
-      socket.emit(START_TYPING_MESSAGE, { members, chatId });
+    if (nextMessage.trim() && !IamTyping) {
+      socket.emit(START_TYPING_MESSAGE, { chatId });
       setIamTyping(true);
     }
 
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
 
     typingTimeout.current = setTimeout(() => {
-      socket.emit(STOP_TYPING_MESSAGE, {
-        members,
-        chatId,
-      });
+      socket.emit(STOP_TYPING_MESSAGE, { chatId });
       setIamTyping(false);
-    }, [2000]);
+      typingTimeout.current = null;
+    }, 2000);
   };
 
   // Handle file upload button click event
@@ -127,8 +139,10 @@ const Chat = ({ chatId, user }) => {
       setNewMessage("");
       setFetchedOldMessages([]);
       setPage(1);
+      if (typingTimeout.current) clearTimeout(typingTimeout.current);
+      socket.emit(STOP_TYPING_MESSAGE, { chatId });
     };
-  }, [chatId]);
+  }, [chatId, dispatch, setFetchedOldMessages, socket]);
 
   useEffect(() => {
     if (saveBottomRef.current)
@@ -136,8 +150,8 @@ const Chat = ({ chatId, user }) => {
   }, [realTimeMessages]);
 
   useEffect(() => {
-    if (!members) return navigate("/");
-  }, [members]);
+    if (chatDetails && !chatDetails.allChats) navigate("/");
+  }, [chatDetails, navigate]);
 
   // Callback function to handle the receipt of a new message via socket
   const newMessageListener = useCallback(
@@ -169,7 +183,6 @@ const Chat = ({ chatId, user }) => {
     [chatId]
   );
 
-  // TODO: Fix later
   const alertListener = useCallback(
     (data) => {
       // console.log("ALERT received:", content); // Debugging line
@@ -198,7 +211,7 @@ const Chat = ({ chatId, user }) => {
       [START_TYPING_MESSAGE]: startTypingListener,
       [STOP_TYPING_MESSAGE]: stopTypingListener,
     }),
-    []
+    [alertListener, newMessageListener, startTypingListener, stopTypingListener]
   );
 
   // Attach socket event listeners when the component mounts
@@ -206,20 +219,28 @@ const Chat = ({ chatId, user }) => {
 
   // Function to handle message submission when the form is submitted
   const handleSendMessage = (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
 
-    // Only send if the message is not empty (trimmed)
-    if (!newMessage.trim()) return;
+    const message = normalizeMessageText(newMessage);
+    if (!message || isSending) return;
 
-    // Emit a "NEW_MESSAGE" event to the server via socket
-    socket.emit(NEW_MESSAGE, {
-      chatId, // The chat room ID
-      members, // List of chat members
-      message: newMessage, // The message content
-    });
+    stopTyping();
+    setIsSending(true);
 
-    // Clear the input box after sending the message
-    setNewMessage("");
+    socket.timeout(5000).emit(
+      NEW_MESSAGE,
+      { chatId, message },
+      (timeoutError, response) => {
+        setIsSending(false);
+
+        if (timeoutError || !response?.ok) {
+          toast.error(response?.error || "Message could not be sent");
+          return;
+        }
+
+        setNewMessage("");
+      }
+    );
   };
 
   // Use custom hook to handle and display errors if any
@@ -232,24 +253,28 @@ const Chat = ({ chatId, user }) => {
   return isLoading ? (
     <Skeleton />
   ) : (
-    <>
+    <Stack height="100%" minHeight={0} bgcolor={grayColor}>
       {/* ChatStack component renders the list of messages */}
       <ChatStack
         ref={containerRef} // Attach the ref to the chat container
         boxSizing="border-box" // Ensure proper sizing
-        padding="1rem" // Padding around the chat content
+        padding={{ xs: "0.75rem", sm: "1rem" }}
         spacing="1rem" // Space between messages
         bgcolor={grayColor} // Background color for the chat area
-        height={"90%"} // Set height of chat container
         sx={{
+          flex: 1,
+          minHeight: 0,
           overflowX: "hidden", // Hide horizontal overflow
           overflowY: "auto", // Enable vertical scroll for messages
         }}
       >
         {/* Render new real-time messages */}
-        {allMessages?.map((currentMessage) => (
+        {allMessages?.map((currentMessage, index) => (
           <MessageComponent
-            key={currentMessage._id} // Unique key for each new message
+            key={
+              currentMessage._id ||
+              `${currentMessage.chat}-${currentMessage.createdAt}-${index}`
+            }
             message={currentMessage} // Pass message data
             user={user} // Pass user data
           />
@@ -260,19 +285,20 @@ const Chat = ({ chatId, user }) => {
       </ChatStack>
 
       {/* Form to handle input and send new messages */}
-      <form style={{ height: "10%" }} onSubmit={handleSendMessage}>
+      <form style={{ flexShrink: 0 }} onSubmit={handleSendMessage}>
         <Stack
           direction={"row"} // Layout the input and send button horizontally
-          height={"100%"} // Full height of the container
-          padding={"1rem"} // Padding around input elements
+          minHeight={{ xs: "4.5rem", sm: "5rem" }}
+          padding={{ xs: "0.65rem", sm: "1rem" }}
           alignItems={"center"} // Align input elements vertically
           position={"relative"} // Set position for attach icon
         >
           {/* Attach file icon button */}
           <IconButton
+            aria-label="Attach a file"
             sx={{
               position: "absolute", // Positioned absolutely inside the container
-              left: "1.5rem", // Positioned 1.5rem from the left
+              left: { xs: "0.9rem", sm: "1.5rem" },
             }}
             onClick={handleFileUploadOpen}
           >
@@ -281,18 +307,23 @@ const Chat = ({ chatId, user }) => {
 
           {/* Input box to type the message */}
           <InputBox
-            placeholder="Type Message here" // Placeholder text
+            aria-label="Message"
+            placeholder="Type a message"
+            maxLength={MAX_MESSAGE_LENGTH}
             value={newMessage} // Controlled input bound to new message state
             onChange={messageOnChange} // Update message state on change
+            disabled={isSending}
           />
 
           {/* Send message button */}
           <IconButton
+            aria-label="Send message"
             type="submit" // Submit the form when clicked
+            disabled={!normalizeMessageText(newMessage) || isSending}
             sx={{
               backgroundColor: "#ea7070", // Button color
               color: "white", // Text color
-              marginLeft: "1rem", // Spacing to the left of input
+              marginLeft: { xs: "0.5rem", sm: "1rem" },
               padding: "0.5rem", // Padding inside the button
               "&:hover": {
                 bgcolor: "error.dark", // Darken button on hover
@@ -306,7 +337,7 @@ const Chat = ({ chatId, user }) => {
 
       {/* File menu for attachments (optional) */}
       <FileUploadMenu anchorElement={fileMenuAnchor} chatId={chatId} />
-    </>
+    </Stack>
   );
 };
 

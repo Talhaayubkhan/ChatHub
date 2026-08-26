@@ -1,16 +1,25 @@
 import { StatusCodes } from "http-status-codes";
 import { Chat, Message, User } from "../models/index.js";
-import { BadRequest, NotFound, Unauthorized } from "../errors/index.js";
+import {
+  BadRequest,
+  CustomApiError,
+  NotFound,
+  Unauthorized,
+} from "../errors/index.js";
 import { setAdminTokenCookie } from "../utils/index.js";
 
 // const
 const adminLogin = async (req, res) => {
   const { secretKey } = req.body;
 
-  const adminSecretKey = process.env.ADMIN_SECRET_KEY || "khakhanhellokhan";
+  const adminSecretKey = process.env.ADMIN_SECRET_KEY;
+
+  if (!adminSecretKey) {
+    throw new CustomApiError("Admin authentication is not configured");
+  }
 
   if (!secretKey) {
-    throw new BadRequest("Please provide username and secret key");
+    throw new BadRequest("Please provide the admin secret key");
   }
 
   if (secretKey !== adminSecretKey) {
@@ -122,11 +131,11 @@ const getAllMessages = async (req, res) => {
     .populate("chat", "groupChat");
 
   const transformMessages = messages.map(
-    ({ _id, content, attachment, sender, createdAt, chat }) => {
+    ({ _id, content, attachments, sender, createdAt, chat }) => {
       return {
         _id,
         content,
-        attachment,
+        attachments,
         createdAt,
         sender: {
           _id: sender._id,
@@ -150,7 +159,7 @@ const getAllMessages = async (req, res) => {
 };
 
 const adminDashboardStats = async (req, res) => {
-  const [usersCount, groupsCount, messagesCount, totalChatsCount] =
+  const [groupsCount, usersCount, messagesCount, totalChatsCount] =
     await Promise.all([
       Chat.countDocuments({ groupChat: true }),
       User.countDocuments({}),

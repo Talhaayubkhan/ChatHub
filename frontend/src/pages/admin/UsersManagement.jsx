@@ -4,7 +4,6 @@ import Table from "../../components/shared/Table";
 import { Skeleton, Typography } from "@mui/material";
 import { Avatar } from "@mui/material";
 import moment from "moment";
-import { dashboardData } from "../../constants/sampleData";
 import { useFetchData } from "6pp";
 import { useErrors } from "../../hooks/hooks";
 import server from "../../constants/config";
@@ -75,7 +74,6 @@ const UsersManagement = () => {
       error: error,
     },
   ]);
-  console.log(data);
   const [rows, setRows] = useState([]);
 
   useEffect(() => {

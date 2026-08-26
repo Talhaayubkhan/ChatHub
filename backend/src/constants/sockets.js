@@ -1,11 +1,7 @@
-// Initialize a Map to store user IDs and their corresponding socket IDs
-const userSocketIDs = new Map();
+import { createSocketRegistry } from "../services/socketRegistry.js";
 
-// Function to retrieve socket IDs of given users
-const getAllSocketIDs = (users = []) => {
-  const sockets = users.map((user) => userSocketIDs.get(user.toString()));
+const socketRegistry = createSocketRegistry();
 
-  return sockets;
-};
+const getAllSocketIDs = (users = []) => socketRegistry.getSocketIds(users);
 
-export { userSocketIDs, getAllSocketIDs };
+export { socketRegistry, getAllSocketIDs };
